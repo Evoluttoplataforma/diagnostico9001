@@ -5,7 +5,7 @@ import { QuizButton } from "../QuizButton";
 interface ContactStepProps {
   currentStep: number;
   totalSteps: number;
-  onSubmit: (data: ContactData) => void;
+  onSubmit: (data: ContactData) => Promise<void>;
   onBack: () => void;
 }
 
@@ -28,6 +28,7 @@ export const ContactStep = ({
     phone: "",
     company: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,9 +38,14 @@ export const ContactStep = ({
   const isValid =
     formData.name && formData.email && formData.phone && formData.company;
 
-  const handleSubmit = () => {
-    if (isValid) {
-      onSubmit(formData);
+  const handleSubmit = async () => {
+    if (isValid && !isLoading) {
+      setIsLoading(true);
+      try {
+        await onSubmit(formData);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -115,7 +121,7 @@ export const ContactStep = ({
             </div>
           </div>
 
-          <QuizButton onClick={handleSubmit} disabled={!isValid}>
+          <QuizButton onClick={handleSubmit} disabled={!isValid} loading={isLoading}>
             Receber Diagnóstico Gratuito
           </QuizButton>
 
