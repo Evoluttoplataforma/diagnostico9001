@@ -1,5 +1,4 @@
 import { QuizButton } from "../QuizButton";
-import templumLogo from "@/assets/templum-logo.png";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -9,7 +8,6 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 animate-fade-in">
       <div className="max-w-xl w-full text-center">
-        <img src={templumLogo} alt="Templum" className="h-12 mx-auto mb-12" />
 
         <div className="mb-8">
           <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-primary/10 flex items-center justify-center">
