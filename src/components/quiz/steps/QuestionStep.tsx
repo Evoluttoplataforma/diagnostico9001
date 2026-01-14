@@ -1,5 +1,5 @@
 import { QuizHeader } from "../QuizHeader";
-import { Question, AnswerValue, answerOptions } from "../quizData";
+import { Question, AnswerValue } from "../quizData";
 
 interface QuestionStepProps {
   question: Question;
@@ -39,7 +39,7 @@ export const QuestionStep = ({
           </h2>
 
           <div className="space-y-3">
-            {answerOptions.map((option) => (
+            {question.answers.map((option) => (
               <button
                 key={option.value}
                 onClick={() => onAnswer(option.value)}
