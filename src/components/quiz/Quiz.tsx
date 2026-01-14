@@ -64,6 +64,7 @@ export const Quiz = () => {
     const diagnosis = getDiagnosis(score);
     
     try {
+      // Save to database
       const { error } = await supabase.from("quiz_leads").insert({
         name: contactData.name,
         email: contactData.email,
@@ -78,6 +79,30 @@ export const Quiz = () => {
         console.error("Error saving lead:", error);
         toast.error("Erro ao salvar dados. Tente novamente.");
         return;
+      }
+
+      // Send to Pipedrive
+      try {
+        const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
+          body: {
+            name: contactData.name,
+            email: contactData.email,
+            phone: contactData.phone,
+            company: contactData.company,
+            score: score,
+            diagnosis_level: diagnosis.level,
+          },
+        });
+
+        if (pipedriveResponse.error) {
+          console.error("Pipedrive error:", pipedriveResponse.error);
+          // Don't block the user flow, just log the error
+        } else {
+          console.log("Lead created in Pipedrive:", pipedriveResponse.data);
+        }
+      } catch (pipedriveErr) {
+        console.error("Pipedrive integration error:", pipedriveErr);
+        // Don't block the user flow
       }
 
       setData((prev) => ({ ...prev, contact: contactData }));
