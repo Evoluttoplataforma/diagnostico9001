@@ -37,7 +37,7 @@ export const ResultStep = ({ name, score }: ResultStepProps) => {
         </h1>
 
         <div className={`inline-block px-4 py-2 rounded-full border-2 font-bold text-lg mb-6 ${levelColors[diagnosis.level]}`}>
-          {score} de 20 pontos
+          {score}% de maturidade
         </div>
 
         <div className={`rounded-2xl p-6 mb-6 ${levelBgColors[diagnosis.level]}`}>
