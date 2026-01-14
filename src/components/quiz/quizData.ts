@@ -247,16 +247,21 @@ export const questions: Question[] = [
 ];
 
 export const getScore = (answers: Record<string, AnswerValue>): number => {
-  return questions.reduce((total, question) => {
+  const rawScore = questions.reduce((total, question) => {
     const answer = answers[question.id];
     if (!answer) return total;
     const answerData = question.answers.find((a) => a.value === answer);
     return total + (answerData?.points || 0);
   }, 0);
+  
+  // Convert to percentage (max 20 points = 100%)
+  const maxPoints = 20;
+  return Math.round((rawScore / maxPoints) * 100);
 };
 
 export const getDiagnosis = (score: number) => {
-  if (score <= 6) {
+  // Score is now 0-100 percentage
+  if (score <= 30) {
     return {
       level: "low" as const,
       emoji: "🔴",
@@ -266,7 +271,7 @@ export const getDiagnosis = (score: number) => {
       recommendation:
         "Você precisa urgentemente estruturar seus processos básicos para reduzir riscos e ganhar previsibilidade.",
     };
-  } else if (score <= 13) {
+  } else if (score <= 65) {
     return {
       level: "medium" as const,
       emoji: "🟡",
