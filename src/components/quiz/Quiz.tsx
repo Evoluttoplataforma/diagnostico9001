@@ -3,7 +3,9 @@ import { WelcomeStep } from "./steps/WelcomeStep";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
 import { ResultStep } from "./steps/ResultStep";
-import { questions, AnswerValue, getScore } from "./quizData";
+import { questions, AnswerValue, getScore, getDiagnosis } from "./quizData";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type Step = "welcome" | "questions" | "contact" | "result";
 
@@ -57,10 +59,33 @@ export const Quiz = () => {
     setCurrentQuestionIndex(totalQuestions - 1);
   };
 
-  const handleContactSubmit = (contactData: ContactData) => {
-    setData((prev) => ({ ...prev, contact: contactData }));
-    console.log("Quiz completed:", { ...data, contact: contactData, score: getScore(data.answers) });
-    setCurrentStep("result");
+  const handleContactSubmit = async (contactData: ContactData) => {
+    const score = getScore(data.answers);
+    const diagnosis = getDiagnosis(score);
+    
+    try {
+      const { error } = await supabase.from("quiz_leads").insert({
+        name: contactData.name,
+        email: contactData.email,
+        phone: contactData.phone,
+        company: contactData.company,
+        score: score,
+        answers: data.answers,
+        diagnosis_level: diagnosis.level,
+      });
+
+      if (error) {
+        console.error("Error saving lead:", error);
+        toast.error("Erro ao salvar dados. Tente novamente.");
+        return;
+      }
+
+      setData((prev) => ({ ...prev, contact: contactData }));
+      setCurrentStep("result");
+    } catch (err) {
+      console.error("Error:", err);
+      toast.error("Erro ao processar. Tente novamente.");
+    }
   };
 
   switch (currentStep) {
