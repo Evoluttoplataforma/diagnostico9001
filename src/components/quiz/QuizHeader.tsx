@@ -1,5 +1,3 @@
-import templumLogo from "@/assets/templum-logo.png";
-
 interface QuizHeaderProps {
   currentStep: number;
   totalSteps: number;
@@ -31,8 +29,6 @@ export const QuizHeader = ({ currentStep, totalSteps, onBack }: QuizHeaderProps)
               />
             </svg>
           </button>
-
-          <img src={templumLogo} alt="Templum" className="h-8" />
 
           <span className="text-sm text-muted-foreground font-medium">
             {currentStep} / {totalSteps}
