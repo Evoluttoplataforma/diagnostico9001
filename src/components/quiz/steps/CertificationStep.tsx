@@ -6,6 +6,7 @@ interface CertificationStepProps {
   totalSteps: number;
   selected: string;
   onSelect: (value: string) => void;
+  onBack: () => void;
 }
 
 const options = [
@@ -20,10 +21,11 @@ export const CertificationStep = ({
   totalSteps,
   selected,
   onSelect,
+  onBack,
 }: CertificationStepProps) => {
   return (
     <div className="min-h-screen flex flex-col animate-fade-in">
-      <QuizHeader currentStep={currentStep} totalSteps={totalSteps} />
+      <QuizHeader currentStep={currentStep} totalSteps={totalSteps} onBack={onBack} />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="max-w-xl w-full">

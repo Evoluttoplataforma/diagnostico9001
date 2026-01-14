@@ -9,6 +9,7 @@ interface ObjectiveStepProps {
   selected: string[];
   onSelect: (values: string[]) => void;
   onNext: () => void;
+  onBack: () => void;
 }
 
 const options = [
@@ -45,6 +46,7 @@ export const ObjectiveStep = ({
   selected,
   onSelect,
   onNext,
+  onBack,
 }: ObjectiveStepProps) => {
   const toggleOption = (value: string) => {
     if (selected.includes(value)) {
@@ -56,7 +58,7 @@ export const ObjectiveStep = ({
 
   return (
     <div className="min-h-screen flex flex-col animate-fade-in">
-      <QuizHeader currentStep={currentStep} totalSteps={totalSteps} />
+      <QuizHeader currentStep={currentStep} totalSteps={totalSteps} onBack={onBack} />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="max-w-xl w-full">
