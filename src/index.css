@@ -6,47 +6,49 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96%;
-    --foreground: 0 0% 13%;
+    --background: 0 0% 100%;
+    --foreground: 220 20% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
+    --card-foreground: 220 20% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
+    --popover-foreground: 220 20% 20%;
 
-    --primary: 17 100% 55%;
+    --primary: 210 100% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 92%;
-    --secondary-foreground: 0 0% 13%;
+    --secondary: 220 15% 95%;
+    --secondary-foreground: 220 20% 20%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 220 15% 95%;
+    --muted-foreground: 220 10% 50%;
 
-    --accent: 17 100% 55%;
+    --accent: 210 100% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 88%;
-    --input: 0 0% 88%;
-    --ring: 17 100% 55%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 210 100% 45%;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
-    /* Custom Templum colors */
-    --templum-orange: 17 100% 55%;
-    --templum-orange-light: 17 100% 95%;
-    --templum-orange-hover: 17 100% 48%;
-    --templum-dark: 0 0% 13%;
-    --templum-gray: 0 0% 96%;
-    --templum-gray-dark: 0 0% 60%;
+    /* Custom colors */
+    --hero-dark: 220 25% 12%;
+    --hero-dark-accent: 220 25% 18%;
+    --accent-blue: 210 100% 45%;
+    --accent-blue-light: 210 100% 95%;
+    --accent-blue-hover: 210 100% 38%;
+    --text-dark: 220 20% 20%;
+    --text-light: 220 10% 50%;
+    --surface-light: 220 15% 97%;
 
     /* Progress bar */
-    --progress-bg: 17 100% 55%;
-    --progress-track: 0 0% 88%;
+    --progress-bg: 210 100% 45%;
+    --progress-track: 220 15% 90%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -59,33 +61,33 @@
   }
 
   .dark {
-    --background: 0 0% 10%;
+    --background: 220 25% 12%;
     --foreground: 0 0% 95%;
 
-    --card: 0 0% 13%;
+    --card: 220 25% 16%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 13%;
+    --popover: 220 25% 16%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 17 100% 55%;
+    --primary: 210 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 20%;
+    --secondary: 220 20% 20%;
     --secondary-foreground: 0 0% 95%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 220 20% 20%;
+    --muted-foreground: 220 10% 65%;
 
-    --accent: 17 100% 55%;
+    --accent: 210 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 95%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 17 100% 55%;
+    --border: 220 20% 22%;
+    --input: 220 20% 22%;
+    --ring: 210 100% 50%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -111,7 +113,7 @@
 
 @layer components {
   .quiz-card {
-    @apply bg-card rounded-2xl p-5 cursor-pointer transition-all duration-200 border-2 border-transparent;
+    @apply bg-card rounded-xl p-5 cursor-pointer transition-all duration-200 border-2 border-transparent;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
@@ -122,18 +124,18 @@
 
   .quiz-card.selected {
     @apply border-primary bg-primary/5;
-    box-shadow: 0 4px 16px rgba(255, 90, 31, 0.15);
+    box-shadow: 0 4px 16px hsl(210 100% 45% / 0.15);
   }
 
   .quiz-button {
-    @apply w-full py-4 px-8 rounded-xl font-bold text-lg uppercase tracking-wide transition-all duration-200;
-    @apply bg-primary text-foreground;
+    @apply w-full py-4 px-8 rounded-xl font-bold text-lg transition-all duration-200;
+    @apply bg-primary text-primary-foreground;
   }
 
   .quiz-button:hover:not(:disabled) {
-    background: hsl(var(--templum-orange-hover));
+    background: hsl(var(--accent-blue-hover));
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(255, 90, 31, 0.3);
+    box-shadow: 0 6px 20px hsl(210 100% 45% / 0.3);
   }
 
   .quiz-button:disabled {
@@ -141,12 +143,12 @@
   }
 
   .progress-bar {
-    @apply h-1 rounded-full transition-all duration-500 ease-out;
+    @apply h-1.5 rounded-full transition-all duration-500 ease-out;
     background: hsl(var(--progress-bg));
   }
 
   .progress-track {
-    @apply h-1 rounded-full w-full;
+    @apply h-1.5 rounded-full w-full;
     background: hsl(var(--progress-track));
   }
 }

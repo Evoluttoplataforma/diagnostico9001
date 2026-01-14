@@ -1,102 +1,145 @@
 import { QuizButton } from "../QuizButton";
-import { CheckCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle, TrendingUp, Users, Target, Shield, Zap } from "lucide-react";
 
 interface WelcomeStepProps {
   onNext: () => void;
 }
 
 export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
+  const pillars = [
+    { icon: Target, label: "Processos" },
+    { icon: Users, label: "Pessoas" },
+    { icon: TrendingUp, label: "Clientes" },
+    { icon: Shield, label: "Controle" },
+    { icon: Zap, label: "Crescimento" },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 animate-fade-in">
-      <div className="max-w-2xl w-full">
-        <div className="text-center mb-10">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-foreground mb-4">
-            Diagnóstico de Maturidade de Gestão – ISO 9001
+    <div className="min-h-screen flex flex-col lg:flex-row animate-fade-in">
+      {/* Left Side - Dark Hero */}
+      <div className="lg:w-1/2 bg-[hsl(220,25%,12%)] text-white p-8 lg:p-12 flex flex-col justify-center relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/50 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
+        </div>
+
+        <div className="relative z-10 max-w-lg mx-auto lg:mx-0">
+          <span className="inline-block bg-primary/20 text-primary px-4 py-1.5 rounded-full text-sm font-semibold mb-6 border border-primary/30">
+            DIAGNÓSTICO GRATUITO
+          </span>
+
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-6">
+            Sua empresa está pronta para{" "}
+            <span className="text-primary">crescer sem perder o controle?</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-primary font-semibold mb-4">
-            Descubra se sua empresa está pronta para crescer sem perder o controle
+          <p className="text-lg text-white/70 mb-8 leading-relaxed">
+            Descubra em 5 minutos como sua gestão se compara ao padrão <strong className="text-white">ISO 9001</strong> — usado por empresas organizadas e escaláveis.
           </p>
 
-          <p className="text-muted-foreground leading-relaxed">
-            Responda algumas perguntas rápidas e veja como sua empresa se compara ao padrão usado por empresas organizadas, escaláveis e certificadas.
-          </p>
-        </div>
-
-        <div className="bg-muted/50 rounded-xl p-6 mb-8">
-          <h2 className="font-bold text-foreground mb-4">Você vai receber:</h2>
-          <ul className="space-y-3 text-muted-foreground">
-            <li className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <span>Um <strong className="text-foreground">score de maturidade</strong></span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <span>Um <strong className="text-foreground">mapa dos seus principais gargalos</strong></span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-              <span>Uma <strong className="text-foreground">leitura estratégica gratuita</strong> com um especialista</span>
-            </li>
-          </ul>
-          <p className="text-sm text-muted-foreground mt-4 pt-4 border-t border-border">
-            Tudo baseado no modelo de gestão da <strong className="text-foreground">ISO 9001</strong> — o padrão mundial de empresas que crescem com previsibilidade.
-          </p>
-        </div>
-
-        <div className="mb-8">
-          <h2 className="font-bold text-foreground mb-4 text-center">Por que isso importa?</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-destructive/10 rounded-xl p-5">
-              <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                Empresas sem processos:
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Dependem demais do dono</li>
-                <li>• Perdem dinheiro em retrabalho</li>
-                <li>• Vivem apagando incêndio</li>
-                <li>• Travaram o crescimento</li>
-              </ul>
+          {/* Visual Stats */}
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+              <div className="text-3xl font-bold text-primary mb-1">+2.000</div>
+              <div className="text-sm text-white/60">Empresas certificadas</div>
             </div>
-            <div className="bg-primary/10 rounded-xl p-5">
-              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
-                Empresas com modelo:
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Escalam com consistência</li>
-                <li>• Mantêm qualidade</li>
-                <li>• Atraem clientes maiores</li>
-                <li>• Têm controle total</li>
-              </ul>
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+              <div className="text-3xl font-bold text-primary mb-1">30+</div>
+              <div className="text-sm text-white/60">Anos de experiência</div>
             </div>
           </div>
-          <p className="text-center text-sm text-muted-foreground mt-4">
-            <strong className="text-foreground">A ISO 9001 é esse modelo.</strong>
-          </p>
-        </div>
 
-        <div className="bg-muted/50 rounded-xl p-6 mb-8">
-          <h2 className="font-bold text-foreground mb-4">O que este diagnóstico avalia?</h2>
-          <p className="text-muted-foreground mb-4">Ele mede como sua empresa está em 5 pilares críticos:</p>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {["Processos", "Pessoas", "Clientes", "Controle", "Capacidade de crescimento"].map((pilar) => (
-              <span key={pilar} className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                {pilar}
-              </span>
-            ))}
+          {/* Pillars */}
+          <div className="hidden lg:block">
+            <p className="text-sm text-white/50 mb-3 uppercase tracking-wider">O que avaliamos:</p>
+            <div className="flex flex-wrap gap-2">
+              {pillars.map((pillar) => (
+                <div
+                  key={pillar.label}
+                  className="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10"
+                >
+                  <pillar.icon className="w-4 h-4 text-primary" />
+                  <span className="text-sm text-white/80">{pillar.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Em menos de <strong className="text-foreground">5 minutos</strong> você saberá exatamente onde sua empresa está hoje e o que precisa mudar para evoluir.
-          </p>
         </div>
+      </div>
 
-        <div className="text-center">
-          <QuizButton onClick={onNext}>Começar Diagnóstico Gratuito</QuizButton>
-          <p className="text-xs text-muted-foreground mt-4">
-            +2.000 empresas já conquistaram a certificação com a Templum
-          </p>
+      {/* Right Side - Light Content */}
+      <div className="lg:w-1/2 bg-background p-8 lg:p-12 flex flex-col justify-center">
+        <div className="max-w-md mx-auto w-full">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              Diagnóstico de Maturidade
+            </h2>
+            <p className="text-muted-foreground">
+              Responda perguntas rápidas e receba um relatório personalizado.
+            </p>
+          </div>
+
+          {/* Benefits */}
+          <div className="space-y-4 mb-8">
+            <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider">
+              Você vai receber:
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Score de Maturidade</p>
+                  <p className="text-sm text-muted-foreground">Nota de 0 a 100% baseada em 5 pilares</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Mapa de Gargalos</p>
+                  <p className="text-sm text-muted-foreground">Identifique onde sua empresa trava</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Consultoria Gratuita</p>
+                  <p className="text-sm text-muted-foreground">Leitura estratégica com especialista</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="space-y-4">
+            <QuizButton onClick={onNext}>
+              Começar Diagnóstico Gratuito
+            </QuizButton>
+            <p className="text-center text-xs text-muted-foreground">
+              ⏱️ Leva apenas 5 minutos • 100% gratuito
+            </p>
+          </div>
+
+          {/* Mobile Pillars */}
+          <div className="lg:hidden mt-8 pt-8 border-t border-border">
+            <p className="text-sm text-muted-foreground mb-3">O que avaliamos:</p>
+            <div className="flex flex-wrap gap-2">
+              {pillars.map((pillar) => (
+                <span
+                  key={pillar.label}
+                  className="bg-muted px-3 py-1.5 rounded-full text-xs font-medium text-foreground"
+                >
+                  {pillar.label}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
