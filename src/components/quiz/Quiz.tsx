@@ -27,6 +27,17 @@ interface QuizData {
   contact: ContactData | null;
 }
 
+const stepOrder: Step[] = [
+  "welcome",
+  "companySize",
+  "segment",
+  "certification",
+  "objective",
+  "timeline",
+  "contact",
+  "result",
+];
+
 export const Quiz = () => {
   const [currentStep, setCurrentStep] = useState<Step>("welcome");
   const [data, setData] = useState<QuizData>({
@@ -55,19 +66,16 @@ export const Quiz = () => {
   };
 
   const goToNextStep = () => {
-    const stepOrder: Step[] = [
-      "welcome",
-      "companySize",
-      "segment",
-      "certification",
-      "objective",
-      "timeline",
-      "contact",
-      "result",
-    ];
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex < stepOrder.length - 1) {
       setCurrentStep(stepOrder[currentIndex + 1]);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    const currentIndex = stepOrder.indexOf(currentStep);
+    if (currentIndex > 0) {
+      setCurrentStep(stepOrder[currentIndex - 1]);
     }
   };
 
@@ -93,6 +101,7 @@ export const Quiz = () => {
           totalSteps={totalSteps}
           selected={data.companySize}
           onSelect={(value) => handleSelectAndNext("companySize", value)}
+          onBack={goToPreviousStep}
         />
       );
 
@@ -103,6 +112,7 @@ export const Quiz = () => {
           totalSteps={totalSteps}
           selected={data.segment}
           onSelect={(value) => handleSelectAndNext("segment", value)}
+          onBack={goToPreviousStep}
         />
       );
 
@@ -113,6 +123,7 @@ export const Quiz = () => {
           totalSteps={totalSteps}
           selected={data.certification}
           onSelect={(value) => handleSelectAndNext("certification", value)}
+          onBack={goToPreviousStep}
         />
       );
 
@@ -124,6 +135,7 @@ export const Quiz = () => {
           selected={data.objectives}
           onSelect={(values) => setData((prev) => ({ ...prev, objectives: values }))}
           onNext={goToNextStep}
+          onBack={goToPreviousStep}
         />
       );
 
@@ -134,6 +146,7 @@ export const Quiz = () => {
           totalSteps={totalSteps}
           selected={data.timeline}
           onSelect={(value) => handleSelectAndNext("timeline", value)}
+          onBack={goToPreviousStep}
         />
       );
 
@@ -143,6 +156,7 @@ export const Quiz = () => {
           currentStep={getStepNumber(currentStep)}
           totalSteps={totalSteps}
           onSubmit={handleContactSubmit}
+          onBack={goToPreviousStep}
         />
       );
 
