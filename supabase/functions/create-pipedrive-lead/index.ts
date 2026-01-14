@@ -29,6 +29,36 @@ serve(async (req) => {
     const leadData: LeadData = await req.json();
     console.log("Received lead data:", leadData);
 
+    // Get pipelines to find "Inbound"
+    const pipelinesResponse = await fetch(
+      `https://api.pipedrive.com/v1/pipelines?api_token=${apiToken}`
+    );
+    const pipelinesResult = await pipelinesResponse.json();
+    console.log("Pipelines:", pipelinesResult);
+
+    let pipelineId = null;
+    let firstStageId = null;
+
+    if (pipelinesResult.success && pipelinesResult.data) {
+      const inboundPipeline = pipelinesResult.data.find(
+        (p: { name: string }) => p.name.toLowerCase().includes("inbound")
+      );
+      if (inboundPipeline) {
+        pipelineId = inboundPipeline.id;
+        console.log("Found Inbound pipeline:", pipelineId);
+
+        // Get stages for this pipeline
+        const stagesResponse = await fetch(
+          `https://api.pipedrive.com/v1/stages?pipeline_id=${pipelineId}&api_token=${apiToken}`
+        );
+        const stagesResult = await stagesResponse.json();
+        if (stagesResult.success && stagesResult.data && stagesResult.data.length > 0) {
+          firstStageId = stagesResult.data[0].id;
+          console.log("First stage ID:", firstStageId);
+        }
+      }
+    }
+
     // First, create a person in Pipedrive
     const personResponse = await fetch(
       `https://api.pipedrive.com/v1/persons?api_token=${apiToken}`,
@@ -41,7 +71,6 @@ serve(async (req) => {
           name: leadData.name,
           email: [{ value: leadData.email, primary: true }],
           phone: [{ value: leadData.phone, primary: true }],
-          org_id: null,
         }),
       }
     );
@@ -91,9 +120,67 @@ serve(async (req) => {
       );
     }
 
-    // Create a lead in Pipedrive
-    const leadTitle = `Diagnóstico ISO 9001 - ${leadData.name} (${leadData.company})`;
-    const leadNote = `
+    // Get deal labels to find "DIAGNÓSTICO"
+    const dealFieldsResponse = await fetch(
+      `https://api.pipedrive.com/v1/dealFields?api_token=${apiToken}`
+    );
+    const dealFieldsResult = await dealFieldsResponse.json();
+    
+    let labelId = null;
+    if (dealFieldsResult.success && dealFieldsResult.data) {
+      const labelField = dealFieldsResult.data.find(
+        (f: { key: string }) => f.key === "label"
+      );
+      if (labelField && labelField.options) {
+        const diagnosticoLabel = labelField.options.find(
+          (opt: { label: string }) => opt.label.toUpperCase().includes("DIAGNÓSTICO") || opt.label.toUpperCase().includes("DIAGNOSTICO")
+        );
+        if (diagnosticoLabel) {
+          labelId = diagnosticoLabel.id;
+          console.log("Found DIAGNÓSTICO label:", labelId);
+        }
+      }
+    }
+
+    // Create a deal in Pipedrive (in Inbound pipeline with DIAGNÓSTICO label)
+    const dealTitle = `Diagnóstico ISO 9001 - ${leadData.name} (${leadData.company})`;
+    
+    const dealBody: Record<string, unknown> = {
+      title: dealTitle,
+      person_id: personId,
+      org_id: orgId,
+    };
+
+    if (pipelineId) {
+      dealBody.pipeline_id = pipelineId;
+    }
+    if (firstStageId) {
+      dealBody.stage_id = firstStageId;
+    }
+    if (labelId) {
+      dealBody.label = labelId;
+    }
+
+    const dealResponse = await fetch(
+      `https://api.pipedrive.com/v1/deals?api_token=${apiToken}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dealBody),
+      }
+    );
+
+    const dealResult = await dealResponse.json();
+    console.log("Deal creation result:", dealResult);
+
+    if (!dealResult.success) {
+      throw new Error(`Failed to create deal: ${JSON.stringify(dealResult)}`);
+    }
+
+    // Add a note to the deal with diagnosis details
+    const dealNote = `
 📊 **Diagnóstico de Maturidade ISO 9001**
 
 👤 **Contato:** ${leadData.name}
@@ -105,29 +192,6 @@ serve(async (req) => {
 🏷️ **Nível:** ${leadData.diagnosis_level}
     `.trim();
 
-    const leadResponse = await fetch(
-      `https://api.pipedrive.com/v1/leads?api_token=${apiToken}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: leadTitle,
-          person_id: personId,
-          organization_id: orgId,
-        }),
-      }
-    );
-
-    const leadResult = await leadResponse.json();
-    console.log("Lead creation result:", leadResult);
-
-    if (!leadResult.success) {
-      throw new Error(`Failed to create lead: ${JSON.stringify(leadResult)}`);
-    }
-
-    // Add a note to the lead
     const noteResponse = await fetch(
       `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
       {
@@ -136,8 +200,8 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: leadNote,
-          lead_id: leadResult.data.id,
+          content: dealNote,
+          deal_id: dealResult.data.id,
         }),
       }
     );
@@ -148,9 +212,11 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        lead_id: leadResult.data.id,
+        deal_id: dealResult.data.id,
         person_id: personId,
         org_id: orgId,
+        pipeline_id: pipelineId,
+        label_id: labelId,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -159,7 +225,7 @@ serve(async (req) => {
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error creating Pipedrive lead:", errorMessage);
+    console.error("Error creating Pipedrive deal:", errorMessage);
     return new Response(
       JSON.stringify({
         success: false,
