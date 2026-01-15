@@ -267,7 +267,7 @@ export const getDiagnosis = (score: number) => {
       emoji: "🔴",
       title: "Empresa dependente de pessoas",
       description:
-        "Sua empresa funciona mais como uma lanchonete improvisada do que como um McDonald's. Isso significa alto risco, dependência do dono e dificuldade de crescimento.",
+        "Sua empresa ainda opera no improviso, sem processos definidos. Isso significa alto risco, dependência do dono e dificuldade de crescimento sustentável.",
       recommendation:
         "Você precisa urgentemente estruturar seus processos básicos para reduzir riscos e ganhar previsibilidade.",
     };
