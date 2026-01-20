@@ -11,7 +11,7 @@ const Obrigado = () => {
   const state = location.state as LocationState | null;
 
   // If no state, redirect to home
-  if (!state?.name || state?.score === undefined) {
+  if (!state || !state.name || typeof state.score !== "number") {
     return <Navigate to="/" replace />;
   }
 
