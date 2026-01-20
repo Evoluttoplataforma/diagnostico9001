@@ -1,13 +1,13 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
-import { ResultStep } from "./steps/ResultStep";
 import { questions, AnswerValue, getScore, getDiagnosis } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type Step = "welcome" | "questions" | "contact" | "result";
+type Step = "welcome" | "questions" | "contact";
 
 interface QuizData {
   answers: Record<string, AnswerValue>;
@@ -15,6 +15,7 @@ interface QuizData {
 }
 
 export const Quiz = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>("welcome");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [data, setData] = useState<QuizData>({
@@ -111,7 +112,14 @@ export const Quiz = () => {
       }
 
       setData((prev) => ({ ...prev, contact: contactData }));
-      setCurrentStep("result");
+      
+      // Navigate to result page with state
+      navigate("/obrigado-diagnostico", {
+        state: {
+          name: contactData.name,
+          score: score,
+        },
+      });
     } catch (err) {
       console.error("Error:", err);
       toast.error("Erro ao processar. Tente novamente.");
@@ -142,14 +150,6 @@ export const Quiz = () => {
           totalSteps={totalQuestions + 1}
           onSubmit={handleContactSubmit}
           onBack={handleContactBack}
-        />
-      );
-
-    case "result":
-      return (
-        <ResultStep
-          name={data.contact?.name || "Visitante"}
-          score={getScore(data.answers)}
         />
       );
 
