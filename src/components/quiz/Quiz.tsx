@@ -91,6 +91,11 @@ export const Quiz = () => {
             company: contactData.company,
             score: score,
             diagnosis_level: diagnosis.level,
+            utm_source: contactData.utm_source,
+            utm_medium: contactData.utm_medium,
+            utm_campaign: contactData.utm_campaign,
+            utm_content: contactData.utm_content,
+            utm_term: contactData.utm_term,
           },
         });
 

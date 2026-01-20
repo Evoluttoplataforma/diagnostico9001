@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
+import { useUTM, UTMParams } from "@/hooks/use-utm";
 
 interface ContactStepProps {
   currentStep: number;
@@ -14,6 +15,11 @@ export interface ContactData {
   email: string;
   phone: string;
   company: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
 }
 
 export const ContactStep = ({
@@ -22,6 +28,7 @@ export const ContactStep = ({
   onSubmit,
   onBack,
 }: ContactStepProps) => {
+  const utmParams = useUTM();
   const [formData, setFormData] = useState<ContactData>({
     name: "",
     email: "",
@@ -42,7 +49,12 @@ export const ContactStep = ({
     if (isValid && !isLoading) {
       setIsLoading(true);
       try {
-        await onSubmit(formData);
+        // Include UTM params in the submission
+        const dataWithUTM: ContactData = {
+          ...formData,
+          ...utmParams,
+        };
+        await onSubmit(dataWithUTM);
       } finally {
         setIsLoading(false);
       }
