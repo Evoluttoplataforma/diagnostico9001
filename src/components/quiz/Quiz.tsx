@@ -113,12 +113,16 @@ export const Quiz = () => {
 
       setData((prev) => ({ ...prev, contact: contactData }));
       
+      const navigationState = {
+        name: contactData.name,
+        score: score,
+      };
+      
+      console.log("Navigating to /obrigado-diagnostico with state:", navigationState);
+      
       // Navigate to result page with state
       navigate("/obrigado-diagnostico", {
-        state: {
-          name: contactData.name,
-          score: score,
-        },
+        state: navigationState,
       });
     } catch (err) {
       console.error("Error:", err);
