@@ -1,10 +1,12 @@
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface QuizButtonProps {
   children: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
   loading?: boolean;
+  variant?: "primary" | "outline";
 }
 
 export const QuizButton = ({
@@ -12,12 +14,16 @@ export const QuizButton = ({
   onClick,
   disabled = false,
   loading = false,
+  variant = "primary",
 }: QuizButtonProps) => {
   return (
     <button 
       onClick={onClick} 
       disabled={disabled || loading} 
-      className="quiz-button"
+      className={cn(
+        "quiz-button",
+        variant === "outline" && "quiz-button-outline"
+      )}
     >
       {loading ? (
         <>

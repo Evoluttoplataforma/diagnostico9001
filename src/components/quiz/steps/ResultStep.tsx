@@ -7,6 +7,7 @@ import { RadarChart } from "../results/RadarChart";
 import { PillarChecklist } from "../results/PillarChecklist";
 import { DiagnosisSummary } from "../results/DiagnosisSummary";
 import { DiagnosisLoading } from "../results/DiagnosisLoading";
+import { DownloadPDFButton } from "../results/DownloadPDFButton";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ResultStepProps {
@@ -16,6 +17,7 @@ interface ResultStepProps {
   segment: string;
   companySize: string;
   pillarScores: PillarScore[];
+  company?: string;
 }
 
 interface DiagnosisData {
@@ -33,6 +35,7 @@ export const ResultStep = ({
   segment,
   companySize,
   pillarScores,
+  company,
 }: ResultStepProps) => {
   const firstName = name.split(" ")[0];
   const diagnosis = getDiagnosis(score);
@@ -55,29 +58,54 @@ export const ResultStep = ({
           },
         });
 
+        let diagnosisResult: DiagnosisData;
+
         if (error) {
           console.error("AI diagnosis error:", error);
           // Use fallback
-          setAiDiagnosis({
+          diagnosisResult = {
             summary: {
-              paragraph1: `${firstName}, sua empresa demonstra ${score <= 30 ? "oportunidades significativas de estruturação" : score <= 65 ? "uma base operacional que pode ser aprimorada" : "maturidade de gestão admirável"}. ${pillarScores.sort((a, b) => b.score - a.score)[0].name} é seu ponto mais forte, enquanto ${pillarScores.sort((a, b) => a.score - b.score)[0].name} precisa de atenção.`,
+              paragraph1: `${firstName}, sua empresa demonstra ${score <= 30 ? "oportunidades significativas de estruturação" : score <= 65 ? "uma base operacional que pode ser aprimorada" : "maturidade de gestão admirável"}. ${[...pillarScores].sort((a, b) => b.score - a.score)[0].name} é seu ponto mais forte, enquanto ${[...pillarScores].sort((a, b) => a.score - b.score)[0].name} precisa de atenção.`,
               paragraph2: `Para uma empresa de ${companySize} no segmento de ${segment}, recomendamos focar em ${score > 80 ? "governança e certificações" : "estruturar processos fundamentais"}. Isso vai trazer mais previsibilidade e preparar a empresa para o próximo nível.`,
             },
             checklist: getFallbackChecklist(score),
-          });
-        } else if (data) {
-          setAiDiagnosis(data);
+          };
+        } else {
+          diagnosisResult = data;
+        }
+
+        setAiDiagnosis(diagnosisResult);
+
+        // Save AI diagnosis and pillar scores to database
+        try {
+          const { error: updateError } = await supabase
+            .from("quiz_leads")
+            .update({
+              pillar_scores: JSON.parse(JSON.stringify(pillarScores)),
+              ai_diagnosis: JSON.parse(JSON.stringify(diagnosisResult)),
+            })
+            .eq("name", name)
+            .eq("score", score)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          if (updateError) {
+            console.error("Error saving AI diagnosis:", updateError);
+          }
+        } catch (saveErr) {
+          console.error("Failed to save AI diagnosis:", saveErr);
         }
       } catch (err) {
         console.error("Failed to fetch AI diagnosis:", err);
         // Use fallback checklist
-        setAiDiagnosis({
+        const fallbackDiagnosis = {
           summary: {
-            paragraph1: `${firstName}, sua empresa demonstra ${score <= 30 ? "oportunidades significativas de estruturação" : score <= 65 ? "uma base operacional que pode ser aprimorada" : "maturidade de gestão admirável"}. ${pillarScores.sort((a, b) => b.score - a.score)[0].name} é seu ponto mais forte.`,
+            paragraph1: `${firstName}, sua empresa demonstra ${score <= 30 ? "oportunidades significativas de estruturação" : score <= 65 ? "uma base operacional que pode ser aprimorada" : "maturidade de gestão admirável"}. ${[...pillarScores].sort((a, b) => b.score - a.score)[0].name} é seu ponto mais forte.`,
             paragraph2: `Para continuar evoluindo, foque em fortalecer as áreas com menor pontuação. Pequenas melhorias consistentes geram grandes resultados.`,
           },
           checklist: getFallbackChecklist(score),
-        });
+        };
+        setAiDiagnosis(fallbackDiagnosis);
       } finally {
         setIsLoading(false);
       }
@@ -181,6 +209,21 @@ export const ResultStep = ({
             />
           )}
         </section>
+
+        {/* Download PDF Button */}
+        {!isLoading && aiDiagnosis && (
+          <section>
+            <DownloadPDFButton
+              name={name}
+              company={company}
+              score={score}
+              pillarScores={pillarScores}
+              diagnosisSummary={aiDiagnosis.summary}
+              checklist={aiDiagnosis.checklist}
+              diagnosisTitle={diagnosis.title}
+            />
+          </section>
+        )}
 
         {/* Stats */}
         <section className="grid grid-cols-2 gap-3">

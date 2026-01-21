@@ -8,6 +8,7 @@ interface LocationState {
   answers: Record<string, AnswerValue>;
   segment: string;
   companySize: string;
+  company: string;
   pillarScores: PillarScore[];
 }
 
@@ -33,6 +34,7 @@ const Obrigado = () => {
       answers={state.answers}
       segment={state.segment}
       companySize={state.companySize}
+      company={state.company}
       pillarScores={state.pillarScores}
     />
   );

@@ -128,7 +128,7 @@
   }
 
   .quiz-button {
-    @apply w-full py-4 px-8 rounded-xl font-bold text-lg transition-all duration-200;
+    @apply w-full py-4 px-8 rounded-xl font-bold text-lg transition-all duration-200 flex items-center justify-center gap-2;
     @apply bg-primary text-primary-foreground;
   }
 
@@ -140,6 +140,16 @@
 
   .quiz-button:disabled {
     @apply opacity-50 cursor-not-allowed;
+  }
+
+  .quiz-button-outline {
+    @apply bg-transparent border-2 border-primary text-primary;
+  }
+
+  .quiz-button-outline:hover:not(:disabled) {
+    @apply bg-primary/10;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(24 95% 53% / 0.15);
   }
 
   .progress-bar {
