@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { WelcomeStep } from "./steps/WelcomeStep";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
 import { CompanyStep, CompanyData } from "./steps/CompanyStep";
@@ -9,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUTM } from "@/hooks/use-utm";
 
-type Step = "welcome" | "questions" | "contact" | "company";
+type Step = "questions" | "contact" | "company";
 
 interface QuizData {
   answers: Record<string, AnswerValue>;
@@ -20,7 +19,7 @@ interface QuizData {
 export const Quiz = () => {
   const navigate = useNavigate();
   const utmParams = useUTM();
-  const [currentStep, setCurrentStep] = useState<Step>("welcome");
+  const [currentStep, setCurrentStep] = useState<Step>("questions");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [data, setData] = useState<QuizData>({
     answers: {},
@@ -30,11 +29,6 @@ export const Quiz = () => {
 
   const totalQuestions = questions.length;
   const totalSteps = totalQuestions + 2;
-
-  const handleStartQuiz = () => {
-    setCurrentStep("questions");
-    setCurrentQuestionIndex(0);
-  };
 
   const handleAnswer = (value: AnswerValue) => {
     const questionId = questions[currentQuestionIndex].id;
@@ -55,8 +49,6 @@ export const Quiz = () => {
   const handleQuestionBack = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
-    } else {
-      setCurrentStep("welcome");
     }
   };
 
@@ -158,9 +150,6 @@ export const Quiz = () => {
   };
 
   switch (currentStep) {
-    case "welcome":
-      return <WelcomeStep onNext={handleStartQuiz} />;
-
     case "questions":
       const currentQuestion = questions[currentQuestionIndex];
       return (
@@ -195,6 +184,6 @@ export const Quiz = () => {
       );
 
     default:
-      return <WelcomeStep onNext={handleStartQuiz} />;
+      return null;
   }
 };
