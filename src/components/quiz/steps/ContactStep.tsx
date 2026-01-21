@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
-import { useUTM, UTMParams } from "@/hooks/use-utm";
 
 interface ContactStepProps {
   currentStep: number;
   totalSteps: number;
-  onSubmit: (data: ContactData) => Promise<void>;
+  onNext: (data: ContactData) => void;
   onBack: () => void;
 }
 
@@ -14,50 +13,30 @@ export interface ContactData {
   name: string;
   email: string;
   phone: string;
-  company: string;
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  utm_content?: string;
-  utm_term?: string;
 }
 
 export const ContactStep = ({
   currentStep,
   totalSteps,
-  onSubmit,
+  onNext,
   onBack,
 }: ContactStepProps) => {
-  const utmParams = useUTM();
   const [formData, setFormData] = useState<ContactData>({
     name: "",
     email: "",
     phone: "",
-    company: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isValid =
-    formData.name && formData.email && formData.phone && formData.company;
+  const isValid = formData.name && formData.email && formData.phone;
 
-  const handleSubmit = async () => {
-    if (isValid && !isLoading) {
-      setIsLoading(true);
-      try {
-        // Include UTM params in the submission
-        const dataWithUTM: ContactData = {
-          ...formData,
-          ...utmParams,
-        };
-        await onSubmit(dataWithUTM);
-      } finally {
-        setIsLoading(false);
-      }
+  const handleNext = () => {
+    if (isValid) {
+      onNext(formData);
     }
   };
 
@@ -92,20 +71,6 @@ export const ContactStep = ({
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Nome da empresa
-              </label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="Digite o nome da empresa"
-                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
                 E-mail corporativo
               </label>
               <input
@@ -133,8 +98,8 @@ export const ContactStep = ({
             </div>
           </div>
 
-          <QuizButton onClick={handleSubmit} disabled={!isValid} loading={isLoading}>
-            Receber Diagnóstico Gratuito
+          <QuizButton onClick={handleNext} disabled={!isValid}>
+            Continuar
           </QuizButton>
 
           <p className="text-xs text-muted-foreground text-center mt-4">

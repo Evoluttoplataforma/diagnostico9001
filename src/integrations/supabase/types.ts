@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           answers: Json
           company: string
+          company_size: string | null
           created_at: string
           diagnosis_level: string
           email: string
@@ -25,10 +26,12 @@ export type Database = {
           name: string
           phone: string
           score: number
+          segment: string | null
         }
         Insert: {
           answers: Json
           company: string
+          company_size?: string | null
           created_at?: string
           diagnosis_level: string
           email: string
@@ -36,10 +39,12 @@ export type Database = {
           name: string
           phone: string
           score: number
+          segment?: string | null
         }
         Update: {
           answers?: Json
           company?: string
+          company_size?: string | null
           created_at?: string
           diagnosis_level?: string
           email?: string
@@ -47,6 +52,7 @@ export type Database = {
           name?: string
           phone?: string
           score?: number
+          segment?: string | null
         }
         Relationships: []
       }

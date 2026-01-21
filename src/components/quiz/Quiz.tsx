@@ -3,27 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
+import { CompanyStep, CompanyData } from "./steps/CompanyStep";
 import { questions, AnswerValue, getScore, getDiagnosis } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useUTM } from "@/hooks/use-utm";
 
-type Step = "welcome" | "questions" | "contact";
+type Step = "welcome" | "questions" | "contact" | "company";
 
 interface QuizData {
   answers: Record<string, AnswerValue>;
   contact: ContactData | null;
+  company: CompanyData | null;
 }
 
 export const Quiz = () => {
   const navigate = useNavigate();
+  const utmParams = useUTM();
   const [currentStep, setCurrentStep] = useState<Step>("welcome");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [data, setData] = useState<QuizData>({
     answers: {},
     contact: null,
+    company: null,
   });
 
   const totalQuestions = questions.length;
+  const totalSteps = totalQuestions + 2; // 20 questions + contact step + company step
 
   const handleStartQuiz = () => {
     setCurrentStep("questions");
@@ -55,22 +61,39 @@ export const Quiz = () => {
     }
   };
 
+  const handleContactNext = (contactData: ContactData) => {
+    setData((prev) => ({ ...prev, contact: contactData }));
+    setCurrentStep("company");
+  };
+
   const handleContactBack = () => {
     setCurrentStep("questions");
     setCurrentQuestionIndex(totalQuestions - 1);
   };
 
-  const handleContactSubmit = async (contactData: ContactData) => {
+  const handleCompanyBack = () => {
+    setCurrentStep("contact");
+  };
+
+  const handleCompanySubmit = async (companyData: CompanyData) => {
     const score = getScore(data.answers);
     const diagnosis = getDiagnosis(score);
+    const contactData = data.contact!;
     
+    // Determine final segment value
+    const finalSegment = companyData.segment === "Outros" 
+      ? companyData.segmentOther || "Outros"
+      : companyData.segment;
+
     try {
       // Save to database
       const { error } = await supabase.from("quiz_leads").insert({
         name: contactData.name,
         email: contactData.email,
         phone: contactData.phone,
-        company: contactData.company,
+        company: companyData.company,
+        segment: finalSegment,
+        company_size: companyData.companySize,
         score: score,
         answers: data.answers,
         diagnosis_level: diagnosis.level,
@@ -89,29 +112,29 @@ export const Quiz = () => {
             name: contactData.name,
             email: contactData.email,
             phone: contactData.phone,
-            company: contactData.company,
+            company: companyData.company,
+            segment: finalSegment,
+            company_size: companyData.companySize,
             score: score,
             diagnosis_level: diagnosis.level,
-            utm_source: contactData.utm_source,
-            utm_medium: contactData.utm_medium,
-            utm_campaign: contactData.utm_campaign,
-            utm_content: contactData.utm_content,
-            utm_term: contactData.utm_term,
+            utm_source: utmParams.utm_source,
+            utm_medium: utmParams.utm_medium,
+            utm_campaign: utmParams.utm_campaign,
+            utm_content: utmParams.utm_content,
+            utm_term: utmParams.utm_term,
           },
         });
 
         if (pipedriveResponse.error) {
           console.error("Pipedrive error:", pipedriveResponse.error);
-          // Don't block the user flow, just log the error
         } else {
           console.log("Lead created in Pipedrive:", pipedriveResponse.data);
         }
       } catch (pipedriveErr) {
         console.error("Pipedrive integration error:", pipedriveErr);
-        // Don't block the user flow
       }
 
-      setData((prev) => ({ ...prev, contact: contactData }));
+      setData((prev) => ({ ...prev, company: companyData }));
       
       const navigationState = {
         name: contactData.name,
@@ -120,7 +143,6 @@ export const Quiz = () => {
       
       console.log("Navigating to /obrigado-diagnostico with state:", navigationState);
       
-      // Navigate to result page with state
       navigate("/obrigado-diagnostico", {
         state: navigationState,
       });
@@ -151,9 +173,19 @@ export const Quiz = () => {
       return (
         <ContactStep
           currentStep={totalQuestions + 1}
-          totalSteps={totalQuestions + 1}
-          onSubmit={handleContactSubmit}
+          totalSteps={totalSteps}
+          onNext={handleContactNext}
           onBack={handleContactBack}
+        />
+      );
+
+    case "company":
+      return (
+        <CompanyStep
+          currentStep={totalQuestions + 2}
+          totalSteps={totalSteps}
+          onSubmit={handleCompanySubmit}
+          onBack={handleCompanyBack}
         />
       );
 
