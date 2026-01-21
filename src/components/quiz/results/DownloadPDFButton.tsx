@@ -158,11 +158,14 @@ export const DownloadPDFButton = ({
         pdf.setFont("helvetica", "bold");
         pdf.setTextColor(17, 24, 39);
         pdf.text("Plano de Ação", margin, yPos);
-        yPos += 10;
+        yPos += 12;
+
+        const checklistWidth = contentWidth - 10; // Wider text area for better wrapping
 
         Object.entries(checklist).forEach(([pillar, actions]) => {
-          // Check for page break
-          if (yPos > 270) {
+          // Check for page break - need more space for pillar + actions
+          const estimatedHeight = 10 + (actions.length * 15);
+          if (yPos + estimatedHeight > 280) {
             pdf.addPage();
             yPos = 20;
           }
@@ -171,19 +174,25 @@ export const DownloadPDFButton = ({
           pdf.setFont("helvetica", "bold");
           pdf.setTextColor(245, 130, 13);
           pdf.text(`• ${pillar}`, margin, yPos);
-          yPos += 6;
+          yPos += 8;
 
           pdf.setFontSize(9);
           pdf.setFont("helvetica", "normal");
           pdf.setTextColor(75, 85, 99);
           
           actions.forEach((action) => {
-            const actionLines = pdf.splitTextToSize(`  ☐ ${action}`, contentWidth - 5);
+            // Check for page break before each action
+            if (yPos > 275) {
+              pdf.addPage();
+              yPos = 20;
+            }
+            
+            const actionLines = pdf.splitTextToSize(`    ☐ ${action}`, checklistWidth);
             pdf.text(actionLines, margin + 5, yPos);
-            yPos += actionLines.length * 4 + 2;
+            yPos += actionLines.length * 5 + 3;
           });
           
-          yPos += 4;
+          yPos += 6;
         });
       }
 
