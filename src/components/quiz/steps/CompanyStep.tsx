@@ -19,33 +19,8 @@ interface CompanyStepProps {
 export interface CompanyData {
   company: string;
   segment: string;
-  segmentOther?: string;
   companySize: string;
 }
-
-const SEGMENTS = [
-  "Agronegócio",
-  "Alimentício",
-  "Automotivo",
-  "Construção Civil",
-  "Consultoria",
-  "Educação",
-  "Energia",
-  "Farmacêutico",
-  "Financeiro",
-  "Indústria",
-  "Logística",
-  "Metalúrgico",
-  "Mineração",
-  "Plásticos",
-  "Químico",
-  "Saúde",
-  "Serviços",
-  "Tecnologia",
-  "Telecomunicações",
-  "Têxtil",
-  "Outros",
-];
 
 const COMPANY_SIZES = [
   { value: "micro", label: "Microempresa (até 9 funcionários)" },
@@ -64,7 +39,6 @@ export const CompanyStep = ({
   const [formData, setFormData] = useState<CompanyData>({
     company: "",
     segment: "",
-    segmentOther: "",
     companySize: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -81,8 +55,7 @@ export const CompanyStep = ({
   const isValid =
     formData.company &&
     formData.segment &&
-    formData.companySize &&
-    (formData.segment !== "Outros" || formData.segmentOther);
+    formData.companySize;
 
   const handleSubmit = async () => {
     if (isValid && !isLoading) {
@@ -128,38 +101,15 @@ export const CompanyStep = ({
               <label className="block text-sm font-medium text-foreground mb-2">
                 Segmento de atuação
               </label>
-              <Select
+              <input
+                type="text"
+                name="segment"
                 value={formData.segment}
-                onValueChange={(value) => handleSelectChange("segment", value)}
-              >
-                <SelectTrigger className="w-full px-4 py-4 h-auto rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-foreground">
-                  <SelectValue placeholder="Selecione o segmento" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border border-border z-50">
-                  {SEGMENTS.map((segment) => (
-                    <SelectItem key={segment} value={segment}>
-                      {segment}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={handleChange}
+                placeholder="Digite o segmento da sua empresa"
+                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
+              />
             </div>
-
-            {formData.segment === "Outros" && (
-              <div className="animate-fade-in">
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Qual segmento?
-                </label>
-                <input
-                  type="text"
-                  name="segmentOther"
-                  value={formData.segmentOther}
-                  onChange={handleChange}
-                  placeholder="Digite o segmento da sua empresa"
-                  className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-                />
-              </div>
-            )}
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">

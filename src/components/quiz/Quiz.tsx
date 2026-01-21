@@ -72,10 +72,7 @@ export const Quiz = () => {
     const contactData = data.contact!;
     const pillarScores = calculatePillarScores(data.answers);
 
-    const finalSegment =
-      companyData.segment === "Outros"
-        ? companyData.segmentOther || "Outros"
-        : companyData.segment;
+    const finalSegment = companyData.segment;
 
     try {
       // Save to database
