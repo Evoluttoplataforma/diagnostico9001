@@ -154,45 +154,58 @@ export const DownloadPDFButton = ({
 
       // Action Plan Checklist
       if (checklist) {
-        pdf.setFontSize(14);
+        pdf.setFontSize(16);
         pdf.setFont("helvetica", "bold");
         pdf.setTextColor(17, 24, 39);
-        pdf.text("Plano de Ação", margin, yPos);
-        yPos += 12;
+        pdf.text("Plano de Acao", margin, yPos);
+        yPos += 15;
 
-        const checklistWidth = contentWidth - 10; // Wider text area for better wrapping
+        const checklistWidth = contentWidth - 15;
+        let pillarIndex = 1;
 
         Object.entries(checklist).forEach(([pillar, actions]) => {
-          // Check for page break - need more space for pillar + actions
-          const estimatedHeight = 10 + (actions.length * 15);
-          if (yPos + estimatedHeight > 280) {
+          // Check for page break - need space for pillar header + all actions
+          const estimatedHeight = 12 + (actions.length * 18);
+          if (yPos + estimatedHeight > 270) {
             pdf.addPage();
-            yPos = 20;
+            yPos = 25;
           }
 
-          pdf.setFontSize(11);
+          // Pillar header with number
+          pdf.setFontSize(12);
           pdf.setFont("helvetica", "bold");
           pdf.setTextColor(245, 130, 13);
-          pdf.text(`• ${pillar}`, margin, yPos);
+          pdf.text(`${pillarIndex}. ${pillar}`, margin, yPos);
           yPos += 8;
 
-          pdf.setFontSize(9);
+          pdf.setFontSize(10);
           pdf.setFont("helvetica", "normal");
-          pdf.setTextColor(75, 85, 99);
+          pdf.setTextColor(60, 60, 60);
           
           actions.forEach((action) => {
             // Check for page break before each action
-            if (yPos > 275) {
+            if (yPos > 270) {
               pdf.addPage();
-              yPos = 20;
+              yPos = 25;
             }
             
-            const actionLines = pdf.splitTextToSize(`    ☐ ${action}`, checklistWidth);
-            pdf.text(actionLines, margin + 5, yPos);
-            yPos += actionLines.length * 5 + 3;
+            // Use simple dash instead of unicode checkbox
+            const actionText = `- ${action}`;
+            const actionLines = pdf.splitTextToSize(actionText, checklistWidth);
+            
+            actionLines.forEach((line: string, lineIndex: number) => {
+              if (lineIndex === 0) {
+                pdf.text(line, margin + 5, yPos);
+              } else {
+                pdf.text(line, margin + 8, yPos); // Indent continuation lines
+              }
+              yPos += 5;
+            });
+            yPos += 3;
           });
           
-          yPos += 6;
+          yPos += 8;
+          pillarIndex++;
         });
       }
 
