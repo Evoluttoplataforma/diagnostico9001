@@ -14,9 +14,13 @@ export interface Answer {
 
 export type AnswerValue = "positive" | "neutral" | "negative";
 
+export interface PillarScore {
+  name: string;
+  score: number;
+}
+
 export const questions: Question[] = [
   // BLOCO 1 — PROCESSOS
-  // "Suas operações são organizadas e replicáveis? Ou você depende de apagar incêndios todo dia?"
   {
     id: "q1",
     block: 1,
@@ -63,7 +67,6 @@ export const questions: Question[] = [
   },
 
   // BLOCO 2 — PESSOAS
-  // "Seu time entrega resultado sem depender de você? Ou você é o gargalo de tudo que acontece?"
   {
     id: "q5",
     block: 2,
@@ -110,7 +113,6 @@ export const questions: Question[] = [
   },
 
   // BLOCO 3 — CLIENTES
-  // "Você retém clientes e cresce com previsibilidade? Ou vive na montanha-russa de vendas?"
   {
     id: "q9",
     block: 3,
@@ -157,7 +159,6 @@ export const questions: Question[] = [
   },
 
   // BLOCO 4 — CONTROLE
-  // "Você decide com dados ou no feeling? Sabe exatamente para onde vai cada real?"
   {
     id: "q13",
     block: 4,
@@ -204,7 +205,6 @@ export const questions: Question[] = [
   },
 
   // BLOCO 5 — CRESCIMENTO
-  // "Sua estrutura aguenta dobrar de tamanho? Ou você sente que está no limite?"
   {
     id: "q17",
     block: 5,
@@ -251,6 +251,30 @@ export const questions: Question[] = [
   },
 ];
 
+export const pillars = [
+  { name: "Processos", questions: ["q1", "q2", "q3", "q4"] },
+  { name: "Pessoas", questions: ["q5", "q6", "q7", "q8"] },
+  { name: "Clientes", questions: ["q9", "q10", "q11", "q12"] },
+  { name: "Controle", questions: ["q13", "q14", "q15", "q16"] },
+  { name: "Crescimento", questions: ["q17", "q18", "q19", "q20"] },
+];
+
+export const calculatePillarScores = (answers: Record<string, AnswerValue>): PillarScore[] => {
+  return pillars.map((pillar) => {
+    const points = pillar.questions.reduce((sum, qId) => {
+      const answer = answers[qId];
+      const question = questions.find((q) => q.id === qId);
+      const answerData = question?.answers.find((a) => a.value === answer);
+      return sum + (answerData?.points || 0);
+    }, 0);
+    // Each pillar has 4 questions, max 4 points = 100%
+    return {
+      name: pillar.name,
+      score: Math.round((points / 4) * 100),
+    };
+  });
+};
+
 export const getScore = (answers: Record<string, AnswerValue>): number => {
   const rawScore = questions.reduce((total, question) => {
     const answer = answers[question.id];
@@ -258,14 +282,13 @@ export const getScore = (answers: Record<string, AnswerValue>): number => {
     const answerData = question.answers.find((a) => a.value === answer);
     return total + (answerData?.points || 0);
   }, 0);
-  
+
   // Convert to percentage (max 20 points = 100%)
   const maxPoints = 20;
   return Math.round((rawScore / maxPoints) * 100);
 };
 
 export const getDiagnosis = (score: number) => {
-  // Score is now 0-100 percentage
   if (score <= 30) {
     return {
       level: "low" as const,
@@ -297,4 +320,57 @@ export const getDiagnosis = (score: number) => {
         "A certificação ISO 9001 vai consolidar sua gestão e abrir portas para novos mercados.",
     };
   }
+};
+
+// Fallback checklist when AI fails
+export const getFallbackChecklist = (score: number): Record<string, string[]> => {
+  const isHighPerformer = score > 80;
+
+  if (isHighPerformer) {
+    return {
+      Processos: [
+        "Implementar ciclos de melhoria contínua (PDCA) em todos os processos críticos",
+        "Preparar documentação para auditoria interna ISO 9001",
+      ],
+      Pessoas: [
+        "Criar programa de desenvolvimento de lideranças",
+        "Implementar gestão por competências com plano de carreira",
+      ],
+      Clientes: [
+        "Implementar NPS e programa de voz do cliente",
+        "Criar comitê de análise crítica de satisfação do cliente",
+      ],
+      Controle: [
+        "Adotar metodologia OKRs para gestão de indicadores",
+        "Implementar dashboard de gestão com indicadores em tempo real",
+      ],
+      Crescimento: [
+        "Elaborar plano estratégico de 3-5 anos com metas SMART",
+        "Buscar certificação ISO 9001 para ampliar mercado",
+      ],
+    };
+  }
+
+  return {
+    Processos: [
+      "Mapear e documentar os 5 processos mais críticos da operação",
+      "Criar checklist padrão para atividades repetitivas",
+    ],
+    Pessoas: [
+      "Definir descrição de cargo para cada função",
+      "Criar manual de integração para novos colaboradores",
+    ],
+    Clientes: [
+      "Implementar pesquisa de satisfação simples após cada entrega",
+      "Criar rotina semanal de follow-up com clientes ativos",
+    ],
+    Controle: [
+      "Implementar controle financeiro básico (entradas/saídas/DRE)",
+      "Definir 3 indicadores-chave para acompanhar semanalmente",
+    ],
+    Crescimento: [
+      "Definir meta de crescimento para os próximos 6 meses",
+      "Identificar os 3 principais gargalos que impedem o crescimento",
+    ],
+  };
 };

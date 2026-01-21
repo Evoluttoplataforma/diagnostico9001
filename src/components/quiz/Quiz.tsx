@@ -4,7 +4,7 @@ import { WelcomeStep } from "./steps/WelcomeStep";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
 import { CompanyStep, CompanyData } from "./steps/CompanyStep";
-import { questions, AnswerValue, getScore, getDiagnosis } from "./quizData";
+import { questions, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUTM } from "@/hooks/use-utm";
@@ -29,7 +29,7 @@ export const Quiz = () => {
   });
 
   const totalQuestions = questions.length;
-  const totalSteps = totalQuestions + 2; // 20 questions + contact step + company step
+  const totalSteps = totalQuestions + 2;
 
   const handleStartQuiz = () => {
     setCurrentStep("questions");
@@ -43,7 +43,6 @@ export const Quiz = () => {
       answers: { ...prev.answers, [questionId]: value },
     }));
 
-    // Auto-advance after selecting
     setTimeout(() => {
       if (currentQuestionIndex < totalQuestions - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
@@ -79,11 +78,12 @@ export const Quiz = () => {
     const score = getScore(data.answers);
     const diagnosis = getDiagnosis(score);
     const contactData = data.contact!;
-    
-    // Determine final segment value
-    const finalSegment = companyData.segment === "Outros" 
-      ? companyData.segmentOther || "Outros"
-      : companyData.segment;
+    const pillarScores = calculatePillarScores(data.answers);
+
+    const finalSegment =
+      companyData.segment === "Outros"
+        ? companyData.segmentOther || "Outros"
+        : companyData.segment;
 
     try {
       // Save to database
@@ -135,14 +135,19 @@ export const Quiz = () => {
       }
 
       setData((prev) => ({ ...prev, company: companyData }));
-      
+
+      // Navigate with all data needed for the premium report
       const navigationState = {
         name: contactData.name,
         score: score,
+        answers: data.answers,
+        segment: finalSegment,
+        companySize: companyData.companySize,
+        pillarScores: pillarScores,
       };
-      
+
       console.log("Navigating to /obrigado-diagnostico with state:", navigationState);
-      
+
       navigate("/obrigado-diagnostico", {
         state: navigationState,
       });
