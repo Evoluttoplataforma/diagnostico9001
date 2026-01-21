@@ -15,57 +15,12 @@ export interface Answer {
 export type AnswerValue = "positive" | "neutral" | "negative";
 
 export const questions: Question[] = [
-  // BLOCO 1 — DIREÇÃO E CONTROLE
+  // BLOCO 1 — PROCESSOS
+  // "Suas operações são organizadas e replicáveis? Ou você depende de apagar incêndios todo dia?"
   {
     id: "q1",
     block: 1,
-    blockTitle: "Direção e Controle",
-    text: "Sua empresa tem metas claras para este ano?",
-    answers: [
-      { value: "positive", label: "Sim, metas definidas e comunicadas", points: 1 },
-      { value: "neutral", label: "Temos algumas, mas não são claras", points: 0 },
-      { value: "negative", label: "Não temos metas definidas", points: 0 },
-    ],
-  },
-  {
-    id: "q2",
-    block: 1,
-    blockTitle: "Direção e Controle",
-    text: "Seu time sabe quais são as prioridades do negócio?",
-    answers: [
-      { value: "positive", label: "Sim, todos sabem as prioridades", points: 1 },
-      { value: "neutral", label: "Alguns sabem, outros não", points: 0 },
-      { value: "negative", label: "Cada um faz o que acha certo", points: 0 },
-    ],
-  },
-  {
-    id: "q3",
-    block: 1,
-    blockTitle: "Direção e Controle",
-    text: "Você acompanha indicadores (vendas, prazos, qualidade)?",
-    answers: [
-      { value: "positive", label: "Sim, acompanhamos regularmente", points: 1 },
-      { value: "neutral", label: "Às vezes, quando dá tempo", points: 0 },
-      { value: "negative", label: "Não medimos indicadores", points: 0 },
-    ],
-  },
-  {
-    id: "q4",
-    block: 1,
-    blockTitle: "Direção e Controle",
-    text: "As decisões são baseadas em dados?",
-    answers: [
-      { value: "positive", label: "Sim, usamos dados para decidir", points: 1 },
-      { value: "neutral", label: "Misturamos dados e intuição", points: 0 },
-      { value: "negative", label: "Decidimos no feeling", points: 0 },
-    ],
-  },
-
-  // BLOCO 2 — PROCESSOS OPERACIONAIS
-  {
-    id: "q5",
-    block: 2,
-    blockTitle: "Processos Operacionais",
+    blockTitle: "Processos",
     text: "As atividades principais seguem sempre o mesmo passo a passo?",
     answers: [
       { value: "positive", label: "Sim, temos processos padronizados", points: 1 },
@@ -74,9 +29,9 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: "q6",
-    block: 2,
-    blockTitle: "Processos Operacionais",
+    id: "q2",
+    block: 1,
+    blockTitle: "Processos",
     text: "Se alguém sair, outra pessoa consegue assumir sem caos?",
     answers: [
       { value: "positive", label: "Sim, o conhecimento está documentado", points: 1 },
@@ -85,9 +40,9 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: "q7",
-    block: 2,
-    blockTitle: "Processos Operacionais",
+    id: "q3",
+    block: 1,
+    blockTitle: "Processos",
     text: "Os processos estão documentados?",
     answers: [
       { value: "positive", label: "Sim, temos documentação atualizada", points: 1 },
@@ -96,22 +51,23 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: "q8",
-    block: 2,
-    blockTitle: "Processos Operacionais",
-    text: "Os erros se repetem com frequência?",
+    id: "q4",
+    block: 1,
+    blockTitle: "Processos",
+    text: "Você vive apagando incêndios no dia a dia?",
     answers: [
-      { value: "negative", label: "Sim, os mesmos erros sempre voltam", points: 0 },
-      { value: "neutral", label: "Às vezes acontece", points: 0 },
-      { value: "positive", label: "Não, aprendemos com os erros", points: 1 },
+      { value: "negative", label: "Sim, é o modo padrão aqui", points: 0 },
+      { value: "neutral", label: "Às vezes, mas não sempre", points: 0 },
+      { value: "positive", label: "Não, temos rotina organizada", points: 1 },
     ],
   },
 
-  // BLOCO 3 — PESSOAS E RESPONSABILIDADES
+  // BLOCO 2 — PESSOAS
+  // "Seu time entrega resultado sem depender de você? Ou você é o gargalo de tudo que acontece?"
   {
-    id: "q9",
-    block: 3,
-    blockTitle: "Pessoas e Responsabilidades",
+    id: "q5",
+    block: 2,
+    blockTitle: "Pessoas",
     text: "Cada colaborador sabe exatamente o que é sua responsabilidade?",
     answers: [
       { value: "positive", label: "Sim, funções bem definidas", points: 1 },
@@ -120,20 +76,31 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: "q10",
-    block: 3,
-    blockTitle: "Pessoas e Responsabilidades",
-    text: "Existem conflitos por falta de clareza de quem faz o quê?",
+    id: "q6",
+    block: 2,
+    blockTitle: "Pessoas",
+    text: "Seu time consegue resolver problemas sem precisar de você?",
     answers: [
-      { value: "negative", label: "Sim, conflitos frequentes", points: 0 },
-      { value: "neutral", label: "Às vezes acontece", points: 0 },
-      { value: "positive", label: "Não, está tudo claro", points: 1 },
+      { value: "positive", label: "Sim, têm autonomia para decidir", points: 1 },
+      { value: "neutral", label: "Às vezes, mas me consultam muito", points: 0 },
+      { value: "negative", label: "Não, tudo passa por mim", points: 0 },
     ],
   },
   {
-    id: "q11",
-    block: 3,
-    blockTitle: "Pessoas e Responsabilidades",
+    id: "q7",
+    block: 2,
+    blockTitle: "Pessoas",
+    text: "Você consegue tirar férias sem que a empresa pare?",
+    answers: [
+      { value: "positive", label: "Sim, a operação continua normal", points: 1 },
+      { value: "neutral", label: "Funciona, mas com dificuldades", points: 0 },
+      { value: "negative", label: "Não, preciso estar presente sempre", points: 0 },
+    ],
+  },
+  {
+    id: "q8",
+    block: 2,
+    blockTitle: "Pessoas",
     text: "O treinamento de novos colaboradores é estruturado?",
     answers: [
       { value: "positive", label: "Sim, temos programa de integração", points: 1 },
@@ -141,45 +108,13 @@ export const questions: Question[] = [
       { value: "negative", label: "Não, é no improviso total", points: 0 },
     ],
   },
-  {
-    id: "q12",
-    block: 3,
-    blockTitle: "Pessoas e Responsabilidades",
-    text: "O desempenho das pessoas é medido de forma objetiva?",
-    answers: [
-      { value: "positive", label: "Sim, com critérios claros", points: 1 },
-      { value: "neutral", label: "Avaliamos, mas sem critérios fixos", points: 0 },
-      { value: "negative", label: "Não medimos desempenho", points: 0 },
-    ],
-  },
 
-  // BLOCO 4 — CLIENTE E QUALIDADE
+  // BLOCO 3 — CLIENTES
+  // "Você retém clientes e cresce com previsibilidade? Ou vive na montanha-russa de vendas?"
   {
-    id: "q13",
-    block: 4,
-    blockTitle: "Cliente e Qualidade",
-    text: "As reclamações dos clientes são registradas?",
-    answers: [
-      { value: "positive", label: "Sim, temos sistema de registro", points: 1 },
-      { value: "neutral", label: "Algumas sim, outras não", points: 0 },
-      { value: "negative", label: "Não registramos reclamações", points: 0 },
-    ],
-  },
-  {
-    id: "q14",
-    block: 4,
-    blockTitle: "Cliente e Qualidade",
-    text: "Existe um padrão de atendimento ao cliente?",
-    answers: [
-      { value: "positive", label: "Sim, atendimento padronizado", points: 1 },
-      { value: "neutral", label: "Depende de quem atende", points: 0 },
-      { value: "negative", label: "Cada um atende do seu jeito", points: 0 },
-    ],
-  },
-  {
-    id: "q15",
-    block: 4,
-    blockTitle: "Cliente e Qualidade",
+    id: "q9",
+    block: 3,
+    blockTitle: "Clientes",
     text: "Você mede a satisfação dos clientes?",
     answers: [
       { value: "positive", label: "Sim, pesquisamos regularmente", points: 1 },
@@ -188,9 +123,9 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: "q16",
-    block: 4,
-    blockTitle: "Cliente e Qualidade",
+    id: "q10",
+    block: 3,
+    blockTitle: "Clientes",
     text: "Já perdeu clientes por falhas internas?",
     answers: [
       { value: "negative", label: "Sim, já perdemos vários", points: 0 },
@@ -198,50 +133,120 @@ export const questions: Question[] = [
       { value: "positive", label: "Não, retemos bem nossos clientes", points: 1 },
     ],
   },
+  {
+    id: "q11",
+    block: 3,
+    blockTitle: "Clientes",
+    text: "Suas vendas são previsíveis mês a mês?",
+    answers: [
+      { value: "positive", label: "Sim, temos previsibilidade", points: 1 },
+      { value: "neutral", label: "Varia bastante, difícil prever", points: 0 },
+      { value: "negative", label: "É uma montanha-russa", points: 0 },
+    ],
+  },
+  {
+    id: "q12",
+    block: 3,
+    blockTitle: "Clientes",
+    text: "Você sabe qual o ciclo de vida médio dos seus clientes?",
+    answers: [
+      { value: "positive", label: "Sim, acompanhamos esse dado", points: 1 },
+      { value: "neutral", label: "Tenho uma ideia, mas não preciso", points: 0 },
+      { value: "negative", label: "Não, nunca medi isso", points: 0 },
+    ],
+  },
 
-  // BLOCO 5 — CONTROLE E MELHORIA
+  // BLOCO 4 — CONTROLE
+  // "Você decide com dados ou no feeling? Sabe exatamente para onde vai cada real?"
+  {
+    id: "q13",
+    block: 4,
+    blockTitle: "Controle",
+    text: "Você acompanha indicadores (vendas, prazos, qualidade)?",
+    answers: [
+      { value: "positive", label: "Sim, acompanhamos regularmente", points: 1 },
+      { value: "neutral", label: "Às vezes, quando dá tempo", points: 0 },
+      { value: "negative", label: "Não medimos indicadores", points: 0 },
+    ],
+  },
+  {
+    id: "q14",
+    block: 4,
+    blockTitle: "Controle",
+    text: "As decisões são baseadas em dados?",
+    answers: [
+      { value: "positive", label: "Sim, usamos dados para decidir", points: 1 },
+      { value: "neutral", label: "Misturamos dados e intuição", points: 0 },
+      { value: "negative", label: "Decidimos no feeling", points: 0 },
+    ],
+  },
+  {
+    id: "q15",
+    block: 4,
+    blockTitle: "Controle",
+    text: "Você sabe exatamente para onde vai cada real da empresa?",
+    answers: [
+      { value: "positive", label: "Sim, controle financeiro detalhado", points: 1 },
+      { value: "neutral", label: "Tenho uma visão geral apenas", points: 0 },
+      { value: "negative", label: "Não, as finanças são confusas", points: 0 },
+    ],
+  },
+  {
+    id: "q16",
+    block: 4,
+    blockTitle: "Controle",
+    text: "Você tem relatórios financeiros atualizados mensalmente?",
+    answers: [
+      { value: "positive", label: "Sim, DRE e fluxo de caixa em dia", points: 1 },
+      { value: "neutral", label: "Às vezes, quando dá tempo", points: 0 },
+      { value: "negative", label: "Não, só olho o saldo bancário", points: 0 },
+    ],
+  },
+
+  // BLOCO 5 — CRESCIMENTO
+  // "Sua estrutura aguenta dobrar de tamanho? Ou você sente que está no limite?"
   {
     id: "q17",
     block: 5,
-    blockTitle: "Controle e Melhoria",
-    text: "Os problemas são analisados na causa raiz?",
+    blockTitle: "Crescimento",
+    text: "Sua estrutura atual aguenta dobrar de tamanho?",
     answers: [
-      { value: "positive", label: "Sim, investigamos a fundo", points: 1 },
-      { value: "neutral", label: "Às vezes, quando é grave", points: 0 },
-      { value: "negative", label: "Só apagamos incêndios", points: 0 },
+      { value: "positive", label: "Sim, estamos preparados", points: 1 },
+      { value: "neutral", label: "Talvez, com alguns ajustes", points: 0 },
+      { value: "negative", label: "Não, já estamos no limite", points: 0 },
     ],
   },
   {
     id: "q18",
     block: 5,
-    blockTitle: "Controle e Melhoria",
-    text: "A empresa aprende com os erros?",
+    blockTitle: "Crescimento",
+    text: "Você tem um plano claro de crescimento para os próximos 12 meses?",
     answers: [
-      { value: "positive", label: "Sim, implementamos melhorias", points: 1 },
-      { value: "neutral", label: "Tentamos, mas nem sempre", points: 0 },
-      { value: "negative", label: "Repetimos os mesmos erros", points: 0 },
+      { value: "positive", label: "Sim, com metas e ações definidas", points: 1 },
+      { value: "neutral", label: "Tenho ideias, mas nada formalizado", points: 0 },
+      { value: "negative", label: "Não, vou levando conforme dá", points: 0 },
     ],
   },
   {
     id: "q19",
     block: 5,
-    blockTitle: "Controle e Melhoria",
-    text: "Existe alguma rotina de melhoria contínua?",
+    blockTitle: "Crescimento",
+    text: "Você conseguiria contratar 5 pessoas amanhã sem gerar caos?",
     answers: [
-      { value: "positive", label: "Sim, reuniões e ações regulares", points: 1 },
-      { value: "neutral", label: "Melhoramos quando dá", points: 0 },
-      { value: "negative", label: "Não temos rotina de melhoria", points: 0 },
+      { value: "positive", label: "Sim, temos estrutura para isso", points: 1 },
+      { value: "neutral", label: "Seria difícil, mas daria", points: 0 },
+      { value: "negative", label: "Não, seria um caos total", points: 0 },
     ],
   },
   {
     id: "q20",
     block: 5,
-    blockTitle: "Controle e Melhoria",
-    text: "As decisões importantes são registradas?",
+    blockTitle: "Crescimento",
+    text: "A empresa tem capital ou crédito disponível para investir em crescimento?",
     answers: [
-      { value: "positive", label: "Sim, documentamos tudo", points: 1 },
-      { value: "neutral", label: "Algumas sim, outras não", points: 0 },
-      { value: "negative", label: "Só ficam na memória", points: 0 },
+      { value: "positive", label: "Sim, temos reservas ou acesso a crédito", points: 1 },
+      { value: "neutral", label: "Pouco, precisaria buscar", points: 0 },
+      { value: "negative", label: "Não, estamos apertados", points: 0 },
     ],
   },
 ];
