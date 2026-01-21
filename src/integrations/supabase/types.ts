@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       quiz_leads: {
         Row: {
+          ai_diagnosis: Json | null
           answers: Json
           company: string
           company_size: string | null
@@ -25,10 +26,12 @@ export type Database = {
           id: string
           name: string
           phone: string
+          pillar_scores: Json | null
           score: number
           segment: string | null
         }
         Insert: {
+          ai_diagnosis?: Json | null
           answers: Json
           company: string
           company_size?: string | null
@@ -38,10 +41,12 @@ export type Database = {
           id?: string
           name: string
           phone: string
+          pillar_scores?: Json | null
           score: number
           segment?: string | null
         }
         Update: {
+          ai_diagnosis?: Json | null
           answers?: Json
           company?: string
           company_size?: string | null
@@ -51,6 +56,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string
+          pillar_scores?: Json | null
           score?: number
           segment?: string | null
         }
