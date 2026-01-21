@@ -43,13 +43,9 @@ export const DownloadPDFButton = ({
       pdf.rect(0, 0, pageWidth, 35, "F");
       
       pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(24);
+      pdf.setFontSize(22);
       pdf.setFont("helvetica", "bold");
-      pdf.text("Raio-X de Processos", margin, 22);
-      
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "normal");
-      pdf.text("Diagnóstico de Maturidade Empresarial", margin, 30);
+      pdf.text("Diagnostico de Maturidade Empresarial", margin, 24);
 
       yPos = 50;
 
