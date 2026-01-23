@@ -253,7 +253,7 @@ export const ResultStep = ({
             Agende agora com um especialista
           </QuizButton>
           <p className="text-center text-xs text-muted-foreground">
-            💬 Atendimento via WhatsApp • Resposta imediata
+            Vamos te mostrar COMO aumentar sua pontuação através da ISO 9001!
           </p>
         </div>
       </div>
