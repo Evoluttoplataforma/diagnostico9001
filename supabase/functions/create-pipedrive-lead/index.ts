@@ -362,7 +362,8 @@ serve(async (req) => {
     let utmTermFieldKey: string | null = null;
     let origemFieldKey: string | null = null;
     let segmentFieldKey: string | null = null;
-    let companySizeFieldKey: string | null = null;
+    // Use the exact field ID for "Quantidade de funcionarios"
+    const companySizeFieldKey = "07a8ced33cfb9c1c11441fb7957adedaa7212676";
 
     if (dealFieldsResult.success && dealFieldsResult.data) {
       // Find label field
@@ -406,11 +407,7 @@ serve(async (req) => {
         if (fieldName.includes("ramo de atividade") || fieldName === "ramo_de_atividade") {
           segmentFieldKey = fieldKey;
         }
-        // Find Faixa de Funcionários field (maps to company_size)
-        if (fieldName.includes("faixa de funcionários") || fieldName.includes("faixa de funcionarios") || 
-            fieldName === "faixa_de_funcionarios" || fieldName === "faixa_de_funcionários") {
-          companySizeFieldKey = fieldKey;
-        }
+        // companySizeFieldKey is now hardcoded above
       }
 
       console.log("UTM field keys found:", {
