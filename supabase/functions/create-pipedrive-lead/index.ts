@@ -348,14 +348,22 @@ serve(async (req) => {
       );
     }
 
-    // Get deal labels to find "DIAGNÓSTICO"
+    // Get deal labels and UTM custom fields
     const dealFieldsResponse = await fetch(
       `https://api.pipedrive.com/v1/dealFields?api_token=${apiToken}`
     );
     const dealFieldsResult = await dealFieldsResponse.json();
     
     let labelId = null;
+    let utmSourceFieldKey: string | null = null;
+    let utmMediumFieldKey: string | null = null;
+    let utmCampaignFieldKey: string | null = null;
+    let utmContentFieldKey: string | null = null;
+    let utmTermFieldKey: string | null = null;
+    let origemFieldKey: string | null = null;
+
     if (dealFieldsResult.success && dealFieldsResult.data) {
+      // Find label field
       const labelField = dealFieldsResult.data.find(
         (f: { key: string }) => f.key === "label"
       );
@@ -368,6 +376,40 @@ serve(async (req) => {
           console.log("Found DIAGNÓSTICO label:", labelId);
         }
       }
+
+      // Find UTM custom fields
+      for (const field of dealFieldsResult.data) {
+        const fieldName = (field.name || "").toLowerCase();
+        const fieldKey = field.key;
+
+        if (fieldName.includes("utm_source") || fieldName === "source" || fieldName === "utm source") {
+          utmSourceFieldKey = fieldKey;
+        }
+        if (fieldName.includes("utm_medium") || fieldName === "medium" || fieldName === "utm medium") {
+          utmMediumFieldKey = fieldKey;
+        }
+        if (fieldName.includes("utm_campaign") || fieldName === "campaign" || fieldName === "utm campaign") {
+          utmCampaignFieldKey = fieldKey;
+        }
+        if (fieldName.includes("utm_content") || fieldName === "content" || fieldName === "utm content") {
+          utmContentFieldKey = fieldKey;
+        }
+        if (fieldName.includes("utm_term") || fieldName === "term" || fieldName === "utm term") {
+          utmTermFieldKey = fieldKey;
+        }
+        if (fieldName === "origem") {
+          origemFieldKey = fieldKey;
+        }
+      }
+
+      console.log("UTM field keys found:", {
+        utmSourceFieldKey,
+        utmMediumFieldKey,
+        utmCampaignFieldKey,
+        utmContentFieldKey,
+        utmTermFieldKey,
+        origemFieldKey
+      });
     }
 
     // Create a deal in Pipedrive (in Inbound pipeline with DIAGNÓSTICO label)
@@ -388,6 +430,29 @@ serve(async (req) => {
     if (labelId) {
       dealBody.label = labelId;
     }
+
+    // Add UTM custom fields to deal
+    if (utmSourceFieldKey && leadData.utm_source) {
+      dealBody[utmSourceFieldKey] = leadData.utm_source;
+    }
+    if (utmMediumFieldKey && leadData.utm_medium) {
+      dealBody[utmMediumFieldKey] = leadData.utm_medium;
+    }
+    if (utmCampaignFieldKey && leadData.utm_campaign) {
+      dealBody[utmCampaignFieldKey] = leadData.utm_campaign;
+    }
+    if (utmContentFieldKey && leadData.utm_content) {
+      dealBody[utmContentFieldKey] = leadData.utm_content;
+    }
+    if (utmTermFieldKey && leadData.utm_term) {
+      dealBody[utmTermFieldKey] = leadData.utm_term;
+    }
+    // Origem can be the same as utm_source
+    if (origemFieldKey && leadData.utm_source) {
+      dealBody[origemFieldKey] = leadData.utm_source;
+    }
+
+    console.log("Deal body with UTMs:", JSON.stringify(dealBody));
 
     const dealResponse = await fetch(
       `https://api.pipedrive.com/v1/deals?api_token=${apiToken}`,
