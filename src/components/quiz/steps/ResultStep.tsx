@@ -244,13 +244,13 @@ export const ResultStep = ({
           <QuizButton
             onClick={() =>
               window.open(
-                "https://api.whatsapp.com/send?phone=551140035284&text=Ol%C3%A1!%20Acabei%20de%20fazer%20o%20Raio-X%20de%20Processos%20e%20quero%20saber%20mais!",
+                "https://wa.me/5519993521270?text=Diagn%C3%B3stico",
                 "_blank"
               )
             }
           >
             <MessageCircle className="w-5 h-5" />
-            Falar com consultor agora
+            Agende agora com um especialista
           </QuizButton>
           <p className="text-center text-xs text-muted-foreground">
             💬 Atendimento via WhatsApp • Resposta imediata
