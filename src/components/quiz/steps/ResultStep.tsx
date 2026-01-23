@@ -252,8 +252,8 @@ export const ResultStep = ({
             <MessageCircle className="w-5 h-5" />
             Agende agora com um especialista
           </QuizButton>
-          <p className="text-center text-xs text-muted-foreground">
-            Vamos te mostrar COMO aumentar sua pontuação através da ISO 9001!
+          <p className="text-center text-sm font-medium text-foreground">
+            Vamos te mostrar <span className="text-primary font-bold">COMO</span> aumentar sua pontuação através da <span className="text-primary font-bold">ISO 9001</span>!
           </p>
         </div>
       </div>
