@@ -6,6 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Obrigado from "./pages/Obrigado";
 import NotFound from "./pages/NotFound";
+import { captureUTMsFromURL } from "@/hooks/use-utm";
+
+// Capturar UTMs imediatamente na inicialização do app (antes de qualquer render)
+captureUTMsFromURL();
 
 const queryClient = new QueryClient();
 
