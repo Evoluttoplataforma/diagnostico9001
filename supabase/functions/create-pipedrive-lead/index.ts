@@ -402,15 +402,13 @@ serve(async (req) => {
         if (fieldName === "origem") {
           origemFieldKey = fieldKey;
         }
-        // Find Segment/Ramo de Atividade field
-        if (fieldName.includes("segmento") || fieldName.includes("segment") || 
-            fieldName.includes("ramo") || fieldName.includes("atividade")) {
+        // Find Ramo de Atividade field (maps to segment)
+        if (fieldName.includes("ramo de atividade") || fieldName === "ramo_de_atividade") {
           segmentFieldKey = fieldKey;
         }
-        // Find Company Size/Porte field
-        if (fieldName.includes("porte") || fieldName.includes("funcionários") || 
-            fieldName.includes("funcionarios") || fieldName.includes("tamanho") ||
-            fieldName.includes("company_size") || fieldName.includes("size")) {
+        // Find Faixa de Funcionários field (maps to company_size)
+        if (fieldName.includes("faixa de funcionários") || fieldName.includes("faixa de funcionarios") || 
+            fieldName === "faixa_de_funcionarios" || fieldName === "faixa_de_funcionários") {
           companySizeFieldKey = fieldKey;
         }
       }
