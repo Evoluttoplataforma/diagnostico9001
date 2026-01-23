@@ -312,7 +312,19 @@ serve(async (req) => {
 
     const personId = personResult.data.id;
 
-    // Create an organization
+    // Organization field ID for "Quantidade de funcionarios"
+    const orgCompanySizeFieldKey = "07a8ced33cfb9c1c11441fb7957adedaa7212676";
+
+    // Create an organization with company size field
+    const orgBody: Record<string, unknown> = {
+      name: leadData.company,
+    };
+    
+    // Add company size to organization
+    if (leadData.company_size) {
+      orgBody[orgCompanySizeFieldKey] = leadData.company_size;
+    }
+
     const orgResponse = await fetch(
       `https://api.pipedrive.com/v1/organizations?api_token=${apiToken}`,
       {
@@ -320,9 +332,7 @@ serve(async (req) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: leadData.company,
-        }),
+        body: JSON.stringify(orgBody),
       }
     );
 
@@ -362,8 +372,6 @@ serve(async (req) => {
     let utmTermFieldKey: string | null = null;
     let origemFieldKey: string | null = null;
     let segmentFieldKey: string | null = null;
-    // Use the exact field ID for "Quantidade de funcionarios"
-    const companySizeFieldKey = "07a8ced33cfb9c1c11441fb7957adedaa7212676";
 
     if (dealFieldsResult.success && dealFieldsResult.data) {
       // Find label field
@@ -407,7 +415,6 @@ serve(async (req) => {
         if (fieldName.includes("ramo de atividade") || fieldName === "ramo_de_atividade") {
           segmentFieldKey = fieldKey;
         }
-        // companySizeFieldKey is now hardcoded above
       }
 
       console.log("UTM field keys found:", {
@@ -417,8 +424,7 @@ serve(async (req) => {
         utmContentFieldKey,
         utmTermFieldKey,
         origemFieldKey,
-        segmentFieldKey,
-        companySizeFieldKey
+        segmentFieldKey
       });
     }
 
@@ -462,12 +468,9 @@ serve(async (req) => {
       dealBody[origemFieldKey] = leadData.utm_source;
     }
 
-    // Add Segment and Company Size custom fields
+    // Add Segment to deal (company size is now on organization)
     if (segmentFieldKey && leadData.segment) {
       dealBody[segmentFieldKey] = leadData.segment;
-    }
-    if (companySizeFieldKey && leadData.company_size) {
-      dealBody[companySizeFieldKey] = leadData.company_size;
     }
 
     console.log("Deal body with custom fields:", JSON.stringify(dealBody));
