@@ -111,6 +111,8 @@ export const Quiz = () => {
             utm_campaign: utmParams.utm_campaign,
             utm_content: utmParams.utm_content,
             utm_term: utmParams.utm_term,
+            answers: data.answers,
+            pillar_scores: pillarScores,
           },
         });
 
