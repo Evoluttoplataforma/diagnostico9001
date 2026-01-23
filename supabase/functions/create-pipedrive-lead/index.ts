@@ -10,8 +10,15 @@ interface LeadData {
   email: string;
   phone: string;
   company: string;
+  segment: string;
+  company_size: string;
   score: number;
   diagnosis_level: string;
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_content: string;
+  utm_term: string;
 }
 
 serve(async (req) => {
@@ -179,17 +186,31 @@ serve(async (req) => {
       throw new Error(`Failed to create deal: ${JSON.stringify(dealResult)}`);
     }
 
+    // Build UTM section only if any UTM param exists
+    const hasUtm = leadData.utm_source || leadData.utm_medium || leadData.utm_campaign || leadData.utm_content || leadData.utm_term;
+    const utmSection = hasUtm ? `
+
+🎯 **Origem (UTM)**
+${leadData.utm_source ? `- Source: ${leadData.utm_source}` : ""}
+${leadData.utm_medium ? `- Medium: ${leadData.utm_medium}` : ""}
+${leadData.utm_campaign ? `- Campaign: ${leadData.utm_campaign}` : ""}
+${leadData.utm_content ? `- Content: ${leadData.utm_content}` : ""}
+${leadData.utm_term ? `- Term: ${leadData.utm_term}` : ""}`.replace(/\n+/g, '\n').trim() : "";
+
     // Add a note to the deal with diagnosis details
     const dealNote = `
-📊 **Diagnóstico de Maturidade ISO 9001**
+📊 **Diagnóstico de Maturidade Empresarial**
 
 👤 **Contato:** ${leadData.name}
 🏢 **Empresa:** ${leadData.company}
+🏭 **Segmento:** ${leadData.segment || "Não informado"}
+👥 **Porte:** ${leadData.company_size || "Não informado"}
 📧 **Email:** ${leadData.email}
 📱 **Telefone:** ${leadData.phone}
 
 📈 **Score:** ${leadData.score}/100
 🏷️ **Nível:** ${leadData.diagnosis_level}
+${utmSection}
     `.trim();
 
     const noteResponse = await fetch(
