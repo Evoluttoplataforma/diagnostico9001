@@ -361,6 +361,8 @@ serve(async (req) => {
     let utmContentFieldKey: string | null = null;
     let utmTermFieldKey: string | null = null;
     let origemFieldKey: string | null = null;
+    let segmentFieldKey: string | null = null;
+    let companySizeFieldKey: string | null = null;
 
     if (dealFieldsResult.success && dealFieldsResult.data) {
       // Find label field
@@ -400,6 +402,17 @@ serve(async (req) => {
         if (fieldName === "origem") {
           origemFieldKey = fieldKey;
         }
+        // Find Segment/Ramo de Atividade field
+        if (fieldName.includes("segmento") || fieldName.includes("segment") || 
+            fieldName.includes("ramo") || fieldName.includes("atividade")) {
+          segmentFieldKey = fieldKey;
+        }
+        // Find Company Size/Porte field
+        if (fieldName.includes("porte") || fieldName.includes("funcionários") || 
+            fieldName.includes("funcionarios") || fieldName.includes("tamanho") ||
+            fieldName.includes("company_size") || fieldName.includes("size")) {
+          companySizeFieldKey = fieldKey;
+        }
       }
 
       console.log("UTM field keys found:", {
@@ -408,7 +421,9 @@ serve(async (req) => {
         utmCampaignFieldKey,
         utmContentFieldKey,
         utmTermFieldKey,
-        origemFieldKey
+        origemFieldKey,
+        segmentFieldKey,
+        companySizeFieldKey
       });
     }
 
@@ -452,7 +467,15 @@ serve(async (req) => {
       dealBody[origemFieldKey] = leadData.utm_source;
     }
 
-    console.log("Deal body with UTMs:", JSON.stringify(dealBody));
+    // Add Segment and Company Size custom fields
+    if (segmentFieldKey && leadData.segment) {
+      dealBody[segmentFieldKey] = leadData.segment;
+    }
+    if (companySizeFieldKey && leadData.company_size) {
+      dealBody[companySizeFieldKey] = leadData.company_size;
+    }
+
+    console.log("Deal body with custom fields:", JSON.stringify(dealBody));
 
     const dealResponse = await fetch(
       `https://api.pipedrive.com/v1/deals?api_token=${apiToken}`,
