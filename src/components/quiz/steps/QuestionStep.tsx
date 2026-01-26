@@ -53,10 +53,16 @@ export const QuestionStep = ({
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="max-w-xl w-full animate-fade-in">
-          <div className="mb-2">
-            <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
-              Bloco {question.block}: {question.blockTitle}
-            </span>
+          <div className="mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/80 text-white rounded-lg shadow-lg">
+              <span className="text-2xl font-bold">
+                {question.block}
+              </span>
+              <div className="w-px h-6 bg-white/30" />
+              <span className="text-sm font-semibold uppercase tracking-wide">
+                {question.blockTitle}
+              </span>
+            </div>
           </div>
 
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8 leading-tight">
