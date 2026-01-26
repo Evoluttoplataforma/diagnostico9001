@@ -1,5 +1,5 @@
-import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LoadingConfidenceCards } from "./LoadingConfidenceCards";
 
 interface QuizButtonProps {
   children: React.ReactNode;
@@ -26,10 +26,7 @@ export const QuizButton = ({
       )}
     >
       {loading ? (
-        <>
-          <Loader2 className="w-5 h-5 animate-spin mr-2" />
-          Processando...
-        </>
+        <LoadingConfidenceCards />
       ) : (
         children
       )}
