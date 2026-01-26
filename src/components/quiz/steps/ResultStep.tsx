@@ -221,20 +221,6 @@ export const ResultStep = ({
           )}
         </section>
 
-        {/* Download PDF Button */}
-        {!showLoading && aiDiagnosis && (
-          <section>
-            <DownloadPDFButton
-              name={name}
-              company={company}
-              score={score}
-              pillarScores={pillarScores}
-              diagnosisSummary={aiDiagnosis.summary}
-              checklist={aiDiagnosis.checklist}
-              diagnosisTitle={diagnosis.title}
-            />
-          </section>
-        )}
 
         {/* Stats */}
         <section className="grid grid-cols-2 gap-3">
