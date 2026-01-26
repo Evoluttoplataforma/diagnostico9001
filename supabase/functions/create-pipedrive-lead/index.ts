@@ -83,6 +83,15 @@ const pillarQuestions: Record<string, string[]> = {
   "Crescimento": ["q17", "q18", "q19", "q20"],
 };
 
+// Map company size category to numeric range
+const companySizeToRange: Record<string, string> = {
+  "micro": "0 - 9",
+  "pequena": "10 - 49",
+  "media": "50 - 99",
+  "media-grande": "100 - 499",
+  "grande": "500+",
+};
+
 function getSalesGuidance(score: number, diagnosisLevel: string, pillarScores: PillarScore[], answers: Record<string, string>): string {
   // Find weakest pillars
   const sortedPillars = [...pillarScores].sort((a, b) => a.score - b.score);
@@ -320,9 +329,10 @@ serve(async (req) => {
       name: leadData.company,
     };
     
-    // Add company size to organization
+    // Add company size to organization (convert to numeric range)
     if (leadData.company_size) {
-      orgBody[orgCompanySizeFieldKey] = leadData.company_size;
+      const sizeRange = companySizeToRange[leadData.company_size] || leadData.company_size;
+      orgBody[orgCompanySizeFieldKey] = sizeRange;
     }
 
     const orgResponse = await fetch(
