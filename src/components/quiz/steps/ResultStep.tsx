@@ -39,7 +39,7 @@ export const ResultStep = ({
 }: ResultStepProps) => {
   const firstName = name.split(" ")[0];
   const diagnosis = getDiagnosis(score);
-  const isHighPerformer = score > 80;
+  const isHighPerformer = score > 70;
 
   const [aiDiagnosis, setAiDiagnosis] = useState<DiagnosisData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
