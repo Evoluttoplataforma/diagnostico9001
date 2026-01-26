@@ -138,7 +138,11 @@ Responda APENAS com o JSON, nada mais.`;
     let diagnosis: DiagnosisResponse;
     try {
       // Remove any markdown code blocks if present
-      const cleanContent = content.replace(/```json\n?|\n?```/g, "").trim();
+      let cleanContent = content.replace(/```json\n?|\n?```/g, "").trim();
+      
+      // Fix trailing commas in JSON (common AI mistake)
+      cleanContent = cleanContent.replace(/,(\s*[}\]])/g, "$1");
+      
       diagnosis = JSON.parse(cleanContent);
     } catch (parseError) {
       console.error("Failed to parse AI response:", content);
