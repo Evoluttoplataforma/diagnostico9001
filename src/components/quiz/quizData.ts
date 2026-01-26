@@ -27,8 +27,8 @@ export const questions: Question[] = [
     blockTitle: "Processos",
     text: "As atividades principais seguem sempre o mesmo passo a passo?",
     answers: [
-      { value: "positive", label: "Sim, temos processos padronizados", points: 1 },
-      { value: "neutral", label: "Depende de quem está fazendo", points: 0 },
+      { value: "positive", label: "Sim, temos processos padronizados", points: 5 },
+      { value: "neutral", label: "Depende de quem está fazendo", points: 3 },
       { value: "negative", label: "Cada um faz do seu jeito", points: 0 },
     ],
   },
@@ -38,8 +38,8 @@ export const questions: Question[] = [
     blockTitle: "Processos",
     text: "Se alguém sair, outra pessoa consegue assumir sem caos?",
     answers: [
-      { value: "positive", label: "Sim, o conhecimento está documentado", points: 1 },
-      { value: "neutral", label: "Com dificuldade, leva tempo", points: 0 },
+      { value: "positive", label: "Sim, o conhecimento está documentado", points: 5 },
+      { value: "neutral", label: "Com dificuldade, leva tempo", points: 3 },
       { value: "negative", label: "Vira um caos quando alguém sai", points: 0 },
     ],
   },
@@ -49,8 +49,8 @@ export const questions: Question[] = [
     blockTitle: "Processos",
     text: "Os processos estão documentados?",
     answers: [
-      { value: "positive", label: "Sim, temos documentação atualizada", points: 1 },
-      { value: "neutral", label: "Alguns estão, outros não", points: 0 },
+      { value: "positive", label: "Sim, temos documentação atualizada", points: 5 },
+      { value: "neutral", label: "Alguns estão, outros não", points: 3 },
       { value: "negative", label: "Só na cabeça das pessoas", points: 0 },
     ],
   },
@@ -61,8 +61,8 @@ export const questions: Question[] = [
     text: "Você vive apagando incêndios no dia a dia?",
     answers: [
       { value: "negative", label: "Sim, é o modo padrão aqui", points: 0 },
-      { value: "neutral", label: "Às vezes, mas não sempre", points: 0 },
-      { value: "positive", label: "Não, temos rotina organizada", points: 1 },
+      { value: "neutral", label: "Às vezes, mas não sempre", points: 3 },
+      { value: "positive", label: "Não, temos rotina organizada", points: 5 },
     ],
   },
 
@@ -73,8 +73,8 @@ export const questions: Question[] = [
     blockTitle: "Pessoas",
     text: "Cada colaborador sabe exatamente o que é sua responsabilidade?",
     answers: [
-      { value: "positive", label: "Sim, funções bem definidas", points: 1 },
-      { value: "neutral", label: "Mais ou menos, há confusão", points: 0 },
+      { value: "positive", label: "Sim, funções bem definidas", points: 5 },
+      { value: "neutral", label: "Mais ou menos, há confusão", points: 3 },
       { value: "negative", label: "Não, todo mundo faz de tudo", points: 0 },
     ],
   },
@@ -84,8 +84,8 @@ export const questions: Question[] = [
     blockTitle: "Pessoas",
     text: "Seu time consegue resolver problemas sem precisar de você?",
     answers: [
-      { value: "positive", label: "Sim, têm autonomia para decidir", points: 1 },
-      { value: "neutral", label: "Às vezes, mas me consultam muito", points: 0 },
+      { value: "positive", label: "Sim, têm autonomia para decidir", points: 5 },
+      { value: "neutral", label: "Às vezes, mas me consultam muito", points: 3 },
       { value: "negative", label: "Não, tudo passa por mim", points: 0 },
     ],
   },
@@ -95,8 +95,8 @@ export const questions: Question[] = [
     blockTitle: "Pessoas",
     text: "Você consegue tirar férias sem que a empresa pare?",
     answers: [
-      { value: "positive", label: "Sim, a operação continua normal", points: 1 },
-      { value: "neutral", label: "Funciona, mas com dificuldades", points: 0 },
+      { value: "positive", label: "Sim, a operação continua normal", points: 5 },
+      { value: "neutral", label: "Funciona, mas com dificuldades", points: 3 },
       { value: "negative", label: "Não, preciso estar presente sempre", points: 0 },
     ],
   },
@@ -106,8 +106,8 @@ export const questions: Question[] = [
     blockTitle: "Pessoas",
     text: "O treinamento de novos colaboradores é estruturado?",
     answers: [
-      { value: "positive", label: "Sim, temos programa de integração", points: 1 },
-      { value: "neutral", label: "É informal, vai aprendendo", points: 0 },
+      { value: "positive", label: "Sim, temos programa de integração", points: 5 },
+      { value: "neutral", label: "É informal, vai aprendendo", points: 3 },
       { value: "negative", label: "Não, é no improviso total", points: 0 },
     ],
   },
@@ -119,8 +119,8 @@ export const questions: Question[] = [
     blockTitle: "Clientes",
     text: "Você mede a satisfação dos clientes?",
     answers: [
-      { value: "positive", label: "Sim, pesquisamos regularmente", points: 1 },
-      { value: "neutral", label: "Às vezes perguntamos", points: 0 },
+      { value: "positive", label: "Sim, pesquisamos regularmente", points: 5 },
+      { value: "neutral", label: "Às vezes perguntamos", points: 3 },
       { value: "negative", label: "Só reagimos quando reclamam", points: 0 },
     ],
   },
@@ -131,8 +131,8 @@ export const questions: Question[] = [
     text: "Já perdeu clientes por falhas internas?",
     answers: [
       { value: "negative", label: "Sim, já perdemos vários", points: 0 },
-      { value: "neutral", label: "Aconteceu algumas vezes", points: 0 },
-      { value: "positive", label: "Não, retemos bem nossos clientes", points: 1 },
+      { value: "neutral", label: "Aconteceu algumas vezes", points: 3 },
+      { value: "positive", label: "Não, retemos bem nossos clientes", points: 5 },
     ],
   },
   {
@@ -141,8 +141,8 @@ export const questions: Question[] = [
     blockTitle: "Clientes",
     text: "Suas vendas são previsíveis mês a mês?",
     answers: [
-      { value: "positive", label: "Sim, temos previsibilidade", points: 1 },
-      { value: "neutral", label: "Varia bastante, difícil prever", points: 0 },
+      { value: "positive", label: "Sim, temos previsibilidade", points: 5 },
+      { value: "neutral", label: "Varia bastante, difícil prever", points: 3 },
       { value: "negative", label: "É uma montanha-russa", points: 0 },
     ],
   },
@@ -152,8 +152,8 @@ export const questions: Question[] = [
     blockTitle: "Clientes",
     text: "Você sabe qual o ciclo de vida médio dos seus clientes?",
     answers: [
-      { value: "positive", label: "Sim, acompanhamos esse dado", points: 1 },
-      { value: "neutral", label: "Tenho uma ideia, mas não preciso", points: 0 },
+      { value: "positive", label: "Sim, acompanhamos esse dado", points: 5 },
+      { value: "neutral", label: "Tenho uma ideia, mas não preciso", points: 3 },
       { value: "negative", label: "Não, nunca medi isso", points: 0 },
     ],
   },
@@ -165,8 +165,8 @@ export const questions: Question[] = [
     blockTitle: "Controle",
     text: "Você acompanha indicadores (vendas, prazos, qualidade)?",
     answers: [
-      { value: "positive", label: "Sim, acompanhamos regularmente", points: 1 },
-      { value: "neutral", label: "Às vezes, quando dá tempo", points: 0 },
+      { value: "positive", label: "Sim, acompanhamos regularmente", points: 5 },
+      { value: "neutral", label: "Às vezes, quando dá tempo", points: 3 },
       { value: "negative", label: "Não medimos indicadores", points: 0 },
     ],
   },
@@ -176,8 +176,8 @@ export const questions: Question[] = [
     blockTitle: "Controle",
     text: "As decisões são baseadas em dados?",
     answers: [
-      { value: "positive", label: "Sim, usamos dados para decidir", points: 1 },
-      { value: "neutral", label: "Misturamos dados e intuição", points: 0 },
+      { value: "positive", label: "Sim, usamos dados para decidir", points: 5 },
+      { value: "neutral", label: "Misturamos dados e intuição", points: 3 },
       { value: "negative", label: "Decidimos no feeling", points: 0 },
     ],
   },
@@ -187,8 +187,8 @@ export const questions: Question[] = [
     blockTitle: "Controle",
     text: "Você sabe exatamente para onde vai cada real da empresa?",
     answers: [
-      { value: "positive", label: "Sim, controle financeiro detalhado", points: 1 },
-      { value: "neutral", label: "Tenho uma visão geral apenas", points: 0 },
+      { value: "positive", label: "Sim, controle financeiro detalhado", points: 5 },
+      { value: "neutral", label: "Tenho uma visão geral apenas", points: 3 },
       { value: "negative", label: "Não, as finanças são confusas", points: 0 },
     ],
   },
@@ -198,8 +198,8 @@ export const questions: Question[] = [
     blockTitle: "Controle",
     text: "Você tem relatórios financeiros atualizados mensalmente?",
     answers: [
-      { value: "positive", label: "Sim, DRE e fluxo de caixa em dia", points: 1 },
-      { value: "neutral", label: "Às vezes, quando dá tempo", points: 0 },
+      { value: "positive", label: "Sim, DRE e fluxo de caixa em dia", points: 5 },
+      { value: "neutral", label: "Às vezes, quando dá tempo", points: 3 },
       { value: "negative", label: "Não, só olho o saldo bancário", points: 0 },
     ],
   },
@@ -211,8 +211,8 @@ export const questions: Question[] = [
     blockTitle: "Crescimento",
     text: "Sua estrutura atual aguenta dobrar de tamanho?",
     answers: [
-      { value: "positive", label: "Sim, estamos preparados", points: 1 },
-      { value: "neutral", label: "Talvez, com alguns ajustes", points: 0 },
+      { value: "positive", label: "Sim, estamos preparados", points: 5 },
+      { value: "neutral", label: "Talvez, com alguns ajustes", points: 3 },
       { value: "negative", label: "Não, já estamos no limite", points: 0 },
     ],
   },
@@ -222,8 +222,8 @@ export const questions: Question[] = [
     blockTitle: "Crescimento",
     text: "Você tem um plano claro de crescimento para os próximos 12 meses?",
     answers: [
-      { value: "positive", label: "Sim, com metas e ações definidas", points: 1 },
-      { value: "neutral", label: "Tenho ideias, mas nada formalizado", points: 0 },
+      { value: "positive", label: "Sim, com metas e ações definidas", points: 5 },
+      { value: "neutral", label: "Tenho ideias, mas nada formalizado", points: 3 },
       { value: "negative", label: "Não, vou levando conforme dá", points: 0 },
     ],
   },
@@ -233,8 +233,8 @@ export const questions: Question[] = [
     blockTitle: "Crescimento",
     text: "Você conseguiria contratar 5 pessoas amanhã sem gerar caos?",
     answers: [
-      { value: "positive", label: "Sim, temos estrutura para isso", points: 1 },
-      { value: "neutral", label: "Seria difícil, mas daria", points: 0 },
+      { value: "positive", label: "Sim, temos estrutura para isso", points: 5 },
+      { value: "neutral", label: "Seria difícil, mas daria", points: 3 },
       { value: "negative", label: "Não, seria um caos total", points: 0 },
     ],
   },
@@ -244,8 +244,8 @@ export const questions: Question[] = [
     blockTitle: "Crescimento",
     text: "A empresa tem capital ou crédito disponível para investir em crescimento?",
     answers: [
-      { value: "positive", label: "Sim, temos reservas ou acesso a crédito", points: 1 },
-      { value: "neutral", label: "Pouco, precisaria buscar", points: 0 },
+      { value: "positive", label: "Sim, temos reservas ou acesso a crédito", points: 5 },
+      { value: "neutral", label: "Pouco, precisaria buscar", points: 3 },
       { value: "negative", label: "Não, estamos apertados", points: 0 },
     ],
   },
@@ -267,10 +267,10 @@ export const calculatePillarScores = (answers: Record<string, AnswerValue>): Pil
       const answerData = question?.answers.find((a) => a.value === answer);
       return sum + (answerData?.points || 0);
     }, 0);
-    // Each pillar has 4 questions, max 4 points = 100%
+    // Each pillar has 4 questions, max 20 points (4 × 5) = 100%
     return {
       name: pillar.name,
-      score: Math.round((points / 4) * 100),
+      score: Math.round((points / 20) * 100),
     };
   });
 };
@@ -283,13 +283,13 @@ export const getScore = (answers: Record<string, AnswerValue>): number => {
     return total + (answerData?.points || 0);
   }, 0);
 
-  // Convert to percentage (max 20 points = 100%)
-  const maxPoints = 20;
+  // Convert to percentage (max 100 points = 100%)
+  const maxPoints = 100;
   return Math.round((rawScore / maxPoints) * 100);
 };
 
 export const getDiagnosis = (score: number) => {
-  if (score <= 30) {
+  if (score <= 40) {
     return {
       level: "low" as const,
       emoji: "🔴",
@@ -299,7 +299,7 @@ export const getDiagnosis = (score: number) => {
       recommendation:
         "Você precisa urgentemente estruturar seus processos básicos para reduzir riscos e ganhar previsibilidade.",
     };
-  } else if (score <= 65) {
+  } else if (score <= 70) {
     return {
       level: "medium" as const,
       emoji: "🟡",
@@ -324,7 +324,7 @@ export const getDiagnosis = (score: number) => {
 
 // Fallback checklist when AI fails
 export const getFallbackChecklist = (score: number): Record<string, string[]> => {
-  const isHighPerformer = score > 80;
+  const isHighPerformer = score > 70;
 
   if (isHighPerformer) {
     return {
