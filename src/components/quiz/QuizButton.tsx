@@ -7,6 +7,7 @@ interface QuizButtonProps {
   disabled?: boolean;
   loading?: boolean;
   variant?: "primary" | "outline";
+  className?: string;
 }
 
 export const QuizButton = ({
@@ -15,6 +16,7 @@ export const QuizButton = ({
   disabled = false,
   loading = false,
   variant = "primary",
+  className,
 }: QuizButtonProps) => {
   return (
     <button 
@@ -22,7 +24,8 @@ export const QuizButton = ({
       disabled={disabled || loading} 
       className={cn(
         "quiz-button",
-        variant === "outline" && "quiz-button-outline"
+        variant === "outline" && "quiz-button-outline",
+        className
       )}
     >
       {loading ? (
