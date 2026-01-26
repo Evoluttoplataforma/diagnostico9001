@@ -43,6 +43,17 @@ export const ResultStep = ({
 
   const [aiDiagnosis, setAiDiagnosis] = useState<DiagnosisData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [minLoadingComplete, setMinLoadingComplete] = useState(false);
+
+  // Minimum loading time to show all 3 confidence cards (3 cards × 2.5s = 7.5s)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinLoadingComplete(true);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const showLoading = isLoading || !minLoadingComplete;
 
   useEffect(() => {
     const fetchAIDiagnosis = async () => {
@@ -179,7 +190,7 @@ export const ResultStep = ({
 
         {/* AI Diagnosis */}
         <section className="bg-card rounded-2xl p-6 border border-border shadow-sm">
-          {isLoading ? (
+          {showLoading ? (
             <DiagnosisLoading />
           ) : (
             aiDiagnosis && (
@@ -196,7 +207,7 @@ export const ResultStep = ({
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
             <span>✅</span> Plano de Ação
           </h3>
-          {isLoading ? (
+          {showLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="h-20 bg-muted rounded-xl animate-pulse" />
@@ -211,7 +222,7 @@ export const ResultStep = ({
         </section>
 
         {/* Download PDF Button */}
-        {!isLoading && aiDiagnosis && (
+        {!showLoading && aiDiagnosis && (
           <section>
             <DownloadPDFButton
               name={name}
