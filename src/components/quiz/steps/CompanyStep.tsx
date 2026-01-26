@@ -61,7 +61,12 @@ export const CompanyStep = ({
     if (isValid && !isLoading) {
       setIsLoading(true);
       try {
-        await onSubmit(formData);
+        // Minimum loading time to show all 3 confidence cards (3 cards × 2.5s = 7.5s)
+        const minLoadingPromise = new Promise((resolve) => setTimeout(resolve, 8000));
+        const submitPromise = onSubmit(formData);
+        
+        // Wait for both: minimum time AND form submission
+        await Promise.all([minLoadingPromise, submitPromise]);
       } finally {
         setIsLoading(false);
       }
