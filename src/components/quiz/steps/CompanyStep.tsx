@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface CompanyStepProps {
   currentStep: number;
@@ -22,13 +15,6 @@ export interface CompanyData {
   companySize: string;
 }
 
-const COMPANY_SIZES = [
-  { value: "micro", label: "Microempresa (até 9 funcionários)" },
-  { value: "pequena", label: "Pequena (10 a 49 funcionários)" },
-  { value: "media", label: "Média (50 a 99 funcionários)" },
-  { value: "media-grande", label: "Média-grande (100 a 499 funcionários)" },
-  { value: "grande", label: "Grande (500+ funcionários)" },
-];
 
 export const CompanyStep = ({
   currentStep,
@@ -118,23 +104,17 @@ export const CompanyStep = ({
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Porte da empresa
+                Número de funcionários
               </label>
-              <Select
+              <input
+                type="number"
+                name="companySize"
                 value={formData.companySize}
-                onValueChange={(value) => handleSelectChange("companySize", value)}
-              >
-                <SelectTrigger className="w-full px-4 py-4 h-auto rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-foreground">
-                  <SelectValue placeholder="Selecione o porte" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border border-border z-50">
-                  {COMPANY_SIZES.map((size) => (
-                    <SelectItem key={size.value} value={size.value}>
-                      {size.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={handleChange}
+                placeholder="Ex: 25"
+                min="0"
+                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
+              />
             </div>
           </div>
 
