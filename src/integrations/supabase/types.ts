@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          company: string
+          created_at: string
+          id: string
+          lead_email: string
+          lead_id: string | null
+          lead_name: string
+          lead_phone: string
+          meeting_link: string | null
+          notes: string | null
+          pipedrive_activity_id: string | null
+          scheduled_date: string
+          scheduled_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          id?: string
+          lead_email: string
+          lead_id?: string | null
+          lead_name: string
+          lead_phone: string
+          meeting_link?: string | null
+          notes?: string | null
+          pipedrive_activity_id?: string | null
+          scheduled_date: string
+          scheduled_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          id?: string
+          lead_email?: string
+          lead_id?: string | null
+          lead_name?: string
+          lead_phone?: string
+          meeting_link?: string | null
+          notes?: string | null
+          pipedrive_activity_id?: string | null
+          scheduled_date?: string
+          scheduled_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      available_slots: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          is_available: boolean
+          time: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          is_available?: boolean
+          time: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          is_available?: boolean
+          time?: string
+        }
+        Relationships: []
+      }
       quiz_leads: {
         Row: {
           ai_diagnosis: Json | null
