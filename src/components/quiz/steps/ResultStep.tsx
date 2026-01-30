@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { QuizButton } from "../QuizButton";
 import templumLogo from "@/assets/templum-logo.png";
 import { getDiagnosis, AnswerValue, PillarScore, getFallbackChecklist } from "../quizData";
-import { MessageCircle, Trophy, Target } from "lucide-react";
+import { MessageCircle, Trophy, Target, Calendar } from "lucide-react";
 import { RadarChart } from "../results/RadarChart";
 import { PillarChecklist } from "../results/PillarChecklist";
 import { DiagnosisSummary } from "../results/DiagnosisSummary";
 import { DiagnosisLoading } from "../results/DiagnosisLoading";
 import { DownloadPDFButton } from "../results/DownloadPDFButton";
+import { SchedulingModal } from "../results/SchedulingModal";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ResultStepProps {
@@ -18,6 +19,7 @@ interface ResultStepProps {
   companySize: string;
   pillarScores: PillarScore[];
   company?: string;
+  ownerName?: string | null;
 }
 
 interface DiagnosisData {
@@ -36,11 +38,13 @@ export const ResultStep = ({
   companySize,
   pillarScores,
   company,
+  ownerName,
 }: ResultStepProps) => {
   const firstName = name.split(" ")[0];
   const diagnosis = getDiagnosis(score);
   const isHighPerformer = score > 70;
 
+  const [isSchedulingOpen, setIsSchedulingOpen] = useState(false);
   const [aiDiagnosis, setAiDiagnosis] = useState<DiagnosisData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [minLoadingComplete, setMinLoadingComplete] = useState(false);
@@ -235,21 +239,23 @@ export const ResultStep = ({
         </section>
       </main>
 
+      {/* Scheduling Modal */}
+      <SchedulingModal
+        isOpen={isSchedulingOpen}
+        onClose={() => setIsSchedulingOpen(false)}
+        ownerName={ownerName || null}
+      />
+
       {/* Sticky CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-4 safe-area-inset-bottom">
         <div className="max-w-lg mx-auto space-y-2">
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-yellow-400 to-primary rounded-xl blur-md opacity-75 animate-pulse" />
             <QuizButton
-              onClick={() =>
-                window.open(
-                  "https://wa.me/5519993521270?text=Diagn%C3%B3stico",
-                  "_blank"
-                )
-              }
+              onClick={() => setIsSchedulingOpen(true)}
               className="relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent"
             >
-              <MessageCircle className="w-5 h-5" />
+              <Calendar className="w-5 h-5" />
               Agende agora com um especialista
             </QuizButton>
           </div>

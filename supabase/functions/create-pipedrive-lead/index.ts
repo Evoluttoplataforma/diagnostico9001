@@ -494,6 +494,32 @@ serve(async (req) => {
       throw new Error(`Failed to create deal: ${JSON.stringify(dealResult)}`);
     }
 
+    // Get deal owner info
+    let ownerName: string | null = null;
+    let ownerId: number | null = null;
+    
+    if (dealResult.data.user_id) {
+      ownerId = dealResult.data.user_id.id || dealResult.data.user_id;
+      ownerName = dealResult.data.user_id.name || null;
+      
+      // If we only have an ID, fetch user details
+      if (ownerId && !ownerName) {
+        try {
+          const userResponse = await fetch(
+            `https://api.pipedrive.com/v1/users/${ownerId}?api_token=${apiToken}`
+          );
+          const userResult = await userResponse.json();
+          if (userResult.success && userResult.data) {
+            ownerName = userResult.data.name;
+          }
+        } catch (err) {
+          console.error("Failed to fetch user details:", err);
+        }
+      }
+    }
+    
+    console.log("Deal owner:", { ownerId, ownerName });
+
     // Build UTM section only if any UTM param exists
     const hasUtm = leadData.utm_source || leadData.utm_medium || leadData.utm_campaign || leadData.utm_content || leadData.utm_term;
     const utmSection = hasUtm ? `
@@ -599,6 +625,8 @@ ${answersSection}
         org_id: orgId,
         pipeline_id: pipelineId,
         label_id: labelId,
+        owner_id: ownerId,
+        owner_name: ownerName,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
