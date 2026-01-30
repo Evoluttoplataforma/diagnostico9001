@@ -67,11 +67,11 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
       };
     }
     return {
-      bg: isSelected ? "bg-primary/10" : "hover:bg-primary/5",
-      text: "text-primary",
-      border: isSelected ? "border-primary" : "border-transparent",
-      icon: "text-primary",
-      dot: "bg-primary",
+      bg: isSelected ? "bg-blue-500/10" : "hover:bg-blue-500/5",
+      text: "text-blue-600",
+      border: isSelected ? "border-blue-500" : "border-transparent",
+      icon: "text-blue-500",
+      dot: "bg-blue-500",
     };
   };
 
@@ -119,13 +119,13 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
               <span
                 className={cn(
                   "w-3 h-3 rounded-full",
-                   selectedOption.color === "red" ? "bg-destructive" : "bg-primary"
+                   selectedOption.color === "red" ? "bg-destructive" : "bg-blue-500"
                 )}
               />
               <span
                 className={cn(
                   "font-medium",
-                   selectedOption.color === "red" ? "text-destructive" : "text-primary"
+                   selectedOption.color === "red" ? "text-destructive" : "text-blue-600"
                 )}
               >
                 {selectedOption.label}
