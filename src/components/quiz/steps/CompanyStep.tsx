@@ -17,12 +17,8 @@ export interface CompanyData {
 }
 
 const REVENUE_RANGES = [
-  { value: "ate_500k", label: "Até R$ 500 mil/ano" },
-  { value: "500k_1m", label: "R$ 500 mil a R$ 1 milhão/ano" },
-  { value: "1m_5m", label: "R$ 1 milhão a R$ 5 milhões/ano" },
-  { value: "5m_10m", label: "R$ 5 milhões a R$ 10 milhões/ano" },
-  { value: "10m_50m", label: "R$ 10 milhões a R$ 50 milhões/ano" },
-  { value: "acima_50m", label: "Acima de R$ 50 milhões/ano" },
+  { value: "abaixo_100k", label: "Abaixo de R$ 100 mil/mês" },
+  { value: "acima_100k", label: "Acima de R$ 100 mil/mês" },
 ];
 
 
