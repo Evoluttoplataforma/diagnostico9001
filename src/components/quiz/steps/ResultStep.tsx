@@ -255,26 +255,48 @@ export const ResultStep = ({
         dealId={dealId || null}
       />
 
-      {/* Sticky CTA - only show if not disqualified */}
-      {!isDisqualified && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-4 safe-area-inset-bottom">
-          <div className="max-w-lg mx-auto space-y-2">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary via-yellow-400 to-primary rounded-xl blur-md opacity-75 animate-pulse" />
-              <QuizButton
-                onClick={() => setIsSchedulingOpen(true)}
-                className="relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent"
+      {/* Sticky CTA or Thank You Message */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-4 safe-area-inset-bottom">
+        <div className="max-w-lg mx-auto space-y-2">
+          {isDisqualified ? (
+            // Thank you message for disqualified leads
+            <div className="text-center space-y-2">
+              <p className="text-base font-semibold text-foreground">
+                Obrigado por completar o diagnóstico, {firstName}!
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Continue acompanhando nosso conteúdo para fortalecer a gestão da sua empresa.
+              </p>
+              <a
+                href="https://www.instagram.com/templumbrasil/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-primary font-medium text-sm hover:underline"
               >
-                <Calendar className="w-5 h-5" />
-                Agende agora com um especialista
-              </QuizButton>
+                <MessageCircle className="w-4 h-4" />
+                Siga a Templum no Instagram
+              </a>
             </div>
-            <p className="text-center text-sm font-medium text-foreground">
-              Vamos te mostrar <span className="text-primary font-bold">COMO</span> aumentar sua pontuação através da <span className="text-primary font-bold">ISO 9001</span>!
-            </p>
-          </div>
+          ) : (
+            // CTA for qualified leads
+            <>
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-yellow-400 to-primary rounded-xl blur-md opacity-75 animate-pulse" />
+                <QuizButton
+                  onClick={() => setIsSchedulingOpen(true)}
+                  className="relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent"
+                >
+                  <Calendar className="w-5 h-5" />
+                  Agende agora com um especialista
+                </QuizButton>
+              </div>
+              <p className="text-center text-sm font-medium text-foreground">
+                Vamos te mostrar <span className="text-primary font-bold">COMO</span> aumentar sua pontuação através da <span className="text-primary font-bold">ISO 9001</span>!
+              </p>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
