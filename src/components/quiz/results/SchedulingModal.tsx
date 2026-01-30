@@ -5,6 +5,7 @@ import { QuizButton } from "../QuizButton";
 import { supabase } from "@/integrations/supabase/client";
 import { SALESPERSON_DATA, getSalespersonKey, SalespersonInfo } from "./salespersonData";
 import victorPhoto from "@/assets/victor-photo.png";
+import viniciusPhoto from "@/assets/vinicius-photo.png";
 
 interface SchedulingModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface SchedulingModalProps {
 // Photo mapping for dynamic imports
 const PHOTO_MAP: Record<string, string> = {
   Victor: victorPhoto,
+  Vinicius: viniciusPhoto,
 };
 
 export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, dealId, isLoading: externalLoading }: SchedulingModalProps) => {
