@@ -31,12 +31,8 @@ interface LeadData {
 
 // Revenue range labels for display
 const revenueLabels: Record<string, string> = {
-  "ate_500k": "Até R$ 500 mil/ano",
-  "500k_1m": "R$ 500 mil a R$ 1 milhão/ano",
-  "1m_5m": "R$ 1 milhão a R$ 5 milhões/ano",
-  "5m_10m": "R$ 5 milhões a R$ 10 milhões/ano",
-  "10m_50m": "R$ 10 milhões a R$ 50 milhões/ano",
-  "acima_50m": "Acima de R$ 50 milhões/ano",
+  "abaixo_100k": "Abaixo de R$ 100 mil/mês",
+  "acima_100k": "Acima de R$ 100 mil/mês",
 };
 
 // Question mapping for readable answers
