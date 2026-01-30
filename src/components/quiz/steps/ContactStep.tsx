@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { User, Mail, Phone, Sparkles } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
+import { FormStepIndicator } from "../FormStepIndicator";
+import { FormInput } from "../FormInput";
 
 interface ContactStepProps {
   currentStep: number;
@@ -41,70 +44,81 @@ export const ContactStep = ({
   };
 
   return (
-    <div className="min-h-screen flex flex-col animate-fade-in">
+    <div className="min-h-screen flex flex-col animate-fade-in bg-gradient-to-b from-background via-background to-muted/30">
       <QuizHeader currentStep={currentStep} totalSteps={totalSteps} onBack={onBack} />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        <div className="max-w-xl w-full">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-foreground text-center mb-3">
-            Quase lá!
-          </h2>
+        <div className="max-w-lg w-full">
+          {/* Step Indicator */}
+          <FormStepIndicator currentStep={1} />
 
-          <p className="text-muted-foreground text-center mb-8">
-            Preencha seus dados para receber o diagnóstico personalizado
-          </p>
-
-          <div className="space-y-4 mb-8">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Seu nome completo
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Digite seu nome"
-                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-              />
+          {/* Header with animation */}
+          <div className="text-center mb-10 animate-slide-up">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm font-medium">Quase lá!</span>
             </div>
+            
+            <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mb-3">
+              Seus dados pessoais
+            </h2>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                E-mail corporativo
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="seu@email.com"
-                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                WhatsApp
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="(00) 00000-0000"
-                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
+            <p className="text-muted-foreground">
+              Preencha para receber seu diagnóstico personalizado
+            </p>
           </div>
 
-          <QuizButton onClick={handleNext} disabled={!isValid}>
-            Continuar
-          </QuizButton>
+          {/* Form with staggered animations */}
+          <div className="space-y-5 mb-8">
+            <FormInput
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              label="Seu nome completo"
+              icon={User}
+              delay={100}
+              autoComplete="name"
+            />
 
-          <p className="text-xs text-muted-foreground text-center mt-4">
+            <FormInput
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              label="E-mail corporativo"
+              icon={Mail}
+              delay={200}
+              autoComplete="email"
+            />
+
+            <FormInput
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              label="WhatsApp"
+              icon={Phone}
+              delay={300}
+              autoComplete="tel"
+            />
+          </div>
+
+          {/* Button with delayed animation */}
+          <div 
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
+          >
+            <QuizButton onClick={handleNext} disabled={!isValid}>
+              Continuar
+            </QuizButton>
+          </div>
+
+          <p 
+            className="text-xs text-muted-foreground text-center mt-4 animate-slide-up opacity-0"
+            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
+          >
             Ao continuar, você concorda com nossa{" "}
-            <a href="#" className="underline hover:text-foreground">
+            <a href="#" className="underline hover:text-foreground transition-colors">
               Política de Privacidade
             </a>
           </p>
