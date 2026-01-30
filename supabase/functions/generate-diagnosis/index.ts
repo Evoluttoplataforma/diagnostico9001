@@ -100,12 +100,13 @@ Responda APENAS com o JSON, nada mais.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
         temperature: 0.7,
+        max_tokens: 2048,
       }),
     });
 
@@ -128,9 +129,14 @@ Responda APENAS com o JSON, nada mais.`;
     }
 
     const aiResponse = await response.json();
+    console.log("AI response received:", JSON.stringify(aiResponse).substring(0, 500));
+    
     const content = aiResponse.choices?.[0]?.message?.content;
+    const finishReason = aiResponse.choices?.[0]?.finish_reason;
 
     if (!content) {
+      console.error("No content in AI response. Finish reason:", finishReason);
+      console.error("Full response:", JSON.stringify(aiResponse));
       throw new Error("No content in AI response");
     }
 
