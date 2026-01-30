@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SALESPERSON_DATA, getSalespersonKey, SalespersonInfo } from "./salespersonData";
 import victorPhoto from "@/assets/victor-photo.png";
 import viniciusPhoto from "@/assets/vinicius-photo.png";
+import diegoPhoto from "@/assets/diego-photo.png";
 
 interface SchedulingModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface SchedulingModalProps {
 const PHOTO_MAP: Record<string, string> = {
   Victor: victorPhoto,
   Vinicius: viniciusPhoto,
+  Diego: diegoPhoto,
 };
 
 export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, dealId, isLoading: externalLoading }: SchedulingModalProps) => {
