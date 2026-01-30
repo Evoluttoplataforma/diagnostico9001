@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown, TrendingDown, TrendingUp, Check } from "lucide-react";
+import { RevenueSelectMenu } from "./RevenueSelectMenu";
 
 interface RevenueOption {
   value: string;
@@ -31,6 +32,7 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const selectedOption = REVENUE_OPTIONS.find((opt) => opt.value === value);
   const hasValue = value.length > 0;
@@ -57,19 +59,19 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
   const getColorClasses = (color: "red" | "blue", isSelected: boolean) => {
     if (color === "red") {
       return {
-        bg: isSelected ? "bg-red-500/10" : "hover:bg-red-500/5",
-        text: "text-red-600",
-        border: isSelected ? "border-red-500" : "border-transparent",
-        icon: "text-red-500",
-        dot: "bg-red-500",
+        bg: isSelected ? "bg-destructive/10" : "hover:bg-destructive/5",
+        text: "text-destructive",
+        border: isSelected ? "border-destructive" : "border-transparent",
+        icon: "text-destructive",
+        dot: "bg-destructive",
       };
     }
     return {
-      bg: isSelected ? "bg-blue-500/10" : "hover:bg-blue-500/5",
-      text: "text-blue-600",
-      border: isSelected ? "border-blue-500" : "border-transparent",
-      icon: "text-blue-500",
-      dot: "bg-blue-500",
+      bg: isSelected ? "bg-primary/10" : "hover:bg-primary/5",
+      text: "text-primary",
+      border: isSelected ? "border-primary" : "border-transparent",
+      icon: "text-primary",
+      dot: "bg-primary",
     };
   };
 
@@ -84,6 +86,7 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
     >
       {/* Trigger button */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => {
           setIsOpen(!isOpen);
@@ -116,13 +119,13 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
               <span
                 className={cn(
                   "w-3 h-3 rounded-full",
-                  selectedOption.color === "red" ? "bg-red-500" : "bg-blue-500"
+                   selectedOption.color === "red" ? "bg-destructive" : "bg-primary"
                 )}
               />
               <span
                 className={cn(
                   "font-medium",
-                  selectedOption.color === "red" ? "text-red-600" : "text-blue-600"
+                   selectedOption.color === "red" ? "text-destructive" : "text-primary"
                 )}
               >
                 {selectedOption.label}
@@ -155,50 +158,43 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
 
       {/* Dropdown menu */}
       {isOpen && (
-        <>
-          {/* Backdrop to ensure dropdown is on top */}
-          <div 
-            className="fixed inset-0 z-[100]" 
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="absolute top-full left-0 right-0 mt-2 z-[101] bg-card border-2 border-border rounded-2xl shadow-xl overflow-hidden animate-scale-in">
-            {REVENUE_OPTIONS.map((option) => {
-              const isSelected = value === option.value;
-              const colors = getColorClasses(option.color, isSelected);
-              const Icon = option.color === "red" ? TrendingDown : TrendingUp;
+        <RevenueSelectMenu
+          anchorEl={triggerRef.current}
+          open={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+            setIsFocused(false);
+          }}
+        >
+          {REVENUE_OPTIONS.map((option) => {
+            const isSelected = value === option.value;
+            const colors = getColorClasses(option.color, isSelected);
+            const Icon = option.color === "red" ? TrendingDown : TrendingUp;
 
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleSelect(option.value)}
-                  className={cn(
-                    "w-full px-4 py-4 flex items-center gap-3 transition-all duration-200",
-                    "border-l-4",
-                    colors.bg,
-                    colors.border
-                  )}
-                >
-                  {/* Color dot */}
-                  <span className={cn("w-3 h-3 rounded-full flex-shrink-0", colors.dot)} />
-
-                  {/* Icon */}
-                  <Icon className={cn("w-5 h-5 flex-shrink-0", colors.icon)} />
-
-                  {/* Label */}
-                  <span className={cn("flex-1 text-left font-medium", colors.text)}>
-                    {option.label}
-                  </span>
-
-                  {/* Check mark if selected */}
-                  {isSelected && (
-                    <Check className={cn("w-5 h-5 flex-shrink-0", colors.icon)} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </>
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => handleSelect(option.value)}
+                className={cn(
+                  "w-full px-4 py-4 flex items-center gap-3 transition-all duration-200",
+                  "border-l-4",
+                  colors.bg,
+                  colors.border
+                )}
+              >
+                <span className={cn("w-3 h-3 rounded-full flex-shrink-0", colors.dot)} />
+                <Icon className={cn("w-5 h-5 flex-shrink-0", colors.icon)} />
+                <span className={cn("flex-1 text-left font-medium", colors.text)}>
+                  {option.label}
+                </span>
+                {isSelected && (
+                  <Check className={cn("w-5 h-5 flex-shrink-0", colors.icon)} />
+                )}
+              </button>
+            );
+          })}
+        </RevenueSelectMenu>
       )}
     </div>
   );
