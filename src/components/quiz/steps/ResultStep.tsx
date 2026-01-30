@@ -268,7 +268,7 @@ export const ResultStep = ({
                 Continue acompanhando nosso conteúdo para fortalecer a gestão da sua empresa.
               </p>
               <a
-                href="https://www.instagram.com/templumbrasil/"
+                href="https://www.instagram.com/templumconsultoria/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-primary font-medium text-sm hover:underline"
