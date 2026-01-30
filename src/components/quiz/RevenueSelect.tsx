@@ -155,43 +155,50 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-card border-2 border-border rounded-2xl shadow-xl overflow-hidden animate-scale-in">
-          {REVENUE_OPTIONS.map((option) => {
-            const isSelected = value === option.value;
-            const colors = getColorClasses(option.color, isSelected);
-            const Icon = option.color === "red" ? TrendingDown : TrendingUp;
+        <>
+          {/* Backdrop to ensure dropdown is on top */}
+          <div 
+            className="fixed inset-0 z-[100]" 
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute top-full left-0 right-0 mt-2 z-[101] bg-card border-2 border-border rounded-2xl shadow-xl overflow-hidden animate-scale-in">
+            {REVENUE_OPTIONS.map((option) => {
+              const isSelected = value === option.value;
+              const colors = getColorClasses(option.color, isSelected);
+              const Icon = option.color === "red" ? TrendingDown : TrendingUp;
 
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => handleSelect(option.value)}
-                className={cn(
-                  "w-full px-4 py-4 flex items-center gap-3 transition-all duration-200",
-                  "border-l-4",
-                  colors.bg,
-                  colors.border
-                )}
-              >
-                {/* Color dot */}
-                <span className={cn("w-3 h-3 rounded-full flex-shrink-0", colors.dot)} />
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleSelect(option.value)}
+                  className={cn(
+                    "w-full px-4 py-4 flex items-center gap-3 transition-all duration-200",
+                    "border-l-4",
+                    colors.bg,
+                    colors.border
+                  )}
+                >
+                  {/* Color dot */}
+                  <span className={cn("w-3 h-3 rounded-full flex-shrink-0", colors.dot)} />
 
-                {/* Icon */}
-                <Icon className={cn("w-5 h-5 flex-shrink-0", colors.icon)} />
+                  {/* Icon */}
+                  <Icon className={cn("w-5 h-5 flex-shrink-0", colors.icon)} />
 
-                {/* Label */}
-                <span className={cn("flex-1 text-left font-medium", colors.text)}>
-                  {option.label}
-                </span>
+                  {/* Label */}
+                  <span className={cn("flex-1 text-left font-medium", colors.text)}>
+                    {option.label}
+                  </span>
 
-                {/* Check mark if selected */}
-                {isSelected && (
-                  <Check className={cn("w-5 h-5 flex-shrink-0", colors.icon)} />
-                )}
-              </button>
-            );
-          })}
-        </div>
+                  {/* Check mark if selected */}
+                  {isSelected && (
+                    <Check className={cn("w-5 h-5 flex-shrink-0", colors.icon)} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
