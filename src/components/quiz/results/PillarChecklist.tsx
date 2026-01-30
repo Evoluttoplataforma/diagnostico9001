@@ -85,15 +85,22 @@ export const PillarChecklist = ({ pillarScores, checklist }: PillarChecklistProp
             >
               <div className="px-4 pb-4 space-y-3">
                 {actions.length > 0 ? (
-                  actions.map((action, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg"
-                    >
-                      <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-foreground leading-relaxed">{action}</p>
-                    </div>
-                  ))
+                  actions.map((action, index) => {
+                    // Handle both string and object formats from AI
+                    const actionText = typeof action === 'string' 
+                      ? action 
+                      : (action as { action?: string })?.action || JSON.stringify(action);
+                    
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg"
+                      >
+                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-foreground leading-relaxed">{actionText}</p>
+                      </div>
+                    );
+                  })
                 ) : (
                   <p className="text-sm text-muted-foreground italic">
                     Carregando recomendações...
