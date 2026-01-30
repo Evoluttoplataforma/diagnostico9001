@@ -20,6 +20,7 @@ interface ResultStepProps {
   pillarScores: PillarScore[];
   company?: string;
   ownerName?: string | null;
+  dealId?: number | null;
 }
 
 interface DiagnosisData {
@@ -39,6 +40,7 @@ export const ResultStep = ({
   pillarScores,
   company,
   ownerName,
+  dealId,
 }: ResultStepProps) => {
   const firstName = name.split(" ")[0];
   const diagnosis = getDiagnosis(score);
@@ -244,6 +246,7 @@ export const ResultStep = ({
         isOpen={isSchedulingOpen}
         onClose={() => setIsSchedulingOpen(false)}
         ownerName={ownerName || null}
+        dealId={dealId || null}
       />
 
       {/* Sticky CTA */}

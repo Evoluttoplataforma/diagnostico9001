@@ -11,6 +11,7 @@ interface LocationState {
   company: string;
   pillarScores: PillarScore[];
   ownerName: string | null;
+  dealId: number | null;
 }
 
 const Obrigado = () => {
@@ -38,6 +39,7 @@ const Obrigado = () => {
       company={state.company}
       pillarScores={state.pillarScores}
       ownerName={state.ownerName}
+      dealId={state.dealId}
     />
   );
 };

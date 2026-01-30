@@ -96,6 +96,7 @@ export const Quiz = () => {
 
       // Send to Pipedrive and get owner info
       let ownerName: string | null = null;
+      let dealId: number | null = null;
       try {
         const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
           body: {
@@ -122,6 +123,7 @@ export const Quiz = () => {
         } else {
           console.log("Lead created in Pipedrive:", pipedriveResponse.data);
           ownerName = pipedriveResponse.data?.owner_name || null;
+          dealId = pipedriveResponse.data?.deal_id || null;
         }
       } catch (pipedriveErr) {
         console.error("Pipedrive integration error:", pipedriveErr);
@@ -139,6 +141,7 @@ export const Quiz = () => {
         company: companyData.company,
         pillarScores: pillarScores,
         ownerName: ownerName,
+        dealId: dealId,
       };
 
       console.log("Navigating to /obrigado-diagnostico with state:", navigationState);
