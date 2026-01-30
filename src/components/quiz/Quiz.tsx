@@ -139,6 +139,7 @@ export const Quiz = () => {
         answers: data.answers,
         segment: finalSegment,
         companySize: companyData.companySize,
+        revenue: companyData.revenue,
         company: companyData.company,
         pillarScores: pillarScores,
         ownerName: ownerName,
