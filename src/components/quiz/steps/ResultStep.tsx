@@ -167,7 +167,7 @@ export const ResultStep = ({
             )}
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            {isHighPerformer ? "Excelente trabalho" : "Parabéns"}, {firstName}! 🎉
+            {isHighPerformer ? "Excelente trabalho" : "Parabéns"}, {firstName}!
           </h1>
           <p className="text-muted-foreground">
             Seu diagnóstico de maturidade está pronto
@@ -211,7 +211,7 @@ export const ResultStep = ({
         {/* Checklist by Pillar */}
         <section>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span>✅</span> Plano de Ação
+            Plano de Ação
           </h3>
           {showLoading ? (
             <div className="space-y-3">

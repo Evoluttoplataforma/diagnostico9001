@@ -47,7 +47,7 @@ export const ContactStep = ({
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="max-w-xl w-full">
           <h2 className="text-2xl md:text-3xl font-extrabold text-foreground text-center mb-3">
-            Quase lá! 🎉
+            Quase lá!
           </h2>
 
           <p className="text-muted-foreground text-center mb-8">
