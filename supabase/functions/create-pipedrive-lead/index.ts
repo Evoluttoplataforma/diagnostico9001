@@ -17,6 +17,7 @@ interface LeadData {
   company: string;
   segment: string;
   company_size: string;
+  revenue: string;
   score: number;
   diagnosis_level: string;
   utm_source: string;
@@ -27,6 +28,16 @@ interface LeadData {
   answers: Record<string, string>;
   pillar_scores: PillarScore[];
 }
+
+// Revenue range labels for display
+const revenueLabels: Record<string, string> = {
+  "ate_500k": "Até R$ 500 mil/ano",
+  "500k_1m": "R$ 500 mil a R$ 1 milhão/ano",
+  "1m_5m": "R$ 1 milhão a R$ 5 milhões/ano",
+  "5m_10m": "R$ 5 milhões a R$ 10 milhões/ano",
+  "10m_50m": "R$ 10 milhões a R$ 50 milhões/ano",
+  "acima_50m": "Acima de R$ 50 milhões/ano",
+};
 
 // Question mapping for readable answers
 const questionTexts: Record<string, string> = {
@@ -373,6 +384,7 @@ serve(async (req) => {
     let utmTermFieldKey: string | null = null;
     let origemFieldKey: string | null = null;
     let segmentFieldKey: string | null = null;
+    let revenueFieldKey: string | null = null;
 
     if (dealFieldsResult.success && dealFieldsResult.data) {
       // Find label field
@@ -416,6 +428,10 @@ serve(async (req) => {
         if (fieldName.includes("ramo de atividade") || fieldName === "ramo_de_atividade") {
           segmentFieldKey = fieldKey;
         }
+        // Find Faturamento field
+        if (fieldName.includes("faturamento") || fieldName === "faturamento") {
+          revenueFieldKey = fieldKey;
+        }
       }
 
       console.log("UTM field keys found:", {
@@ -425,7 +441,8 @@ serve(async (req) => {
         utmContentFieldKey,
         utmTermFieldKey,
         origemFieldKey,
-        segmentFieldKey
+        segmentFieldKey,
+        revenueFieldKey
       });
     }
 
@@ -472,6 +489,12 @@ serve(async (req) => {
     // Add Segment to deal (company size is now on organization)
     if (segmentFieldKey && leadData.segment) {
       dealBody[segmentFieldKey] = leadData.segment;
+    }
+
+    // Add Revenue to deal
+    if (revenueFieldKey && leadData.revenue) {
+      const revenueLabel = revenueLabels[leadData.revenue] || leadData.revenue;
+      dealBody[revenueFieldKey] = revenueLabel;
     }
 
     console.log("Deal body with custom fields:", JSON.stringify(dealBody));
@@ -531,6 +554,9 @@ ${leadData.utm_campaign ? `- Campaign: ${leadData.utm_campaign}` : ""}
 ${leadData.utm_content ? `- Content: ${leadData.utm_content}` : ""}
 ${leadData.utm_term ? `- Term: ${leadData.utm_term}` : ""}`.replace(/\n+/g, '\n').trim() : "";
 
+    // Get revenue label for display
+    const revenueDisplay = leadData.revenue ? (revenueLabels[leadData.revenue] || leadData.revenue) : "Não informado";
+
     // Build answers section
     let answersSection = "\n\n📋 **RESPOSTAS DO DIAGNÓSTICO:**\n";
     const pillars = ["Processos", "Pessoas", "Clientes", "Controle", "Crescimento"];
@@ -571,7 +597,8 @@ ${leadData.utm_term ? `- Term: ${leadData.utm_term}` : ""}`.replace(/\n+/g, '\n'
 👤 **Contato:** ${leadData.name}
 🏢 **Empresa:** ${leadData.company}
 🏭 **Segmento:** ${leadData.segment || "Não informado"}
-👥 **Porte:** ${leadData.company_size || "Não informado"}
+👥 **Porte:** ${leadData.company_size || "Não informado"} funcionários
+💰 **Faturamento:** ${revenueDisplay}
 📧 **Email:** ${leadData.email}
 📱 **Telefone:** ${leadData.phone}
 

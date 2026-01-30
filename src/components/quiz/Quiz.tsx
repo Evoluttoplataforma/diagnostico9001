@@ -106,6 +106,7 @@ export const Quiz = () => {
             company: companyData.company,
             segment: finalSegment,
             company_size: companyData.companySize,
+            revenue: companyData.revenue,
             score: score,
             diagnosis_level: diagnosis.level,
             utm_source: utmParams.utm_source,

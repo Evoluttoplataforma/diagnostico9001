@@ -13,7 +13,17 @@ export interface CompanyData {
   company: string;
   segment: string;
   companySize: string;
+  revenue: string;
 }
+
+const REVENUE_RANGES = [
+  { value: "ate_500k", label: "Até R$ 500 mil/ano" },
+  { value: "500k_1m", label: "R$ 500 mil a R$ 1 milhão/ano" },
+  { value: "1m_5m", label: "R$ 1 milhão a R$ 5 milhões/ano" },
+  { value: "5m_10m", label: "R$ 5 milhões a R$ 10 milhões/ano" },
+  { value: "10m_50m", label: "R$ 10 milhões a R$ 50 milhões/ano" },
+  { value: "acima_50m", label: "Acima de R$ 50 milhões/ano" },
+];
 
 
 export const CompanyStep = ({
@@ -26,6 +36,7 @@ export const CompanyStep = ({
     company: "",
     segment: "",
     companySize: "",
+    revenue: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,7 +52,8 @@ export const CompanyStep = ({
   const isValid =
     formData.company &&
     formData.segment &&
-    formData.companySize;
+    formData.companySize &&
+    formData.revenue;
 
   const handleSubmit = async () => {
     if (isValid && !isLoading) {
@@ -115,6 +127,26 @@ export const CompanyStep = ({
                 min="0"
                 className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Faturamento anual
+              </label>
+              <select
+                name="revenue"
+                value={formData.revenue}
+                onChange={(e) => handleSelectChange("revenue", e.target.value)}
+                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground appearance-none cursor-pointer"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
+              >
+                <option value="" disabled>Selecione o faturamento</option>
+                {REVENUE_RANGES.map((range) => (
+                  <option key={range.value} value={range.value}>
+                    {range.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
