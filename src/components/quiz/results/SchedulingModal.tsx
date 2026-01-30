@@ -248,10 +248,6 @@ export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, 
                 </div>
               </div>
 
-              {/* Footer */}
-              <p className="text-xs text-center text-muted-foreground pt-2">
-                ⚡ Resposta em até 24h úteis
-              </p>
             </div>
           ) : (
             <>
