@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Building2, Briefcase, Users, TrendingUp, Rocket } from "lucide-react";
+import { Building2, Briefcase, Users, Rocket } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
 import { FormStepIndicator } from "../FormStepIndicator";
 import { FormInput } from "../FormInput";
-import { FormSelect } from "../FormSelect";
+import { RevenueSelect } from "../RevenueSelect";
 
 interface CompanyStepProps {
   currentStep: number;
@@ -126,12 +126,9 @@ export const CompanyStep = ({
               min={0}
             />
 
-            <FormSelect
+            <RevenueSelect
               value={formData.revenue}
               onChange={(value) => handleSelectChange("revenue", value)}
-              label="Faturamento mensal"
-              options={REVENUE_RANGES}
-              icon={TrendingUp}
               delay={400}
             />
           </div>
