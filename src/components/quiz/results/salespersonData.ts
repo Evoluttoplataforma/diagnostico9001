@@ -18,11 +18,11 @@ export const SALESPERSON_DATA: Record<string, SalespersonInfo> = {
     role: "Especialista em ISO 9001",
   },
   Diego: {
-    name: "Diego",
-    calendarLink: "https://calendar.google.com/calendar/diego-placeholder",
-    whatsapp: "",
-    email: "",
-    photo: null,
+    name: "Diego Leite",
+    calendarLink: "https://calendar.app.google/VPPMPrJKcvoHXx8Q7",
+    whatsapp: "5519999830013",
+    email: "diego.leite@templum.com.br",
+    photo: "/src/assets/diego-photo.png",
     role: "Especialista em ISO 9001",
   },
   Vinicius: {
