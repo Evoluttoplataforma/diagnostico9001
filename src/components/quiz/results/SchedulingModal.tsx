@@ -1,11 +1,14 @@
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Calendar, User, ExternalLink } from "lucide-react";
+import { Calendar, User, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { QuizButton } from "../QuizButton";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SchedulingModalProps {
   isOpen: boolean;
   onClose: () => void;
   ownerName: string | null;
+  dealId: number | null;
   isLoading?: boolean;
 }
 
@@ -29,14 +32,116 @@ function getSalespersonKey(ownerName: string | null): string | null {
   return null;
 }
 
-export const SchedulingModal = ({ isOpen, onClose, ownerName, isLoading }: SchedulingModalProps) => {
+export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, dealId, isLoading: externalLoading }: SchedulingModalProps) => {
+  const [ownerName, setOwnerName] = useState<string | null>(initialOwnerName);
+  const [isPolling, setIsPolling] = useState(false);
+  const [pollAttempts, setPollAttempts] = useState(0);
+  const [hasPolled, setHasPolled] = useState(false);
+  
+  const MAX_POLL_ATTEMPTS = 6; // 6 attempts × 3 seconds = 18 seconds max
+  const POLL_INTERVAL = 3000; // 3 seconds
+  
   const salespersonKey = getSalespersonKey(ownerName);
   const calendarLink = salespersonKey ? SALESPERSON_CALENDARS[salespersonKey] : null;
+
+  // Function to fetch updated owner from Pipedrive
+  const fetchUpdatedOwner = useCallback(async () => {
+    if (!dealId) return null;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("get-deal-owner", {
+        body: { deal_id: dealId },
+      });
+      
+      if (error) {
+        console.error("Error fetching deal owner:", error);
+        return null;
+      }
+      
+      return data?.owner_name || null;
+    } catch (err) {
+      console.error("Failed to fetch deal owner:", err);
+      return null;
+    }
+  }, [dealId]);
+
+  // Start polling when modal opens and no valid salesperson is found
+  useEffect(() => {
+    if (!isOpen || !dealId || hasPolled) return;
+    
+    // If we already have a valid salesperson, no need to poll
+    if (getSalespersonKey(initialOwnerName)) {
+      setOwnerName(initialOwnerName);
+      return;
+    }
+    
+    // Start polling for the reassigned owner
+    setIsPolling(true);
+    setPollAttempts(0);
+    
+    const pollForOwner = async () => {
+      let attempts = 0;
+      
+      const poll = async () => {
+        attempts++;
+        setPollAttempts(attempts);
+        
+        const newOwnerName = await fetchUpdatedOwner();
+        const newSalesperson = getSalespersonKey(newOwnerName);
+        
+        if (newSalesperson) {
+          // Found a valid salesperson!
+          setOwnerName(newOwnerName);
+          setIsPolling(false);
+          setHasPolled(true);
+          return;
+        }
+        
+        if (attempts < MAX_POLL_ATTEMPTS) {
+          // Continue polling
+          setTimeout(poll, POLL_INTERVAL);
+        } else {
+          // Max attempts reached, stop polling
+          setIsPolling(false);
+          setHasPolled(true);
+        }
+      };
+      
+      // Start with first attempt after a short delay to give automation time
+      setTimeout(poll, 2000);
+    };
+    
+    pollForOwner();
+  }, [isOpen, dealId, initialOwnerName, fetchUpdatedOwner, hasPolled]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setHasPolled(false);
+      setPollAttempts(0);
+    }
+  }, [isOpen]);
 
   const handleOpenCalendar = () => {
     if (calendarLink) {
       window.open(calendarLink, "_blank");
     }
+  };
+
+  const handleRetryPolling = async () => {
+    setIsPolling(true);
+    setPollAttempts(0);
+    setHasPolled(false);
+    
+    const newOwnerName = await fetchUpdatedOwner();
+    const newSalesperson = getSalespersonKey(newOwnerName);
+    
+    if (newSalesperson) {
+      setOwnerName(newOwnerName);
+    }
+    
+    setIsPolling(false);
+    setHasPolled(true);
   };
 
   return (
@@ -53,9 +158,17 @@ export const SchedulingModal = ({ isOpen, onClose, ownerName, isLoading }: Sched
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          {externalLoading || isPolling ? (
+            <div className="flex flex-col items-center justify-center py-8 space-y-4">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              <div className="text-center">
+                <p className="text-sm text-foreground font-medium">
+                  Identificando seu especialista...
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {pollAttempts > 0 && `Verificando... (${pollAttempts}/${MAX_POLL_ATTEMPTS})`}
+                </p>
+              </div>
             </div>
           ) : salespersonKey ? (
             <>
@@ -84,10 +197,21 @@ export const SchedulingModal = ({ isOpen, onClose, ownerName, isLoading }: Sched
             </>
           ) : (
             <>
-              {/* No specific salesperson assigned - show all options */}
-              <p className="text-sm text-muted-foreground text-center mb-4">
-                Escolha um de nossos especialistas:
-              </p>
+              {/* No specific salesperson assigned after polling - show all options */}
+              <div className="text-center mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Escolha um de nossos especialistas:
+                </p>
+                {dealId && (
+                  <button
+                    onClick={handleRetryPolling}
+                    className="mt-2 text-xs text-primary hover:underline flex items-center gap-1 mx-auto"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Tentar identificar novamente
+                  </button>
+                )}
+              </div>
 
               <div className="space-y-3">
                 {Object.entries(SALESPERSON_CALENDARS).map(([name, link]) => (
