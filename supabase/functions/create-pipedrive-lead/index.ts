@@ -373,6 +373,7 @@ serve(async (req) => {
     const dealFieldsResult = await dealFieldsResponse.json();
     
     let labelId = null;
+    let disqualifiedLabelId = null;
     let utmSourceFieldKey: string | null = null;
     let utmMediumFieldKey: string | null = null;
     let utmCampaignFieldKey: string | null = null;
@@ -388,12 +389,22 @@ serve(async (req) => {
         (f: { key: string }) => f.key === "label"
       );
       if (labelField && labelField.options) {
+        // Find DIAGNÓSTICO label
         const diagnosticoLabel = labelField.options.find(
-          (opt: { label: string }) => opt.label.toUpperCase().includes("DIAGNÓSTICO") || opt.label.toUpperCase().includes("DIAGNOSTICO")
+          (opt: { label: string }) => opt.label.toUpperCase() === "DIAGNÓSTICO" || opt.label.toUpperCase() === "DIAGNOSTICO"
         );
         if (diagnosticoLabel) {
           labelId = diagnosticoLabel.id;
           console.log("Found DIAGNÓSTICO label:", labelId);
+        }
+        
+        // Find DESQUALIFICADO_DIAGNÓSTICO label
+        const desqualificadoLabel = labelField.options.find(
+          (opt: { label: string }) => opt.label.toUpperCase().includes("DESQUALIFICADO_DIAGNÓSTICO") || opt.label.toUpperCase().includes("DESQUALIFICADO_DIAGNOSTICO")
+        );
+        if (desqualificadoLabel) {
+          disqualifiedLabelId = desqualificadoLabel.id;
+          console.log("Found DESQUALIFICADO_DIAGNÓSTICO label:", disqualifiedLabelId);
         }
       }
 
@@ -442,7 +453,12 @@ serve(async (req) => {
       });
     }
 
-    // Create a deal in Pipedrive (in Inbound pipeline with DIAGNÓSTICO label)
+    // Check if lead is disqualified (less than 10 employees AND revenue below 100k/month)
+    const employeeCount = parseInt(leadData.company_size, 10) || 0;
+    const isDisqualified = employeeCount < 10 && leadData.revenue === "abaixo_100k";
+    console.log("Disqualification check:", { employeeCount, revenue: leadData.revenue, isDisqualified });
+
+    // Create a deal in Pipedrive (in Inbound pipeline with appropriate label)
     const dealTitle = `Diagnóstico ISO 9001 - ${leadData.name} (${leadData.company})`;
     
     const dealBody: Record<string, unknown> = {
@@ -457,8 +473,13 @@ serve(async (req) => {
     if (firstStageId) {
       dealBody.stage_id = firstStageId;
     }
-    if (labelId) {
+    // Apply appropriate label based on qualification status
+    if (isDisqualified && disqualifiedLabelId) {
+      dealBody.label = disqualifiedLabelId;
+      console.log("Applying DESQUALIFICADO_DIAGNÓSTICO label");
+    } else if (labelId) {
       dealBody.label = labelId;
+      console.log("Applying DIAGNÓSTICO label");
     }
 
     // Add UTM custom fields to deal
