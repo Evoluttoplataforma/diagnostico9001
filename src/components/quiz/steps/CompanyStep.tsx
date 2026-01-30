@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { Building2, Briefcase, Users, TrendingUp, Rocket } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
+import { FormStepIndicator } from "../FormStepIndicator";
+import { FormInput } from "../FormInput";
+import { FormSelect } from "../FormSelect";
 
 interface CompanyStepProps {
   currentStep: number;
@@ -20,7 +24,6 @@ const REVENUE_RANGES = [
   { value: "abaixo_100k", label: "Abaixo de R$ 100 mil/mês" },
   { value: "acima_100k", label: "Acima de R$ 100 mil/mês" },
 ];
-
 
 export const CompanyStep = ({
   currentStep,
@@ -68,91 +71,87 @@ export const CompanyStep = ({
   };
 
   return (
-    <div className="min-h-screen flex flex-col animate-fade-in">
+    <div className="min-h-screen flex flex-col animate-fade-in bg-gradient-to-b from-background via-background to-muted/30">
       <QuizHeader currentStep={currentStep} totalSteps={totalSteps} onBack={onBack} />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-        <div className="max-w-xl w-full">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-foreground text-center mb-3">
-            Último passo!
-          </h2>
+        <div className="max-w-lg w-full">
+          {/* Step Indicator */}
+          <FormStepIndicator currentStep={2} />
 
-          <p className="text-muted-foreground text-center mb-8">
-            Conte-nos um pouco mais sobre sua empresa
-          </p>
-
-          <div className="space-y-4 mb-8">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Nome da empresa
-              </label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="Digite o nome da empresa"
-                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-              />
+          {/* Header with animation */}
+          <div className="text-center mb-10 animate-slide-up">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
+              <Rocket className="w-4 h-4" />
+              <span className="text-sm font-medium">Último passo!</span>
             </div>
+            
+            <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mb-3">
+              Sobre sua empresa
+            </h2>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Segmento de atuação
-              </label>
-              <input
-                type="text"
-                name="segment"
-                value={formData.segment}
-                onChange={handleChange}
-                placeholder="Digite o segmento da sua empresa"
-                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Número de funcionários
-              </label>
-              <input
-                type="number"
-                name="companySize"
-                value={formData.companySize}
-                onChange={handleChange}
-                placeholder="Ex: 25"
-                min="0"
-                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Faturamento anual
-              </label>
-              <select
-                name="revenue"
-                value={formData.revenue}
-                onChange={(e) => handleSelectChange("revenue", e.target.value)}
-                className="w-full px-4 py-4 rounded-xl bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground appearance-none cursor-pointer"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
-              >
-                <option value="" disabled>Selecione o faturamento</option>
-                {REVENUE_RANGES.map((range) => (
-                  <option key={range.value} value={range.value}>
-                    {range.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <p className="text-muted-foreground">
+              Conte-nos um pouco mais para personalizar o diagnóstico
+            </p>
           </div>
 
-          <QuizButton onClick={handleSubmit} disabled={!isValid} loading={isLoading}>
-            Receber Diagnóstico Gratuito
-          </QuizButton>
+          {/* Form with staggered animations */}
+          <div className="space-y-5 mb-8">
+            <FormInput
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+              label="Nome da empresa"
+              icon={Building2}
+              delay={100}
+            />
 
-          <p className="text-xs text-muted-foreground text-center mt-4">
+            <FormInput
+              name="segment"
+              value={formData.segment}
+              onChange={handleChange}
+              label="Segmento de atuação"
+              icon={Briefcase}
+              delay={200}
+            />
+
+            <FormInput
+              type="number"
+              name="companySize"
+              value={formData.companySize}
+              onChange={handleChange}
+              label="Número de funcionários"
+              icon={Users}
+              delay={300}
+              min={0}
+            />
+
+            <FormSelect
+              value={formData.revenue}
+              onChange={(value) => handleSelectChange("revenue", value)}
+              label="Faturamento mensal"
+              options={REVENUE_RANGES}
+              icon={TrendingUp}
+              delay={400}
+            />
+          </div>
+
+          {/* Button with delayed animation */}
+          <div 
+            className="animate-slide-up opacity-0"
+            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
+          >
+            <QuizButton onClick={handleSubmit} disabled={!isValid} loading={isLoading}>
+              Receber Diagnóstico Gratuito
+            </QuizButton>
+          </div>
+
+          <p 
+            className="text-xs text-muted-foreground text-center mt-4 animate-slide-up opacity-0"
+            style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
+          >
             Ao continuar, você concorda com nossa{" "}
-            <a href="#" className="underline hover:text-foreground">
+            <a href="#" className="underline hover:text-foreground transition-colors">
               Política de Privacidade
             </a>
           </p>
