@@ -37,18 +37,7 @@ export const RevenueSelect = ({ value, onChange, delay = 0 }: RevenueSelectProps
   const selectedOption = REVENUE_OPTIONS.find((opt) => opt.value === value);
   const hasValue = value.length > 0;
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setIsFocused(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  // Close dropdown when clicking outside - removed because Portal handles this via backdrop
 
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
