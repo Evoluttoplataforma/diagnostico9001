@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Mail, Phone, Sparkles } from "lucide-react";
+import { User, Mail, Phone, Sparkles, Briefcase } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
 import { FormStepIndicator } from "../FormStepIndicator";
@@ -16,6 +16,7 @@ export interface ContactData {
   name: string;
   email: string;
   phone: string;
+  jobTitle: string;
 }
 
 export const ContactStep = ({
@@ -28,6 +29,7 @@ export const ContactStep = ({
     name: "",
     email: "",
     phone: "",
+    jobTitle: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +37,7 @@ export const ContactStep = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isValid = formData.name && formData.email && formData.phone;
+  const isValid = formData.name && formData.email && formData.phone && formData.jobTitle;
 
   const handleNext = () => {
     if (isValid) {
@@ -101,12 +103,22 @@ export const ContactStep = ({
               delay={300}
               autoComplete="tel"
             />
+
+            <FormInput
+              name="jobTitle"
+              value={formData.jobTitle}
+              onChange={handleChange}
+              label="Cargo"
+              icon={Briefcase}
+              delay={400}
+              autoComplete="organization-title"
+            />
           </div>
 
           {/* Button with delayed animation */}
           <div 
             className="animate-slide-up opacity-0"
-            style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
           >
             <QuizButton onClick={handleNext} disabled={!isValid}>
               Continuar
@@ -115,7 +127,7 @@ export const ContactStep = ({
 
           <p 
             className="text-xs text-muted-foreground text-center mt-4 animate-slide-up opacity-0"
-            style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
+            style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
           >
             Ao continuar, você concorda com nossa{" "}
             <a href="#" className="underline hover:text-foreground transition-colors">

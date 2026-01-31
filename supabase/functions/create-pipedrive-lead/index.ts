@@ -14,6 +14,7 @@ interface LeadData {
   name: string;
   email: string;
   phone: string;
+  job_title: string;
   company: string;
   segment: string;
   company_size: string;
@@ -295,7 +296,18 @@ serve(async (req) => {
       }
     }
 
-    // First, create a person in Pipedrive
+    // First, create a person in Pipedrive with job_title
+    const personBody: Record<string, unknown> = {
+      name: leadData.name,
+      email: [{ value: leadData.email, primary: true }],
+      phone: [{ value: leadData.phone, primary: true }],
+    };
+
+    // Add job_title if provided - this maps to the "Cargo" field in Pipedrive
+    if (leadData.job_title) {
+      personBody.job_title = leadData.job_title;
+    }
+
     const personResponse = await fetch(
       `https://api.pipedrive.com/v1/persons?api_token=${apiToken}`,
       {
@@ -303,11 +315,7 @@ serve(async (req) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: leadData.name,
-          email: [{ value: leadData.email, primary: true }],
-          phone: [{ value: leadData.phone, primary: true }],
-        }),
+        body: JSON.stringify(personBody),
       }
     );
 
