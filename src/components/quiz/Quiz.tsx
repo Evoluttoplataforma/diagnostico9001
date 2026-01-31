@@ -103,6 +103,7 @@ export const Quiz = () => {
             name: contactData.name,
             email: contactData.email,
             phone: contactData.phone,
+            job_title: contactData.jobTitle,
             company: companyData.company,
             segment: finalSegment,
             company_size: companyData.companySize,
