@@ -2,3 +2,9 @@ project_id = "slxvlocunadfcwzptpqd"
 
 [functions.generate-diagnosis]
 verify_jwt = false
+
+[functions.get-pipedrive-deal]
+verify_jwt = false
+
+[functions.update-pipedrive-deal]
+verify_jwt = false
