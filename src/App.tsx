@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Obrigado from "./pages/Obrigado";
 import VendorQuiz from "./pages/VendorQuiz";
+import GenerateLink from "./pages/GenerateLink";
 import NotFound from "./pages/NotFound";
 import { captureUTMsFromURL } from "@/hooks/use-utm";
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/obrigado-diagnostico" element={<Obrigado />} />
           <Route path="/d/:dealId" element={<VendorQuiz />} />
+          <Route path="/link" element={<GenerateLink />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
