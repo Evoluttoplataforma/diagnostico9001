@@ -15,6 +15,8 @@ interface VendorCompanyStepProps {
   initialData: {
     company: string;
     companySize: string;
+    segment: string;
+    revenue: string;
   };
 }
 
@@ -54,11 +56,25 @@ export const VendorCompanyStep = ({
 
   // Pre-fill with initial data from Pipedrive
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
+    // Find the matching segment value from the options
+    let segmentValue = "";
+    if (initialData.segment) {
+      const lowerSegment = initialData.segment.toLowerCase();
+      const matchingSegment = segments.find(s => 
+        s.label.toLowerCase() === lowerSegment || 
+        s.value === lowerSegment ||
+        s.label.toLowerCase().includes(lowerSegment) ||
+        lowerSegment.includes(s.label.toLowerCase())
+      );
+      segmentValue = matchingSegment?.value || "";
+    }
+
+    setFormData({
       company: initialData.company || "",
       companySize: initialData.companySize || "",
-    }));
+      segment: segmentValue,
+      revenue: initialData.revenue || "",
+    });
   }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

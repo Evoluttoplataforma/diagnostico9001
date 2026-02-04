@@ -18,6 +18,8 @@ interface VendorQuizFlowProps {
     jobTitle: string;
     company: string;
     companySize: string;
+    segment: string;
+    revenue: string;
   };
   ownerName: string | null;
 }
@@ -197,6 +199,8 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
           initialData={{
             company: initialData.company,
             companySize: initialData.companySize,
+            segment: initialData.segment,
+            revenue: initialData.revenue,
           }}
         />
       );
