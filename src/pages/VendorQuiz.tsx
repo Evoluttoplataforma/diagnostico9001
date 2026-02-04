@@ -14,6 +14,8 @@ interface PipedriveData {
   job_title: string;
   company: string;
   company_size: string;
+  segment: string;
+  revenue: string;
   owner_name: string | null;
 }
 
@@ -99,6 +101,8 @@ export default function VendorQuiz() {
         jobTitle: pipedriveData.job_title,
         company: pipedriveData.company,
         companySize: pipedriveData.company_size,
+        segment: pipedriveData.segment,
+        revenue: pipedriveData.revenue,
       }}
       ownerName={pipedriveData.owner_name}
     />
