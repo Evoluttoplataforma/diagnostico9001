@@ -97,6 +97,30 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_events: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string
+        }
+        Relationships: []
+      }
       quiz_leads: {
         Row: {
           ai_diagnosis: Json | null
