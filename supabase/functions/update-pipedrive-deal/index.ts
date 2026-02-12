@@ -222,7 +222,7 @@ serve(async (req) => {
     // If deal is lost, reopen it
     if (wasLost) {
       console.log("Deal is lost, reopening...");
-      await fetch(
+      const reopenResponse = await fetch(
         `https://api.pipedrive.com/v1/deals/${updateData.deal_id}?api_token=${apiToken}`,
         {
           method: "PUT",
@@ -230,7 +230,13 @@ serve(async (req) => {
           body: JSON.stringify({ status: "open" }),
         }
       );
-      console.log("Deal reopened successfully");
+      const reopenResult = await reopenResponse.json();
+      console.log("Reopen response:", JSON.stringify(reopenResult));
+      if (!reopenResult.success) {
+        console.error("Failed to reopen deal:", JSON.stringify(reopenResult));
+      } else {
+        console.log("Deal reopened successfully, new status:", reopenResult.data?.status);
+      }
     }
 
     // Update person with new data
@@ -338,7 +344,7 @@ serve(async (req) => {
       dealBody[revenueFieldKey] = revenueLabels[updateData.revenue] || updateData.revenue;
     }
 
-    await fetch(
+    const dealUpdateResponse = await fetch(
       `https://api.pipedrive.com/v1/deals/${updateData.deal_id}?api_token=${apiToken}`,
       {
         method: "PUT",
@@ -346,7 +352,8 @@ serve(async (req) => {
         body: JSON.stringify(dealBody),
       }
     );
-    console.log("Deal updated");
+    const dealUpdateResult = await dealUpdateResponse.json();
+    console.log("Deal update response:", dealUpdateResult.success, "status:", dealUpdateResult.data?.status);
 
     // Build and add notes
     const revenueDisplay = updateData.revenue ? (revenueLabels[updateData.revenue] || updateData.revenue) : "Não informado";
@@ -455,7 +462,7 @@ ${answersSection}
         }
       );
       const activityResult = await activityResponse.json();
-      console.log("Phone call activity created:", activityResult.success);
+      console.log("Phone call activity response:", JSON.stringify(activityResult));
     }
 
     // Get owner info
