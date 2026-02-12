@@ -217,6 +217,21 @@ serve(async (req) => {
     const deal = dealResult.data;
     const personId = typeof deal.person_id === 'object' ? deal.person_id.value : deal.person_id;
     const orgId = typeof deal.org_id === 'object' ? deal.org_id.value : deal.org_id;
+    const wasLost = deal.status === 'lost';
+
+    // If deal is lost, reopen it
+    if (wasLost) {
+      console.log("Deal is lost, reopening...");
+      await fetch(
+        `https://api.pipedrive.com/v1/deals/${updateData.deal_id}?api_token=${apiToken}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "open" }),
+        }
+      );
+      console.log("Deal reopened successfully");
+    }
 
     // Update person with new data
     if (personId) {
@@ -409,6 +424,39 @@ ${answersSection}
         }),
       }
     );
+
+    // If deal was lost, create a phone call activity
+    if (wasLost) {
+      console.log("Creating phone call activity for reopened deal...");
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dueDate = tomorrow.toISOString().split("T")[0];
+
+      const activityBody: Record<string, unknown> = {
+        subject: `📞 Retorno - Lead reaberto via diagnóstico (${updateData.name})`,
+        type: "call",
+        deal_id: updateData.deal_id,
+        due_date: dueDate,
+        due_time: "09:00",
+        duration: "00:30",
+        note: `Lead ${updateData.name} (${updateData.company}) respondeu o diagnóstico novamente através do link personalizado.\n\nScore: ${updateData.score}/100 - ${updateData.diagnosis_level}\n\nO deal estava como PERDIDO e foi reaberto automaticamente.`,
+        done: 0,
+      };
+
+      if (personId) activityBody.person_id = personId;
+      if (orgId) activityBody.org_id = orgId;
+
+      const activityResponse = await fetch(
+        `https://api.pipedrive.com/v1/activities?api_token=${apiToken}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(activityBody),
+        }
+      );
+      const activityResult = await activityResponse.json();
+      console.log("Phone call activity created:", activityResult.success);
+    }
 
     // Get owner info
     let ownerName = null;
