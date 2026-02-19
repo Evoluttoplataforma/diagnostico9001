@@ -199,6 +199,7 @@ export const Quiz = () => {
                 diagnosis_level: diagnosis.level,
                 answers: allAnswers,
                 pillar_scores: pillarScores,
+                questions: dynamicQuestions,
               },
             });
 

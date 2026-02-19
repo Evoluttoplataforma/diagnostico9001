@@ -5,6 +5,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface DynamicAnswer {
+  value: number;
+  label: string;
+}
+
+interface DynamicQuestion {
+  id: string;
+  block: number;
+  blockTitle: string;
+  text: string;
+  answers: DynamicAnswer[];
+}
+
 interface PillarScore {
   name: string;
   score: number;
@@ -22,8 +35,9 @@ interface UpdateData {
   revenue: string;
   score: number;
   diagnosis_level: string;
-  answers: Record<string, string>;
+  answers: Record<string, number>;
   pillar_scores: PillarScore[];
+  questions?: DynamicQuestion[];
 }
 
 // Revenue range labels for display
@@ -32,51 +46,28 @@ const revenueLabels: Record<string, string> = {
   "acima_100k": "Acima de R$ 100 mil/mês",
 };
 
-// Question mapping for readable answers
-const questionTexts: Record<string, string> = {
-  q1: "As atividades principais seguem sempre o mesmo passo a passo?",
-  q2: "Se alguém sair, outra pessoa consegue assumir sem caos?",
-  q3: "Os processos estão documentados?",
-  q4: "Você vive apagando incêndios no dia a dia?",
-  q5: "Cada colaborador sabe exatamente o que é sua responsabilidade?",
-  q6: "Seu time consegue resolver problemas sem precisar de você?",
-  q7: "Você consegue tirar férias sem que a empresa pare?",
-  q8: "O treinamento de novos colaboradores é estruturado?",
-  q9: "Você mede a satisfação dos clientes?",
-  q10: "Já perdeu clientes por falhas internas?",
-  q11: "Suas vendas são previsíveis mês a mês?",
-  q12: "Você sabe qual o ciclo de vida médio dos seus clientes?",
-  q13: "Você acompanha indicadores (vendas, prazos, qualidade)?",
-  q14: "As decisões são baseadas em dados?",
-  q15: "Você sabe exatamente para onde vai cada real da empresa?",
-  q16: "Você tem relatórios financeiros atualizados mensalmente?",
-  q17: "Sua estrutura atual aguenta dobrar de tamanho?",
-  q18: "Você tem um plano claro de crescimento para os próximos 12 meses?",
-  q19: "Você conseguiria contratar 5 pessoas amanhã sem gerar caos?",
-  q20: "A empresa tem capital ou crédito disponível para investir em crescimento?",
-};
-
-const answerLabels: Record<string, Record<string, string>> = {
-  q1: { positive: "Sim, temos processos padronizados", neutral: "Depende de quem está fazendo", negative: "Cada um faz do seu jeito" },
-  q2: { positive: "Sim, o conhecimento está documentado", neutral: "Com dificuldade, leva tempo", negative: "Vira um caos quando alguém sai" },
-  q3: { positive: "Sim, temos documentação atualizada", neutral: "Alguns estão, outros não", negative: "Só na cabeça das pessoas" },
-  q4: { negative: "Sim, é o modo padrão aqui", neutral: "Às vezes, mas não sempre", positive: "Não, temos rotina organizada" },
-  q5: { positive: "Sim, funções bem definidas", neutral: "Mais ou menos, há confusão", negative: "Não, todo mundo faz de tudo" },
-  q6: { positive: "Sim, têm autonomia para decidir", neutral: "Às vezes, mas me consultam muito", negative: "Não, tudo passa por mim" },
-  q7: { positive: "Sim, a operação continua normal", neutral: "Funciona, mas com dificuldades", negative: "Não, preciso estar presente sempre" },
-  q8: { positive: "Sim, temos programa de integração", neutral: "É informal, vai aprendendo", negative: "Não, é no improviso total" },
-  q9: { positive: "Sim, pesquisamos regularmente", neutral: "Às vezes perguntamos", negative: "Só reagimos quando reclamam" },
-  q10: { negative: "Sim, já perdemos vários", neutral: "Aconteceu algumas vezes", positive: "Não, retemos bem nossos clientes" },
-  q11: { positive: "Sim, temos previsibilidade", neutral: "Varia bastante, difícil prever", negative: "É uma montanha-russa" },
-  q12: { positive: "Sim, acompanhamos esse dado", neutral: "Tenho uma ideia, mas não preciso", negative: "Não, nunca medi isso" },
-  q13: { positive: "Sim, acompanhamos regularmente", neutral: "Às vezes, quando dá tempo", negative: "Não medimos indicadores" },
-  q14: { positive: "Sim, usamos dados para decidir", neutral: "Misturamos dados e intuição", negative: "Decidimos no feeling" },
-  q15: { positive: "Sim, controle financeiro detalhado", neutral: "Tenho uma visão geral apenas", negative: "Não, as finanças são confusas" },
-  q16: { positive: "Sim, DRE e fluxo de caixa em dia", neutral: "Às vezes, quando dá tempo", negative: "Não, só olho o saldo bancário" },
-  q17: { positive: "Sim, estamos preparados", neutral: "Talvez, com alguns ajustes", negative: "Não, já estamos no limite" },
-  q18: { positive: "Sim, com metas e ações definidas", neutral: "Tenho ideias, mas nada formalizado", negative: "Não, vou levando conforme dá" },
-  q19: { positive: "Sim, temos estrutura para isso", neutral: "Seria difícil, mas daria", negative: "Não, seria um caos total" },
-  q20: { positive: "Sim, temos reservas ou acesso a crédito", neutral: "Pouco, precisaria buscar", negative: "Não, estamos apertados" },
+// Fallback question texts (used only if dynamic questions not provided)
+const fallbackQuestionTexts: Record<string, string> = {
+  q1: "Processos - Pergunta 1",
+  q2: "Processos - Pergunta 2",
+  q3: "Processos - Pergunta 3",
+  q4: "Processos - Pergunta 4",
+  q5: "Pessoas - Pergunta 5",
+  q6: "Pessoas - Pergunta 6",
+  q7: "Pessoas - Pergunta 7",
+  q8: "Pessoas - Pergunta 8",
+  q9: "Clientes - Pergunta 9",
+  q10: "Clientes - Pergunta 10",
+  q11: "Clientes - Pergunta 11",
+  q12: "Clientes - Pergunta 12",
+  q13: "Controle - Pergunta 13",
+  q14: "Controle - Pergunta 14",
+  q15: "Controle - Pergunta 15",
+  q16: "Controle - Pergunta 16",
+  q17: "Crescimento - Pergunta 17",
+  q18: "Crescimento - Pergunta 18",
+  q19: "Crescimento - Pergunta 19",
+  q20: "Crescimento - Pergunta 20",
 };
 
 const pillarQuestions: Record<string, string[]> = {
@@ -87,18 +78,24 @@ const pillarQuestions: Record<string, string[]> = {
   "Crescimento": ["q17", "q18", "q19", "q20"],
 };
 
-function getSalesGuidance(score: number, diagnosisLevel: string, pillarScores: PillarScore[], answers: Record<string, string>, leadName: string): string {
+function getSalesGuidance(score: number, diagnosisLevel: string, pillarScores: PillarScore[], answers: Record<string, number>, leadName: string, questions?: DynamicQuestion[]): string {
   const sortedPillars = [...pillarScores].sort((a, b) => a.score - b.score);
   const weakestPillars = sortedPillars.slice(0, 2);
   const strongestPillar = sortedPillars[sortedPillars.length - 1];
 
+  // Build question lookup from dynamic questions
+  const questionMap: Record<string, DynamicQuestion> = {};
+  if (questions) {
+    questions.forEach((q) => { questionMap[q.id] = q; });
+  }
+
   const painPoints: string[] = [];
-  Object.entries(answers).forEach(([qId, answer]) => {
-    if (answer === "negative") {
-      const question = questionTexts[qId];
-      if (question) {
-        painPoints.push(`❌ ${question}`);
-      }
+  Object.entries(answers).forEach(([qId, answerValue]) => {
+    if (typeof answerValue === 'number' && answerValue <= 2) {
+      const q = questionMap[qId];
+      const questionText = q?.text || fallbackQuestionTexts[qId] || qId;
+      const answerLabel = q?.answers?.find((a) => a.value === answerValue)?.label || `Nota ${answerValue}/5`;
+      painPoints.push(`❌ ${questionText}\n   → ${answerLabel}`);
     }
   });
 
@@ -355,21 +352,33 @@ serve(async (req) => {
     const dealUpdateResult = await dealUpdateResponse.json();
     console.log("Deal update response:", dealUpdateResult.success, "status:", dealUpdateResult.data?.status);
 
+    // Build question lookup from dynamic questions
+    const questionMap: Record<string, DynamicQuestion> = {};
+    if (updateData.questions) {
+      updateData.questions.forEach((q) => { questionMap[q.id] = q; });
+    }
+
     // Build and add notes
     const revenueDisplay = updateData.revenue ? (revenueLabels[updateData.revenue] || updateData.revenue) : "Não informado";
 
-    let answersSection = "\n\n📋 **RESPOSTAS DO DIAGNÓSTICO:**\n";
+    let answersSection = "\n\n📋 **RESPOSTAS DO DIAGNÓSTICO PERSONALIZADO:**\n";
     const pillars = ["Processos", "Pessoas", "Clientes", "Controle", "Crescimento"];
     
     pillars.forEach((pillar) => {
       answersSection += `\n**${pillar}:**\n`;
-      const questions = pillarQuestions[pillar];
-      questions.forEach((qId) => {
-        const answer = updateData.answers?.[qId];
-        const questionText = questionTexts[qId];
-        const answerText = answer ? answerLabels[qId]?.[answer] || answer : "Não respondeu";
-        const emoji = answer === "positive" ? "✅" : answer === "neutral" ? "⚠️" : "❌";
-        answersSection += `${emoji} ${questionText}\n   → ${answerText}\n`;
+      const qIds = pillarQuestions[pillar];
+      qIds.forEach((qId) => {
+        const answerValue = updateData.answers?.[qId];
+        const q = questionMap[qId];
+        const questionText = q?.text || fallbackQuestionTexts[qId] || qId;
+        
+        let answerText = "Não respondeu";
+        let emoji = "⬜";
+        if (typeof answerValue === 'number') {
+          answerText = q?.answers?.find((a) => a.value === answerValue)?.label || `Nota ${answerValue}/5`;
+          emoji = answerValue >= 4 ? "✅" : answerValue === 3 ? "⚠️" : "❌";
+        }
+        answersSection += `${emoji} ${questionText}\n   → ${answerText} (${answerValue || 0}/5)\n`;
       });
     });
 
@@ -417,7 +426,8 @@ ${answersSection}
       updateData.diagnosis_level,
       updateData.pillar_scores || [],
       updateData.answers || {},
-      updateData.name
+      updateData.name,
+      updateData.questions
     );
 
     await fetch(
