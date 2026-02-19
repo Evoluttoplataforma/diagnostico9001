@@ -25,25 +25,35 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    const hasSegment = segment && segment.trim().length > 0;
+
     const systemPrompt = `Você é um consultor especialista em ISO 9001 e gestão empresarial.
 Sua tarefa é gerar 20 perguntas de diagnóstico empresarial ULTRA PERSONALIZADAS.
 
 REGRAS CRÍTICAS:
 - Responda APENAS com JSON válido, sem markdown, sem texto adicional
 - Cada pergunta deve ter exatamente 5 opções de resposta numa escala de maturidade (1=pior, 5=melhor)
-- As perguntas devem ser específicas para o segmento, porte e realidade do cargo informado
+${hasSegment
+  ? `- As perguntas devem ser específicas para o segmento, porte e realidade do cargo informado
 - Use linguagem direta, prática, que o gestor se identifique
 - As opções devem refletir níveis reais de maturidade, do caos total à excelência
-- NÃO use perguntas genéricas — cada pergunta deve mencionar situações reais do segmento`;
+- NÃO use perguntas genéricas — cada pergunta deve mencionar situações reais do segmento`
+  : `- Como o segmento NÃO foi identificado, gere perguntas GERAIS sobre gestão da qualidade e ISO 9001
+- As perguntas devem ser aplicáveis a qualquer tipo de empresa
+- Foque em boas práticas universais de gestão: processos, pessoas, clientes, controle e crescimento
+- Use linguagem direta e prática, adaptada ao porte da empresa informado
+- As opções devem refletir níveis reais de maturidade, do caos total à excelência`}`;
+
+    const segmentLabel = hasSegment ? segment : "Não identificado (usar perguntas gerais de gestão/ISO 9001)";
 
     const userPrompt = `DADOS DO LEAD:
 - Cargo: ${jobTitle}
-- Segmento: ${segment}
+- Segmento: ${segmentLabel}
 - Número de funcionários: ${companySize}
 - Faturamento mensal: ${revenue}
 
 CONTEXTO: Este lead chegou por um criativo oferecendo ISO 9001. As perguntas devem avaliar a maturidade de gestão da empresa nos 5 pilares abaixo.
-
+${!hasSegment ? "\nIMPORTANTE: O segmento NÃO foi identificado. Gere perguntas GERAIS sobre gestão da qualidade e ISO 9001, aplicáveis a qualquer empresa. NÃO mencione um segmento específico nas perguntas.\n" : ""}
 GERE 20 perguntas (4 por pilar) no seguinte formato JSON:
 
 {
@@ -65,9 +75,9 @@ GERE 20 perguntas (4 por pilar) no seguinte formato JSON:
 }
 
 PILARES (4 perguntas cada):
-1. Processos (q1-q4): Padronização, documentação, fluxos operacionais específicos de ${segment}
+1. Processos (q1-q4): Padronização, documentação, fluxos operacionais${hasSegment ? ` específicos de ${segment}` : " gerais"}
 2. Pessoas (q5-q8): Estrutura de equipe, autonomia, treinamento — considerando porte de ${companySize} funcionários
-3. Clientes (q9-q12): Satisfação, retenção, previsibilidade comercial no segmento ${segment}
+3. Clientes (q9-q12): Satisfação, retenção, previsibilidade comercial${hasSegment ? ` no segmento ${segment}` : ""}
 4. Controle (q13-q16): Indicadores, gestão financeira, dados — adequado ao faturamento de ${revenue}
 5. Crescimento (q17-q20): Escalabilidade, planejamento estratégico, capacidade de investimento
 
@@ -78,7 +88,7 @@ IMPORTANTE:
 - Perguntas q13-q16 DEVEM ter block=4 e blockTitle="Controle"
 - Perguntas q17-q20 DEVEM ter block=5 e blockTitle="Crescimento"
 - Cada answer DEVE ter value de 1 a 5 (inteiro)
-- Labels devem ser curtos (máx 8 palavras) e específicos para ${segment}
+- Labels devem ser curtos (máx 8 palavras)${hasSegment ? ` e específicos para ${segment}` : ""}
 
 Responda APENAS com o JSON.`;
 
