@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
 import { VendorContactStep, VendorContactData } from "./steps/VendorContactStep";
 import { VendorCompanyStep, VendorCompanyData } from "./steps/VendorCompanyStep";
-import { SegmentStep } from "./steps/SegmentStep";
 import { DynamicQuestion, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { QuestionsLoading } from "./results/QuestionsLoading";
 
-type Step = "segment" | "generating" | "questions" | "contact" | "company";
+type Step = "generating" | "questions" | "contact" | "company";
 
 interface VendorQuizFlowProps {
   dealId: number;
@@ -34,52 +33,44 @@ interface QuizData {
 
 export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlowProps) => {
   const navigate = useNavigate();
-  const hasSegment = Boolean(initialData.segment && initialData.segment.trim());
-  const [currentStep, setCurrentStep] = useState<Step>(hasSegment ? "generating" : "segment");
+  const [currentStep, setCurrentStep] = useState<Step>("generating");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [dynamicQuestions, setDynamicQuestions] = useState<DynamicQuestion[]>([]);
-  const [segmentOverride, setSegmentOverride] = useState<string>("");
   const [data, setData] = useState<QuizData>({
     answers: {},
     contact: null,
     company: null,
   });
 
-  const effectiveSegment = segmentOverride || initialData.segment;
   const totalQuestions = dynamicQuestions.length || 20;
   const totalSteps = totalQuestions + 2;
 
-  const startGenerating = async (segment: string) => {
-    setCurrentStep("generating");
-    try {
-      const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
-        body: {
-          segment,
-          companySize: initialData.companySize,
-          revenue: initialData.revenue,
-          jobTitle: initialData.jobTitle,
-        },
-      });
-      if (error) throw error;
-      if (questionsData?.questions) {
-        setDynamicQuestions(questionsData.questions);
-        setCurrentStep("questions");
-      } else {
-        throw new Error("Failed to generate questions");
-      }
-    } catch (err) {
-      console.error("Error generating questions:", err);
-      toast.error("Erro ao gerar perguntas. Tente novamente.");
-    }
-  };
-
-  // Generate questions on mount if segment is already available
+  // Generate questions on mount using initial data
   useEffect(() => {
-    if (hasSegment) {
-      startGenerating(initialData.segment);
-    }
-  }, []);
-  
+    const generateQuestions = async () => {
+      try {
+        const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
+          body: {
+            segment: initialData.segment,
+            companySize: initialData.companySize,
+            revenue: initialData.revenue,
+            jobTitle: initialData.jobTitle,
+          },
+        });
+        if (error) throw error;
+        if (questionsData?.questions) {
+          setDynamicQuestions(questionsData.questions);
+          setCurrentStep("questions");
+        } else {
+          throw new Error("Failed to generate questions");
+        }
+      } catch (err) {
+        console.error("Error generating questions:", err);
+        toast.error("Erro ao gerar perguntas. Tente novamente.");
+      }
+    };
+    generateQuestions();
+  }, [initialData]);
 
   const handleAnswer = (value: AnswerValue) => {
     const questionId = dynamicQuestions[currentQuestionIndex].id;
@@ -192,15 +183,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
     }
   };
 
-  const handleSegmentSubmit = (segment: string) => {
-    setSegmentOverride(segment);
-    startGenerating(segment);
-  };
-
   switch (currentStep) {
-    case "segment":
-      return <SegmentStep onSubmit={handleSegmentSubmit} />;
-
     case "generating":
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
@@ -247,7 +230,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
           initialData={{
             company: initialData.company,
             companySize: initialData.companySize,
-            segment: effectiveSegment,
+            segment: initialData.segment,
             revenue: initialData.revenue,
           }}
         />
