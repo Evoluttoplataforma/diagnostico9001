@@ -1,23 +1,11 @@
 import { useState } from "react";
 import { Briefcase } from "lucide-react";
 import { QuizButton } from "../QuizButton";
-import { FormSelect } from "../FormSelect";
+import { FormInput } from "../FormInput";
 
 interface VendorSegmentStepProps {
   onSubmit: (segment: string) => void;
 }
-
-const segments = [
-  { value: "industria", label: "Indústria" },
-  { value: "comercio", label: "Comércio" },
-  { value: "servicos", label: "Serviços" },
-  { value: "tecnologia", label: "Tecnologia" },
-  { value: "saude", label: "Saúde" },
-  { value: "educacao", label: "Educação" },
-  { value: "construcao", label: "Construção" },
-  { value: "agronegocio", label: "Agronegócio" },
-  { value: "outro", label: "Outro" },
-];
 
 export const VendorSegmentStep = ({ onSubmit }: VendorSegmentStepProps) => {
   const [segment, setSegment] = useState("");
@@ -38,13 +26,14 @@ export const VendorSegmentStep = ({ onSubmit }: VendorSegmentStepProps) => {
         </div>
 
         <div className="mb-8">
-          <FormSelect
+          <FormInput
+            name="segment"
             value={segment}
-            onChange={setSegment}
+            onChange={(e) => setSegment(e.target.value)}
             label="Segmento de atuação"
-            options={segments}
             icon={Briefcase}
             delay={200}
+            placeholder="Ex: Indústria, Tecnologia, Saúde..."
           />
         </div>
 
@@ -52,7 +41,7 @@ export const VendorSegmentStep = ({ onSubmit }: VendorSegmentStepProps) => {
           className="animate-slide-up opacity-0"
           style={{ animationDelay: "300ms", animationFillMode: "forwards" }}
         >
-          <QuizButton onClick={() => onSubmit(segment)} disabled={!segment}>
+          <QuizButton onClick={() => onSubmit(segment.trim())} disabled={!segment.trim()}>
             Continuar
           </QuizButton>
         </div>
