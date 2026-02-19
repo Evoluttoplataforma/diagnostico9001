@@ -37,6 +37,8 @@ export const CompanyStep = ({
     companySize: "",
     revenue: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -53,8 +55,13 @@ export const CompanyStep = ({
     formData.revenue;
 
   const handleSubmit = async () => {
-    if (isValid) {
-      await onSubmit(formData);
+    if (isValid && !isLoading) {
+      setIsLoading(true);
+      try {
+        await onSubmit(formData);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -126,7 +133,7 @@ export const CompanyStep = ({
             className="animate-slide-up opacity-0"
             style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
           >
-            <QuizButton onClick={handleSubmit} disabled={!isValid}>
+            <QuizButton onClick={handleSubmit} disabled={!isValid} loading={isLoading}>
               Continuar
             </QuizButton>
           </div>
