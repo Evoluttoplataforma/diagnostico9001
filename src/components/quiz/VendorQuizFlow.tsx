@@ -150,6 +150,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
             diagnosis_level: diagnosis.level,
             answers: data.answers,
             pillar_scores: pillarScores,
+            questions: dynamicQuestions,
           },
         });
 
