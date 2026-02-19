@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
 import { CompanyStep, CompanyData } from "./steps/CompanyStep";
-import { questions, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
+import { DynamicQuestion, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUTM } from "@/hooks/use-utm";
 import { DiagnosisLoading } from "./results/DiagnosisLoading";
+import { QuestionsLoading } from "./results/QuestionsLoading";
 
-type Step = "contact" | "company" | "questions";
+type Step = "contact" | "company" | "generating" | "questions";
 
 interface QuizData {
   answers: Record<string, AnswerValue>;
@@ -22,6 +23,7 @@ export const Quiz = () => {
   const utmParams = useUTM();
   const [currentStep, setCurrentStep] = useState<Step>("contact");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [dynamicQuestions, setDynamicQuestions] = useState<DynamicQuestion[]>([]);
   const [data, setData] = useState<QuizData>({
     answers: {},
     contact: null,
@@ -31,7 +33,7 @@ export const Quiz = () => {
   const dealIdRef = useRef<number | null>(null);
   const ownerNameRef = useRef<string | null>(null);
 
-  const totalQuestions = questions.length;
+  const totalQuestions = dynamicQuestions.length || 20;
   const totalSteps = totalQuestions + 2;
 
   // --- Contact step ---
@@ -42,47 +44,75 @@ export const Quiz = () => {
 
   const handleContactBack = () => {};
 
-  // --- Company step: create lead in Pipedrive ---
+  // --- Company step: create lead + generate questions ---
   const handleCompanyNext = async (companyData: CompanyData) => {
     const contactData = data.contact!;
     setData((prev) => ({ ...prev, company: companyData }));
+    setCurrentStep("generating");
 
-    // Create lead in Pipedrive in background (don't block navigation)
     try {
-      const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
-        body: {
-          name: contactData.name,
-          email: contactData.email,
-          phone: contactData.phone,
-          job_title: contactData.jobTitle,
-          company: companyData.company,
-          segment: companyData.segment,
-          company_size: companyData.companySize,
-          revenue: companyData.revenue,
-          score: 0,
-          diagnosis_level: "pending",
-          utm_source: utmParams.utm_source,
-          utm_medium: utmParams.utm_medium,
-          utm_campaign: utmParams.utm_campaign,
-          utm_content: utmParams.utm_content,
-          utm_term: utmParams.utm_term,
-          answers: {},
-          pillar_scores: [],
-        },
-      });
+      // Run Pipedrive creation and question generation in parallel
+      const [, questionsResult] = await Promise.all([
+        // Create lead in Pipedrive
+        (async () => {
+          try {
+            const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
+              body: {
+                name: contactData.name,
+                email: contactData.email,
+                phone: contactData.phone,
+                job_title: contactData.jobTitle,
+                company: companyData.company,
+                segment: companyData.segment,
+                company_size: companyData.companySize,
+                revenue: companyData.revenue,
+                score: 0,
+                diagnosis_level: "pending",
+                utm_source: utmParams.utm_source,
+                utm_medium: utmParams.utm_medium,
+                utm_campaign: utmParams.utm_campaign,
+                utm_content: utmParams.utm_content,
+                utm_term: utmParams.utm_term,
+                answers: {},
+                pillar_scores: [],
+              },
+            });
+            if (!pipedriveResponse.error) {
+              dealIdRef.current = pipedriveResponse.data?.deal_id || null;
+              ownerNameRef.current = pipedriveResponse.data?.owner_name || null;
+            } else {
+              console.error("Pipedrive error:", pipedriveResponse.error);
+            }
+          } catch (err) {
+            console.error("Pipedrive creation error:", err);
+          }
+        })(),
+        // Generate personalized questions via AI
+        (async () => {
+          const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
+            body: {
+              segment: companyData.segment,
+              companySize: companyData.companySize,
+              revenue: companyData.revenue,
+              jobTitle: contactData.jobTitle,
+            },
+          });
+          if (error) throw error;
+          return questionsData;
+        })(),
+      ]);
 
-      if (pipedriveResponse.error) {
-        console.error("Pipedrive error:", pipedriveResponse.error);
+      if (questionsResult?.questions) {
+        setDynamicQuestions(questionsResult.questions);
+        setCurrentStep("questions");
       } else {
-        console.log("Lead created in Pipedrive:", pipedriveResponse.data);
-        dealIdRef.current = pipedriveResponse.data?.deal_id || null;
-        ownerNameRef.current = pipedriveResponse.data?.owner_name || null;
+        throw new Error("Failed to generate questions");
       }
     } catch (err) {
-      console.error("Pipedrive creation error:", err);
+      console.error("Error generating questions:", err);
+      toast.error("Erro ao gerar perguntas. Tente novamente.");
+      setCurrentStep("company");
     }
-
-    setCurrentStep("questions");
   };
 
   const handleCompanyBack = () => {
@@ -91,14 +121,14 @@ export const Quiz = () => {
 
   // --- Questions step ---
   const handleAnswer = (value: AnswerValue) => {
-    const questionId = questions[currentQuestionIndex].id;
+    const questionId = dynamicQuestions[currentQuestionIndex].id;
     setData((prev) => ({
       ...prev,
       answers: { ...prev.answers, [questionId]: value },
     }));
 
     setTimeout(() => {
-      if (currentQuestionIndex < totalQuestions - 1) {
+      if (currentQuestionIndex < dynamicQuestions.length - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
       } else {
         handleSubmit(value);
@@ -117,14 +147,14 @@ export const Quiz = () => {
   const handleSubmit = async (lastAnswerValue: AnswerValue) => {
     setIsSubmitting(true);
 
-    const lastQuestionId = questions[totalQuestions - 1].id;
+    const lastQuestionId = dynamicQuestions[dynamicQuestions.length - 1].id;
     const allAnswers = { ...data.answers, [lastQuestionId]: lastAnswerValue };
 
     const score = getScore(allAnswers);
     const diagnosis = getDiagnosis(score);
     const contactData = data.contact!;
     const companyData = data.company!;
-    const pillarScores = calculatePillarScores(allAnswers);
+    const pillarScores = calculatePillarScores(allAnswers, dynamicQuestions);
     const finalSegment = companyData.segment;
 
     try {
@@ -175,7 +205,6 @@ export const Quiz = () => {
             if (updateResponse.error) {
               console.error("Pipedrive update error:", updateResponse.error);
             } else {
-              console.log("Deal updated in Pipedrive:", updateResponse.data);
               ownerNameRef.current = updateResponse.data?.owner_name || ownerNameRef.current;
             }
           } catch (updateErr) {
@@ -242,13 +271,20 @@ export const Quiz = () => {
         />
       );
 
+    case "generating":
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
+          <QuestionsLoading />
+        </div>
+      );
+
     case "questions":
-      const currentQuestion = questions[currentQuestionIndex];
+      const currentQuestion = dynamicQuestions[currentQuestionIndex];
       return (
         <QuestionStep
           question={currentQuestion}
           questionIndex={currentQuestionIndex}
-          totalQuestions={totalQuestions}
+          totalQuestions={dynamicQuestions.length}
           selectedAnswer={data.answers[currentQuestion.id]}
           onAnswer={handleAnswer}
           onBack={handleQuestionBack}

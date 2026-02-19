@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
 import { VendorContactStep, VendorContactData } from "./steps/VendorContactStep";
 import { VendorCompanyStep, VendorCompanyData } from "./steps/VendorCompanyStep";
-import { questions, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
+import { DynamicQuestion, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { QuestionsLoading } from "./results/QuestionsLoading";
 
-type Step = "questions" | "contact" | "company";
+type Step = "generating" | "questions" | "contact" | "company";
 
 interface VendorQuizFlowProps {
   dealId: number;
@@ -32,26 +33,54 @@ interface QuizData {
 
 export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlowProps) => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState<Step>("questions");
+  const [currentStep, setCurrentStep] = useState<Step>("generating");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [dynamicQuestions, setDynamicQuestions] = useState<DynamicQuestion[]>([]);
   const [data, setData] = useState<QuizData>({
     answers: {},
     contact: null,
     company: null,
   });
 
-  const totalQuestions = questions.length;
+  const totalQuestions = dynamicQuestions.length || 20;
   const totalSteps = totalQuestions + 2;
 
+  // Generate questions on mount using initial data
+  useEffect(() => {
+    const generateQuestions = async () => {
+      try {
+        const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
+          body: {
+            segment: initialData.segment,
+            companySize: initialData.companySize,
+            revenue: initialData.revenue,
+            jobTitle: initialData.jobTitle,
+          },
+        });
+        if (error) throw error;
+        if (questionsData?.questions) {
+          setDynamicQuestions(questionsData.questions);
+          setCurrentStep("questions");
+        } else {
+          throw new Error("Failed to generate questions");
+        }
+      } catch (err) {
+        console.error("Error generating questions:", err);
+        toast.error("Erro ao gerar perguntas. Tente novamente.");
+      }
+    };
+    generateQuestions();
+  }, [initialData]);
+
   const handleAnswer = (value: AnswerValue) => {
-    const questionId = questions[currentQuestionIndex].id;
+    const questionId = dynamicQuestions[currentQuestionIndex].id;
     setData((prev) => ({
       ...prev,
       answers: { ...prev.answers, [questionId]: value },
     }));
 
     setTimeout(() => {
-      if (currentQuestionIndex < totalQuestions - 1) {
+      if (currentQuestionIndex < dynamicQuestions.length - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
       } else {
         setCurrentStep("contact");
@@ -72,7 +101,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
 
   const handleContactBack = () => {
     setCurrentStep("questions");
-    setCurrentQuestionIndex(totalQuestions - 1);
+    setCurrentQuestionIndex(dynamicQuestions.length - 1);
   };
 
   const handleCompanyBack = () => {
@@ -83,10 +112,9 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
     const score = getScore(data.answers);
     const diagnosis = getDiagnosis(score);
     const contactData = data.contact!;
-    const pillarScores = calculatePillarScores(data.answers);
+    const pillarScores = calculatePillarScores(data.answers, dynamicQuestions);
 
     try {
-      // Save to database
       const { error } = await supabase.from("quiz_leads").insert({
         name: contactData.name,
         email: contactData.email,
@@ -105,7 +133,6 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
         return;
       }
 
-      // Update the existing Pipedrive deal instead of creating a new one
       let dealOwnerName: string | null = ownerName;
       try {
         const pipedriveResponse = await supabase.functions.invoke("update-pipedrive-deal", {
@@ -126,10 +153,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
           },
         });
 
-        if (pipedriveResponse.error) {
-          console.error("Pipedrive update error:", pipedriveResponse.error);
-        } else {
-          console.log("Deal updated in Pipedrive:", pipedriveResponse.data);
+        if (!pipedriveResponse.error) {
           dealOwnerName = pipedriveResponse.data?.owner_name || ownerName;
         }
       } catch (pipedriveErr) {
@@ -138,7 +162,6 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
 
       setData((prev) => ({ ...prev, company: companyData }));
 
-      // Navigate with all data needed for the premium report
       navigate("/obrigado-diagnostico", {
         state: {
           name: contactData.name,
@@ -160,13 +183,20 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
   };
 
   switch (currentStep) {
+    case "generating":
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
+          <QuestionsLoading />
+        </div>
+      );
+
     case "questions":
-      const currentQuestion = questions[currentQuestionIndex];
+      const currentQuestion = dynamicQuestions[currentQuestionIndex];
       return (
         <QuestionStep
           question={currentQuestion}
           questionIndex={currentQuestionIndex}
-          totalQuestions={totalQuestions}
+          totalQuestions={dynamicQuestions.length}
           selectedAnswer={data.answers[currentQuestion.id]}
           onAnswer={handleAnswer}
           onBack={handleQuestionBack}
@@ -176,7 +206,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
     case "contact":
       return (
         <VendorContactStep
-          currentStep={totalQuestions + 1}
+          currentStep={dynamicQuestions.length + 1}
           totalSteps={totalSteps}
           onNext={handleContactNext}
           onBack={handleContactBack}
@@ -192,7 +222,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
     case "company":
       return (
         <VendorCompanyStep
-          currentStep={totalQuestions + 2}
+          currentStep={dynamicQuestions.length + 2}
           totalSteps={totalSteps}
           onSubmit={handleCompanySubmit}
           onBack={handleCompanyBack}

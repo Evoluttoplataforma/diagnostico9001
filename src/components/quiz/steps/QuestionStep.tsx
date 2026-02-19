@@ -1,39 +1,22 @@
 import { QuizHeader } from "../QuizHeader";
-import { Question, AnswerValue } from "../quizData";
-import { Check, Minus, X } from "lucide-react";
+import { DynamicQuestion } from "../quizData";
 
 interface QuestionStepProps {
-  question: Question;
+  question: DynamicQuestion;
   questionIndex: number;
   totalQuestions: number;
-  selectedAnswer?: AnswerValue;
-  onAnswer: (value: AnswerValue) => void;
+  selectedAnswer?: number;
+  onAnswer: (value: number) => void;
   onBack: () => void;
 }
 
-const getIndicator = (value: AnswerValue, isSelected: boolean) => {
-  const baseClass = "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all";
-  
-  if (value === "positive") {
-    return (
-      <div className={`${baseClass} ${isSelected ? "bg-green-500" : "bg-green-100"}`}>
-        <Check className={`w-4 h-4 ${isSelected ? "text-white" : "text-green-600"}`} />
-      </div>
-    );
-  }
-  if (value === "neutral") {
-    return (
-      <div className={`${baseClass} ${isSelected ? "bg-yellow-500" : "bg-yellow-100"}`}>
-        <Minus className={`w-4 h-4 ${isSelected ? "text-white" : "text-yellow-600"}`} />
-      </div>
-    );
-  }
-  return (
-    <div className={`${baseClass} ${isSelected ? "bg-red-500" : "bg-red-100"}`}>
-      <X className={`w-4 h-4 ${isSelected ? "text-white" : "text-red-600"}`} />
-    </div>
-  );
-};
+const scaleColors = [
+  { bg: "bg-red-500", bgLight: "bg-red-100", text: "text-white", textLight: "text-red-600", border: "border-red-500" },
+  { bg: "bg-orange-500", bgLight: "bg-orange-100", text: "text-white", textLight: "text-orange-600", border: "border-orange-500" },
+  { bg: "bg-yellow-500", bgLight: "bg-yellow-100", text: "text-white", textLight: "text-yellow-600", border: "border-yellow-500" },
+  { bg: "bg-emerald-500", bgLight: "bg-emerald-100", text: "text-white", textLight: "text-emerald-600", border: "border-emerald-500" },
+  { bg: "bg-green-600", bgLight: "bg-green-100", text: "text-white", textLight: "text-green-700", border: "border-green-600" },
+];
 
 export const QuestionStep = ({
   question,
@@ -70,8 +53,9 @@ export const QuestionStep = ({
           </h2>
 
           <div className="space-y-3">
-            {question.answers.map((option) => {
+            {question.answers.map((option, idx) => {
               const isSelected = selectedAnswer === option.value;
+              const color = scaleColors[idx] || scaleColors[0];
               return (
                 <button
                   key={option.value}
@@ -79,12 +63,16 @@ export const QuestionStep = ({
                   className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center gap-4 text-left
                     ${
                       isSelected
-                        ? "border-primary bg-primary/5 shadow-md"
+                        ? `${color.border} bg-primary/5 shadow-md`
                         : "border-border bg-card hover:border-primary/50 hover:shadow-sm"
                     }
                   `}
                 >
-                  {getIndicator(option.value, isSelected)}
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? color.bg : color.bgLight}`}>
+                    <span className={`text-sm font-bold ${isSelected ? color.text : color.textLight}`}>
+                      {option.value}
+                    </span>
+                  </div>
                   <span className="font-medium text-foreground text-lg">
                     {option.label}
                   </span>
