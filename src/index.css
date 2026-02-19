@@ -128,14 +128,21 @@
   }
 
   .quiz-button {
-    @apply w-full py-4 px-8 rounded-xl font-bold text-lg transition-all duration-200 flex items-center justify-center gap-2;
+    @apply w-full py-5 px-8 rounded-xl font-extrabold text-lg tracking-wide uppercase transition-all duration-200 flex items-center justify-center gap-2;
     @apply bg-primary text-primary-foreground;
+    box-shadow: 0 4px 14px hsl(24 95% 53% / 0.35), 0 2px 4px hsl(0 0% 0% / 0.1);
+    letter-spacing: 0.04em;
   }
 
   .quiz-button:hover:not(:disabled) {
     background: hsl(var(--templum-orange-hover));
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px hsl(24 95% 53% / 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px hsl(24 95% 53% / 0.45), 0 4px 8px hsl(0 0% 0% / 0.12);
+  }
+
+  .quiz-button:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 2px 8px hsl(24 95% 53% / 0.3);
   }
 
   .quiz-button:disabled {
