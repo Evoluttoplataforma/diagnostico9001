@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
@@ -26,6 +26,8 @@ export const Quiz = () => {
     contact: null,
     company: null,
   });
+  const dealIdRef = useRef<number | null>(null);
+  const ownerNameRef = useRef<string | null>(null);
 
   const totalQuestions = questions.length;
   const totalSteps = totalQuestions + 2;
@@ -36,13 +38,48 @@ export const Quiz = () => {
     setCurrentStep("company");
   };
 
-  const handleContactBack = () => {
-    // First step, no back
-  };
+  const handleContactBack = () => {};
 
-  // --- Company step ---
-  const handleCompanyNext = (companyData: CompanyData) => {
+  // --- Company step: create lead in Pipedrive ---
+  const handleCompanyNext = async (companyData: CompanyData) => {
+    const contactData = data.contact!;
     setData((prev) => ({ ...prev, company: companyData }));
+
+    // Create lead in Pipedrive in background (don't block navigation)
+    try {
+      const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
+        body: {
+          name: contactData.name,
+          email: contactData.email,
+          phone: contactData.phone,
+          job_title: contactData.jobTitle,
+          company: companyData.company,
+          segment: companyData.segment,
+          company_size: companyData.companySize,
+          revenue: companyData.revenue,
+          score: 0,
+          diagnosis_level: "pending",
+          utm_source: utmParams.utm_source,
+          utm_medium: utmParams.utm_medium,
+          utm_campaign: utmParams.utm_campaign,
+          utm_content: utmParams.utm_content,
+          utm_term: utmParams.utm_term,
+          answers: {},
+          pillar_scores: [],
+        },
+      });
+
+      if (pipedriveResponse.error) {
+        console.error("Pipedrive error:", pipedriveResponse.error);
+      } else {
+        console.log("Lead created in Pipedrive:", pipedriveResponse.data);
+        dealIdRef.current = pipedriveResponse.data?.deal_id || null;
+        ownerNameRef.current = pipedriveResponse.data?.owner_name || null;
+      }
+    } catch (err) {
+      console.error("Pipedrive creation error:", err);
+    }
+
     setCurrentStep("questions");
   };
 
@@ -84,10 +121,10 @@ export const Quiz = () => {
     const contactData = data.contact!;
     const companyData = data.company!;
     const pillarScores = calculatePillarScores(allAnswers);
-
     const finalSegment = companyData.segment;
 
     try {
+      // Save to database
       const { error } = await supabase.from("quiz_leads").insert({
         name: contactData.name,
         email: contactData.email,
@@ -106,40 +143,37 @@ export const Quiz = () => {
         return;
       }
 
-      let ownerName: string | null = null;
-      let dealId: number | null = null;
-      try {
-        const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
-          body: {
-            name: contactData.name,
-            email: contactData.email,
-            phone: contactData.phone,
-            job_title: contactData.jobTitle,
-            company: companyData.company,
-            segment: finalSegment,
-            company_size: companyData.companySize,
-            revenue: companyData.revenue,
-            score: score,
-            diagnosis_level: diagnosis.level,
-            utm_source: utmParams.utm_source,
-            utm_medium: utmParams.utm_medium,
-            utm_campaign: utmParams.utm_campaign,
-            utm_content: utmParams.utm_content,
-            utm_term: utmParams.utm_term,
-            answers: allAnswers,
-            pillar_scores: pillarScores,
-          },
-        });
+      // Update existing Pipedrive deal with diagnosis results
+      const currentDealId = dealIdRef.current;
+      if (currentDealId) {
+        try {
+          const updateResponse = await supabase.functions.invoke("update-pipedrive-deal", {
+            body: {
+              deal_id: currentDealId,
+              name: contactData.name,
+              email: contactData.email,
+              phone: contactData.phone,
+              job_title: contactData.jobTitle,
+              company: companyData.company,
+              segment: finalSegment,
+              company_size: companyData.companySize,
+              revenue: companyData.revenue,
+              score: score,
+              diagnosis_level: diagnosis.level,
+              answers: allAnswers,
+              pillar_scores: pillarScores,
+            },
+          });
 
-        if (pipedriveResponse.error) {
-          console.error("Pipedrive error:", pipedriveResponse.error);
-        } else {
-          console.log("Lead created in Pipedrive:", pipedriveResponse.data);
-          ownerName = pipedriveResponse.data?.owner_name || null;
-          dealId = pipedriveResponse.data?.deal_id || null;
+          if (updateResponse.error) {
+            console.error("Pipedrive update error:", updateResponse.error);
+          } else {
+            console.log("Deal updated in Pipedrive:", updateResponse.data);
+            ownerNameRef.current = updateResponse.data?.owner_name || ownerNameRef.current;
+          }
+        } catch (updateErr) {
+          console.error("Pipedrive update error:", updateErr);
         }
-      } catch (pipedriveErr) {
-        console.error("Pipedrive integration error:", pipedriveErr);
       }
 
       navigate("/obrigado-diagnostico", {
@@ -152,8 +186,8 @@ export const Quiz = () => {
           revenue: companyData.revenue,
           company: companyData.company,
           pillarScores: pillarScores,
-          ownerName: ownerName,
-          dealId: dealId,
+          ownerName: ownerNameRef.current,
+          dealId: currentDealId,
         },
       });
     } catch (err) {
@@ -178,7 +212,7 @@ export const Quiz = () => {
         <CompanyStep
           currentStep={2}
           totalSteps={totalSteps}
-          onSubmit={async (companyData) => handleCompanyNext(companyData)}
+          onSubmit={handleCompanyNext}
           onBack={handleCompanyBack}
         />
       );
