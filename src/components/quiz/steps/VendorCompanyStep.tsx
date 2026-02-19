@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { Building2, Users, Loader2 } from "lucide-react";
+import { Building2, Briefcase, Users, Loader2 } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
 import { FormStepIndicator } from "../FormStepIndicator";
 import { FormInput } from "../FormInput";
-import { FormSelect } from "../FormSelect";
 import { RevenueSelect } from "../RevenueSelect";
 
 interface VendorCompanyStepProps {
@@ -27,18 +26,6 @@ export interface VendorCompanyData {
   revenue: string;
 }
 
-const segments = [
-  { value: "industria", label: "Indústria" },
-  { value: "comercio", label: "Comércio" },
-  { value: "servicos", label: "Serviços" },
-  { value: "tecnologia", label: "Tecnologia" },
-  { value: "saude", label: "Saúde" },
-  { value: "educacao", label: "Educação" },
-  { value: "construcao", label: "Construção" },
-  { value: "agronegocio", label: "Agronegócio" },
-  { value: "outro", label: "Outro" },
-];
-
 export const VendorCompanyStep = ({
   currentStep,
   totalSteps,
@@ -56,23 +43,10 @@ export const VendorCompanyStep = ({
 
   // Pre-fill with initial data from Pipedrive
   useEffect(() => {
-    // Find the matching segment value from the options
-    let segmentValue = "";
-    if (initialData.segment) {
-      const lowerSegment = initialData.segment.toLowerCase();
-      const matchingSegment = segments.find(s => 
-        s.label.toLowerCase() === lowerSegment || 
-        s.value === lowerSegment ||
-        s.label.toLowerCase().includes(lowerSegment) ||
-        lowerSegment.includes(s.label.toLowerCase())
-      );
-      segmentValue = matchingSegment?.value || "";
-    }
-
     setFormData({
       company: initialData.company || "",
       companySize: initialData.companySize || "",
-      segment: segmentValue,
+      segment: initialData.segment || "",
       revenue: initialData.revenue || "",
     });
   }, [initialData]);
@@ -80,10 +54,6 @@ export const VendorCompanyStep = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSegmentChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, segment: value }));
   };
 
   const handleRevenueChange = (value: string) => {
@@ -142,11 +112,12 @@ export const VendorCompanyStep = ({
               autoComplete="organization"
             />
             
-            <FormSelect
+            <FormInput
+              name="segment"
               value={formData.segment}
-              onChange={handleSegmentChange}
-              label="Segmento"
-              options={segments}
+              onChange={handleChange}
+              label="Segmento de atuação"
+              icon={Briefcase}
               delay={100}
             />
 
