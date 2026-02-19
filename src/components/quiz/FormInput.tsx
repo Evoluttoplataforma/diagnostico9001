@@ -55,8 +55,8 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
                 props.onBlur?.(e);
               }}
               className={cn(
-                "w-full px-4 pt-5 pb-2 sm:pt-6 sm:pb-3 bg-transparent outline-none",
-                "text-foreground text-sm sm:text-base font-medium",
+                "w-full px-4 pt-6 pb-3 bg-transparent outline-none",
+                "text-foreground text-base font-medium",
                 "placeholder:text-transparent",
                 Icon && "pr-12",
                 className

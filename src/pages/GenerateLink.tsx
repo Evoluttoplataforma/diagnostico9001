@@ -94,7 +94,7 @@ export default function GenerateLink() {
   };
 
   return (
-    <div className="h-dvh flex flex-col bg-background overflow-hidden">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center justify-between">
@@ -106,8 +106,7 @@ export default function GenerateLink() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto px-4 py-6 sm:py-8">
-        <div className="max-w-lg mx-auto space-y-6">
+      <main className="px-4 py-8 max-w-lg mx-auto space-y-6">
         {/* Title */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-2">
@@ -248,7 +247,6 @@ export default function GenerateLink() {
             <li>Envie o link para o lead por WhatsApp ou email</li>
             <li>O lead responde o diagnóstico e os dados são atualizados no Pipedrive</li>
           </ol>
-        </div>
         </div>
       </main>
     </div>

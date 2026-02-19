@@ -245,7 +245,7 @@ export const Quiz = () => {
 
   if (isSubmitting) {
     return (
-      <div className="h-dvh flex flex-col items-center justify-center bg-background px-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
         <DiagnosisLoading />
       </div>
     );
@@ -274,7 +274,7 @@ export const Quiz = () => {
 
     case "generating":
       return (
-        <div className="h-dvh flex flex-col items-center justify-center bg-background px-6">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
           <QuestionsLoading />
         </div>
       );

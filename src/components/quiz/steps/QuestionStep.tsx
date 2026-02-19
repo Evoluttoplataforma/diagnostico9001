@@ -27,32 +27,32 @@ export const QuestionStep = ({
   onBack,
 }: QuestionStepProps) => {
   return (
-    <div className="h-dvh flex flex-col bg-background overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background">
       <QuizHeader
         currentStep={questionIndex + 1}
         totalSteps={totalQuestions}
         onBack={onBack}
       />
 
-      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-2 sm:py-8 min-h-0">
-        <div className="max-w-xl w-full animate-fade-in flex flex-col min-h-0">
-          <div className="mb-2 sm:mb-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-primary to-primary/80 text-white rounded-lg shadow-lg">
-              <span className="text-lg sm:text-2xl font-bold">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        <div className="max-w-xl w-full animate-fade-in">
+          <div className="mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/80 text-white rounded-lg shadow-lg">
+              <span className="text-2xl font-bold">
                 {question.block}
               </span>
-              <div className="w-px h-5 sm:h-6 bg-white/30" />
-              <span className="text-[10px] sm:text-sm font-semibold uppercase tracking-wide">
+              <div className="w-px h-6 bg-white/30" />
+              <span className="text-sm font-semibold uppercase tracking-wide">
                 {question.blockTitle}
               </span>
             </div>
           </div>
 
-          <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground mb-4 sm:mb-8 leading-tight">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8 leading-tight">
             {question.text}
           </h2>
 
-          <div className="space-y-2 sm:space-y-3 overflow-y-auto min-h-0">
+          <div className="space-y-3">
             {question.answers.map((option, idx) => {
               const isSelected = selectedAnswer === option.value;
               const color = scaleColors[idx] || scaleColors[0];
@@ -60,7 +60,7 @@ export const QuestionStep = ({
                 <button
                   key={option.value}
                   onClick={() => onAnswer(option.value)}
-                  className={`w-full p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex items-center gap-3 sm:gap-4 text-left
+                  className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center gap-4 text-left
                     ${
                       isSelected
                         ? `${color.border} bg-primary/5 shadow-md`
@@ -68,12 +68,12 @@ export const QuestionStep = ({
                     }
                   `}
                 >
-                  <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? color.bg : color.bgLight}`}>
-                    <span className={`text-xs sm:text-sm font-bold ${isSelected ? color.text : color.textLight}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? color.bg : color.bgLight}`}>
+                    <span className={`text-sm font-bold ${isSelected ? color.text : color.textLight}`}>
                       {option.value}
                     </span>
                   </div>
-                  <span className="font-medium text-foreground text-sm sm:text-lg leading-snug">
+                  <span className="font-medium text-foreground text-lg">
                     {option.label}
                   </span>
                 </button>

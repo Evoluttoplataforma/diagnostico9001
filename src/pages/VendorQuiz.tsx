@@ -66,7 +66,7 @@ export default function VendorQuiz() {
 
   if (loading) {
     return (
-      <div className="h-dvh flex flex-col items-center justify-center bg-background p-4">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <img src={templumLogo} alt="Templum" className="h-8 mb-8" />
         <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
         <p className="text-muted-foreground">Carregando seus dados...</p>
@@ -76,7 +76,7 @@ export default function VendorQuiz() {
 
   if (error) {
     return (
-      <div className="h-dvh flex flex-col items-center justify-center bg-background p-4">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <img src={templumLogo} alt="Templum" className="h-8 mb-8" />
         <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 max-w-md text-center">
           <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />

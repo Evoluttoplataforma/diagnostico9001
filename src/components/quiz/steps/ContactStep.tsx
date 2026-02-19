@@ -46,34 +46,32 @@ export const ContactStep = ({
   };
 
   return (
-    <div className="h-dvh flex flex-col animate-fade-in bg-gradient-to-b from-background via-background to-muted/30 overflow-hidden">
+    <div className="min-h-screen flex flex-col animate-fade-in bg-gradient-to-b from-background via-background to-muted/30">
       <QuizHeader currentStep={currentStep} totalSteps={totalSteps} onBack={onBack} />
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-2 sm:py-8 min-h-0">
-        <div className="max-w-lg w-full flex flex-col min-h-0">
-          {/* Step Indicator - hidden on very small screens */}
-          <div className="hidden sm:block">
-            <FormStepIndicator currentStep={1} />
-          </div>
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        <div className="max-w-lg w-full">
+          {/* Step Indicator */}
+          <FormStepIndicator currentStep={1} />
 
-          {/* Header */}
-          <div className="text-center mb-4 sm:mb-10 animate-slide-up">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full mb-2 sm:mb-4">
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="text-xs sm:text-sm font-medium">Quase lá!</span>
+          {/* Header with animation */}
+          <div className="text-center mb-10 animate-slide-up">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm font-medium">Quase lá!</span>
             </div>
             
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground mb-1 sm:mb-3">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mb-3">
               Seus dados pessoais
             </h2>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground">
               Preencha para receber seu diagnóstico personalizado
             </p>
           </div>
 
-          {/* Form */}
-          <div className="space-y-3 sm:space-y-5 mb-4 sm:mb-8">
+          {/* Form with staggered animations */}
+          <div className="space-y-5 mb-8">
             <FormInput
               name="name"
               value={formData.name}
@@ -117,9 +115,9 @@ export const ContactStep = ({
             />
           </div>
 
-          {/* Button */}
+          {/* Button with delayed animation */}
           <div 
-            className="animate-slide-up opacity-0 mt-auto"
+            className="animate-slide-up opacity-0"
             style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
           >
             <QuizButton onClick={handleNext} disabled={!isValid}>
@@ -128,7 +126,7 @@ export const ContactStep = ({
           </div>
 
           <p 
-            className="text-xs text-muted-foreground text-center mt-2 sm:mt-4 pb-2 animate-slide-up opacity-0"
+            className="text-xs text-muted-foreground text-center mt-4 animate-slide-up opacity-0"
             style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}
           >
             Ao continuar, você concorda com nossa{" "}
