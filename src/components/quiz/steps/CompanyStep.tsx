@@ -37,8 +37,6 @@ export const CompanyStep = ({
     companySize: "",
     revenue: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -55,18 +53,8 @@ export const CompanyStep = ({
     formData.revenue;
 
   const handleSubmit = async () => {
-    if (isValid && !isLoading) {
-      setIsLoading(true);
-      try {
-        // Minimum loading time to show all 3 confidence cards (3 cards × 2.5s = 7.5s)
-        const minLoadingPromise = new Promise((resolve) => setTimeout(resolve, 8000));
-        const submitPromise = onSubmit(formData);
-        
-        // Wait for both: minimum time AND form submission
-        await Promise.all([minLoadingPromise, submitPromise]);
-      } finally {
-        setIsLoading(false);
-      }
+    if (isValid) {
+      await onSubmit(formData);
     }
   };
 
@@ -138,8 +126,8 @@ export const CompanyStep = ({
             className="animate-slide-up opacity-0"
             style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}
           >
-            <QuizButton onClick={handleSubmit} disabled={!isValid} loading={isLoading}>
-              Receber Diagnóstico Gratuito
+            <QuizButton onClick={handleSubmit} disabled={!isValid}>
+              Continuar
             </QuizButton>
           </div>
 

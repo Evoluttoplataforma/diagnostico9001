@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUTM } from "@/hooks/use-utm";
 
-type Step = "questions" | "contact" | "company";
+type Step = "contact" | "company" | "questions";
 
 interface QuizData {
   answers: Record<string, AnswerValue>;
@@ -19,7 +19,7 @@ interface QuizData {
 export const Quiz = () => {
   const navigate = useNavigate();
   const utmParams = useUTM();
-  const [currentStep, setCurrentStep] = useState<Step>("questions");
+  const [currentStep, setCurrentStep] = useState<Step>("contact");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [data, setData] = useState<QuizData>({
     answers: {},
@@ -30,6 +30,27 @@ export const Quiz = () => {
   const totalQuestions = questions.length;
   const totalSteps = totalQuestions + 2;
 
+  // --- Contact step ---
+  const handleContactNext = (contactData: ContactData) => {
+    setData((prev) => ({ ...prev, contact: contactData }));
+    setCurrentStep("company");
+  };
+
+  const handleContactBack = () => {
+    // First step, no back
+  };
+
+  // --- Company step ---
+  const handleCompanyNext = (companyData: CompanyData) => {
+    setData((prev) => ({ ...prev, company: companyData }));
+    setCurrentStep("questions");
+  };
+
+  const handleCompanyBack = () => {
+    setCurrentStep("contact");
+  };
+
+  // --- Questions step ---
   const handleAnswer = (value: AnswerValue) => {
     const questionId = questions[currentQuestionIndex].id;
     setData((prev) => ({
@@ -41,7 +62,7 @@ export const Quiz = () => {
       if (currentQuestionIndex < totalQuestions - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
       } else {
-        setCurrentStep("contact");
+        handleSubmit(value);
       }
     }, 300);
   };
@@ -49,33 +70,24 @@ export const Quiz = () => {
   const handleQuestionBack = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
+    } else {
+      setCurrentStep("company");
     }
   };
 
-  const handleContactNext = (contactData: ContactData) => {
-    setData((prev) => ({ ...prev, contact: contactData }));
-    setCurrentStep("company");
-  };
+  const handleSubmit = async (lastAnswerValue: AnswerValue) => {
+    const lastQuestionId = questions[totalQuestions - 1].id;
+    const allAnswers = { ...data.answers, [lastQuestionId]: lastAnswerValue };
 
-  const handleContactBack = () => {
-    setCurrentStep("questions");
-    setCurrentQuestionIndex(totalQuestions - 1);
-  };
-
-  const handleCompanyBack = () => {
-    setCurrentStep("contact");
-  };
-
-  const handleCompanySubmit = async (companyData: CompanyData) => {
-    const score = getScore(data.answers);
+    const score = getScore(allAnswers);
     const diagnosis = getDiagnosis(score);
     const contactData = data.contact!;
-    const pillarScores = calculatePillarScores(data.answers);
+    const companyData = data.company!;
+    const pillarScores = calculatePillarScores(allAnswers);
 
     const finalSegment = companyData.segment;
 
     try {
-      // Save to database
       const { error } = await supabase.from("quiz_leads").insert({
         name: contactData.name,
         email: contactData.email,
@@ -84,7 +96,7 @@ export const Quiz = () => {
         segment: finalSegment,
         company_size: companyData.companySize,
         score: score,
-        answers: data.answers,
+        answers: allAnswers,
         diagnosis_level: diagnosis.level,
       });
 
@@ -94,7 +106,6 @@ export const Quiz = () => {
         return;
       }
 
-      // Send to Pipedrive and get owner info
       let ownerName: string | null = null;
       let dealId: number | null = null;
       try {
@@ -115,7 +126,7 @@ export const Quiz = () => {
             utm_campaign: utmParams.utm_campaign,
             utm_content: utmParams.utm_content,
             utm_term: utmParams.utm_term,
-            answers: data.answers,
+            answers: allAnswers,
             pillar_scores: pillarScores,
           },
         });
@@ -131,26 +142,19 @@ export const Quiz = () => {
         console.error("Pipedrive integration error:", pipedriveErr);
       }
 
-      setData((prev) => ({ ...prev, company: companyData }));
-
-      // Navigate with all data needed for the premium report
-      const navigationState = {
-        name: contactData.name,
-        score: score,
-        answers: data.answers,
-        segment: finalSegment,
-        companySize: companyData.companySize,
-        revenue: companyData.revenue,
-        company: companyData.company,
-        pillarScores: pillarScores,
-        ownerName: ownerName,
-        dealId: dealId,
-      };
-
-      console.log("Navigating to /obrigado-diagnostico with state:", navigationState);
-
       navigate("/obrigado-diagnostico", {
-        state: navigationState,
+        state: {
+          name: contactData.name,
+          score: score,
+          answers: allAnswers,
+          segment: finalSegment,
+          companySize: companyData.companySize,
+          revenue: companyData.revenue,
+          company: companyData.company,
+          pillarScores: pillarScores,
+          ownerName: ownerName,
+          dealId: dealId,
+        },
       });
     } catch (err) {
       console.error("Error:", err);
@@ -159,6 +163,26 @@ export const Quiz = () => {
   };
 
   switch (currentStep) {
+    case "contact":
+      return (
+        <ContactStep
+          currentStep={1}
+          totalSteps={totalSteps}
+          onNext={handleContactNext}
+          onBack={handleContactBack}
+        />
+      );
+
+    case "company":
+      return (
+        <CompanyStep
+          currentStep={2}
+          totalSteps={totalSteps}
+          onSubmit={async (companyData) => handleCompanyNext(companyData)}
+          onBack={handleCompanyBack}
+        />
+      );
+
     case "questions":
       const currentQuestion = questions[currentQuestionIndex];
       return (
@@ -169,26 +193,6 @@ export const Quiz = () => {
           selectedAnswer={data.answers[currentQuestion.id]}
           onAnswer={handleAnswer}
           onBack={handleQuestionBack}
-        />
-      );
-
-    case "contact":
-      return (
-        <ContactStep
-          currentStep={totalQuestions + 1}
-          totalSteps={totalSteps}
-          onNext={handleContactNext}
-          onBack={handleContactBack}
-        />
-      );
-
-    case "company":
-      return (
-        <CompanyStep
-          currentStep={totalQuestions + 2}
-          totalSteps={totalSteps}
-          onSubmit={handleCompanySubmit}
-          onBack={handleCompanyBack}
         />
       );
 
