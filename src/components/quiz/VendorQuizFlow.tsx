@@ -81,21 +81,8 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
   }, []);
 
   const handleSegmentSubmit = (segment: string) => {
-    // Find the label for the selected segment value
-    const segments = [
-      { value: "industria", label: "Indústria" },
-      { value: "comercio", label: "Comércio" },
-      { value: "servicos", label: "Serviços" },
-      { value: "tecnologia", label: "Tecnologia" },
-      { value: "saude", label: "Saúde" },
-      { value: "educacao", label: "Educação" },
-      { value: "construcao", label: "Construção" },
-      { value: "agronegocio", label: "Agronegócio" },
-      { value: "outro", label: "Outro" },
-    ];
-    const segmentLabel = segments.find(s => s.value === segment)?.label || segment;
-    setResolvedSegment(segmentLabel);
-    generateQuestions(segmentLabel);
+    setResolvedSegment(segment);
+    generateQuestions(segment);
   };
 
   const handleAnswer = (value: AnswerValue) => {
