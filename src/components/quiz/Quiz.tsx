@@ -7,6 +7,7 @@ import { questions, AnswerValue, getScore, getDiagnosis, calculatePillarScores }
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUTM } from "@/hooks/use-utm";
+import { DiagnosisLoading } from "./results/DiagnosisLoading";
 
 type Step = "contact" | "company" | "questions";
 
@@ -26,6 +27,7 @@ export const Quiz = () => {
     contact: null,
     company: null,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dealIdRef = useRef<number | null>(null);
   const ownerNameRef = useRef<string | null>(null);
 
@@ -113,6 +115,8 @@ export const Quiz = () => {
   };
 
   const handleSubmit = async (lastAnswerValue: AnswerValue) => {
+    setIsSubmitting(true);
+
     const lastQuestionId = questions[totalQuestions - 1].id;
     const allAnswers = { ...data.answers, [lastQuestionId]: lastAnswerValue };
 
@@ -124,56 +128,68 @@ export const Quiz = () => {
     const finalSegment = companyData.segment;
 
     try {
-      // Save to database
-      const { error } = await supabase.from("quiz_leads").insert({
-        name: contactData.name,
-        email: contactData.email,
-        phone: contactData.phone,
-        company: companyData.company,
-        segment: finalSegment,
-        company_size: companyData.companySize,
-        score: score,
-        answers: allAnswers,
-        diagnosis_level: diagnosis.level,
-      });
+      const minLoadingPromise = new Promise((resolve) => setTimeout(resolve, 8000));
 
-      if (error) {
-        console.error("Error saving lead:", error);
-        toast.error("Erro ao salvar dados. Tente novamente.");
-        return;
-      }
+      const submitPromise = (async () => {
+        // Save to database
+        const { error } = await supabase.from("quiz_leads").insert({
+          name: contactData.name,
+          email: contactData.email,
+          phone: contactData.phone,
+          company: companyData.company,
+          segment: finalSegment,
+          company_size: companyData.companySize,
+          score: score,
+          answers: allAnswers,
+          diagnosis_level: diagnosis.level,
+        });
 
-      // Update existing Pipedrive deal with diagnosis results
-      const currentDealId = dealIdRef.current;
-      if (currentDealId) {
-        try {
-          const updateResponse = await supabase.functions.invoke("update-pipedrive-deal", {
-            body: {
-              deal_id: currentDealId,
-              name: contactData.name,
-              email: contactData.email,
-              phone: contactData.phone,
-              job_title: contactData.jobTitle,
-              company: companyData.company,
-              segment: finalSegment,
-              company_size: companyData.companySize,
-              revenue: companyData.revenue,
-              score: score,
-              diagnosis_level: diagnosis.level,
-              answers: allAnswers,
-              pillar_scores: pillarScores,
-            },
-          });
-
-          if (updateResponse.error) {
-            console.error("Pipedrive update error:", updateResponse.error);
-          } else {
-            console.log("Deal updated in Pipedrive:", updateResponse.data);
-            ownerNameRef.current = updateResponse.data?.owner_name || ownerNameRef.current;
-          }
-        } catch (updateErr) {
-          console.error("Pipedrive update error:", updateErr);
+        if (error) {
+          console.error("Error saving lead:", error);
+          toast.error("Erro ao salvar dados. Tente novamente.");
+          return false;
         }
+
+        // Update existing Pipedrive deal with diagnosis results
+        const currentDealId = dealIdRef.current;
+        if (currentDealId) {
+          try {
+            const updateResponse = await supabase.functions.invoke("update-pipedrive-deal", {
+              body: {
+                deal_id: currentDealId,
+                name: contactData.name,
+                email: contactData.email,
+                phone: contactData.phone,
+                job_title: contactData.jobTitle,
+                company: companyData.company,
+                segment: finalSegment,
+                company_size: companyData.companySize,
+                revenue: companyData.revenue,
+                score: score,
+                diagnosis_level: diagnosis.level,
+                answers: allAnswers,
+                pillar_scores: pillarScores,
+              },
+            });
+
+            if (updateResponse.error) {
+              console.error("Pipedrive update error:", updateResponse.error);
+            } else {
+              console.log("Deal updated in Pipedrive:", updateResponse.data);
+              ownerNameRef.current = updateResponse.data?.owner_name || ownerNameRef.current;
+            }
+          } catch (updateErr) {
+            console.error("Pipedrive update error:", updateErr);
+          }
+        }
+        return true;
+      })();
+
+      const [, success] = await Promise.all([minLoadingPromise, submitPromise]);
+
+      if (success === false) {
+        setIsSubmitting(false);
+        return;
       }
 
       navigate("/obrigado-diagnostico", {
@@ -187,14 +203,23 @@ export const Quiz = () => {
           company: companyData.company,
           pillarScores: pillarScores,
           ownerName: ownerNameRef.current,
-          dealId: currentDealId,
+          dealId: dealIdRef.current,
         },
       });
     } catch (err) {
       console.error("Error:", err);
       toast.error("Erro ao processar. Tente novamente.");
+      setIsSubmitting(false);
     }
   };
+
+  if (isSubmitting) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
+        <DiagnosisLoading />
+      </div>
+    );
+  }
 
   switch (currentStep) {
     case "contact":
