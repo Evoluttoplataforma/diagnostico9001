@@ -77,17 +77,28 @@ serve(async (req) => {
 
     // Get segment from organization (Ramo de atividade field) or deal custom field
     let segment = "";
-    // Check organization fields for "Ramo de atividade" or similar
     if (orgData) {
-      // First check the address.label which sometimes has industry info
-      if (orgData.label) {
-        segment = String(orgData.label);
-      }
-      // Look through custom fields for segment/industry
-      for (const [key, value] of Object.entries(orgData)) {
-        if (typeof value === 'string' && key.length > 30) {
-          // Check if this might be a segment field by looking at deal fields
-          continue;
+      // Scan organization fields for "Ramo de atividade"
+      const orgFieldsResponse = await fetch(
+        `https://api.pipedrive.com/v1/organizationFields?api_token=${apiToken}`
+      );
+      const orgFieldsResult = await orgFieldsResponse.json();
+      if (orgFieldsResult.success && orgFieldsResult.data) {
+        for (const field of orgFieldsResult.data) {
+          const fieldName = field.name?.toLowerCase() || "";
+          if (fieldName.includes("ramo") || fieldName.includes("atividade") || fieldName.includes("segmento") || fieldName.includes("segment")) {
+            const rawValue = orgData[field.key];
+            if (rawValue) {
+              if (field.options && Array.isArray(field.options)) {
+                const option = field.options.find((o: any) => String(o.id) === String(rawValue));
+                segment = option?.label || String(rawValue);
+              } else {
+                segment = String(rawValue);
+              }
+              console.log("Segment found in org field:", field.name, "=", segment);
+              break;
+            }
+          }
         }
       }
     }
