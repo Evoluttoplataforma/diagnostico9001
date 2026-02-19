@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
 import { VendorContactStep, VendorContactData } from "./steps/VendorContactStep";
 import { VendorCompanyStep, VendorCompanyData } from "./steps/VendorCompanyStep";
+import { VendorSegmentStep } from "./steps/VendorSegmentStep";
 import { DynamicQuestion, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { QuestionsLoading } from "./results/QuestionsLoading";
 
-type Step = "generating" | "questions" | "contact" | "company";
+type Step = "segment" | "generating" | "questions" | "contact" | "company";
 
 interface VendorQuizFlowProps {
   dealId: number;
@@ -33,9 +34,11 @@ interface QuizData {
 
 export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlowProps) => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState<Step>("generating");
+  const hasInitialSegment = !!(initialData.segment && initialData.segment.trim());
+  const [currentStep, setCurrentStep] = useState<Step>(hasInitialSegment ? "generating" : "segment");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [dynamicQuestions, setDynamicQuestions] = useState<DynamicQuestion[]>([]);
+  const [resolvedSegment, setResolvedSegment] = useState(initialData.segment || "");
   const [data, setData] = useState<QuizData>({
     answers: {},
     contact: null,
@@ -45,32 +48,55 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
   const totalQuestions = dynamicQuestions.length || 20;
   const totalSteps = totalQuestions + 2;
 
-  // Generate questions on mount using initial data
-  useEffect(() => {
-    const generateQuestions = async () => {
-      try {
-        const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
-          body: {
-            segment: initialData.segment,
-            companySize: initialData.companySize,
-            revenue: initialData.revenue,
-            jobTitle: initialData.jobTitle,
-          },
-        });
-        if (error) throw error;
-        if (questionsData?.questions) {
-          setDynamicQuestions(questionsData.questions);
-          setCurrentStep("questions");
-        } else {
-          throw new Error("Failed to generate questions");
-        }
-      } catch (err) {
-        console.error("Error generating questions:", err);
-        toast.error("Erro ao gerar perguntas. Tente novamente.");
+  const generateQuestions = async (segment: string) => {
+    setCurrentStep("generating");
+    try {
+      const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
+        body: {
+          segment,
+          companySize: initialData.companySize,
+          revenue: initialData.revenue,
+          jobTitle: initialData.jobTitle,
+        },
+      });
+      if (error) throw error;
+      if (questionsData?.questions) {
+        setDynamicQuestions(questionsData.questions);
+        setCurrentStep("questions");
+      } else {
+        throw new Error("Failed to generate questions");
       }
-    };
-    generateQuestions();
-  }, [initialData]);
+    } catch (err) {
+      console.error("Error generating questions:", err);
+      toast.error("Erro ao gerar perguntas. Tente novamente.");
+    }
+  };
+
+  // Auto-generate questions if segment already exists
+  useEffect(() => {
+    if (hasInitialSegment) {
+      setResolvedSegment(initialData.segment);
+      generateQuestions(initialData.segment);
+    }
+  }, []);
+
+  const handleSegmentSubmit = (segment: string) => {
+    // Find the label for the selected segment value
+    const segments = [
+      { value: "industria", label: "Indústria" },
+      { value: "comercio", label: "Comércio" },
+      { value: "servicos", label: "Serviços" },
+      { value: "tecnologia", label: "Tecnologia" },
+      { value: "saude", label: "Saúde" },
+      { value: "educacao", label: "Educação" },
+      { value: "construcao", label: "Construção" },
+      { value: "agronegocio", label: "Agronegócio" },
+      { value: "outro", label: "Outro" },
+    ];
+    const segmentLabel = segments.find(s => s.value === segment)?.label || segment;
+    setResolvedSegment(segmentLabel);
+    generateQuestions(segmentLabel);
+  };
 
   const handleAnswer = (value: AnswerValue) => {
     const questionId = dynamicQuestions[currentQuestionIndex].id;
@@ -184,6 +210,9 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
   };
 
   switch (currentStep) {
+    case "segment":
+      return <VendorSegmentStep onSubmit={handleSegmentSubmit} />;
+
     case "generating":
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
@@ -230,7 +259,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
           initialData={{
             company: initialData.company,
             companySize: initialData.companySize,
-            segment: initialData.segment,
+            segment: resolvedSegment,
             revenue: initialData.revenue,
           }}
         />
