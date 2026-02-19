@@ -14,7 +14,7 @@ export const QuestionsLoading = () => {
           Preparando seu diagnóstico...
         </h2>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Nossa IA está criando perguntas personalizadas para o seu segmento e porte de empresa.
+          Estamos criando perguntas personalizadas para o seu segmento e porte de empresa.
         </p>
       </div>
 
