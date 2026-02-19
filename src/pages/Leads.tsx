@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Lock, Loader2, Download, Search } from "lucide-react";
+import { Lock, Loader2, Download, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 
 interface Lead {
   id: string;
@@ -27,6 +27,9 @@ const diagnosisColors: Record<string, string> = {
   avançado: "bg-green-100 text-green-800",
 };
 
+type SortKey = "name" | "email" | "company" | "segment" | "score" | "diagnosis_level" | "created_at";
+type SortDir = "asc" | "desc";
+
 export default function Leads() {
   const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
@@ -34,6 +37,24 @@ export default function Leads() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 ml-1 inline opacity-40" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="w-3 h-3 ml-1 inline" />
+      : <ArrowDown className="w-3 h-3 ml-1 inline" />;
+  };
 
   const handleLogin = async () => {
     setLoading(true);
@@ -55,15 +76,24 @@ export default function Leads() {
     }
   };
 
-  const filtered = leads.filter((l) => {
-    const q = search.toLowerCase();
-    return (
-      l.name.toLowerCase().includes(q) ||
-      l.email.toLowerCase().includes(q) ||
-      l.company.toLowerCase().includes(q) ||
-      (l.segment || "").toLowerCase().includes(q)
-    );
-  });
+  const filtered = leads
+    .filter((l) => {
+      const q = search.toLowerCase();
+      return (
+        l.name.toLowerCase().includes(q) ||
+        l.email.toLowerCase().includes(q) ||
+        l.company.toLowerCase().includes(q) ||
+        (l.segment || "").toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      const valA = a[sortKey] ?? "";
+      const valB = b[sortKey] ?? "";
+      const cmp = typeof valA === "number" && typeof valB === "number"
+        ? valA - valB
+        : String(valA).localeCompare(String(valB), "pt-BR");
+      return sortDir === "asc" ? cmp : -cmp;
+    });
 
   const exportCSV = () => {
     const header = "Nome,Email,Telefone,Empresa,Tamanho,Segmento,Score,Nível,Data\n";
@@ -137,14 +167,14 @@ export default function Leads() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("name")}>Nome <SortIcon col="name" /></TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("email")}>Email <SortIcon col="email" /></TableHead>
                 <TableHead>Telefone</TableHead>
-                <TableHead>Empresa</TableHead>
-                <TableHead>Segmento</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Nível</TableHead>
-                <TableHead>Data</TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("company")}>Empresa <SortIcon col="company" /></TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("segment")}>Segmento <SortIcon col="segment" /></TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("score")}>Score <SortIcon col="score" /></TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("diagnosis_level")}>Nível <SortIcon col="diagnosis_level" /></TableHead>
+                <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("created_at")}>Data / Hora <SortIcon col="created_at" /></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -162,7 +192,7 @@ export default function Leads() {
                     </span>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {new Date(l.created_at).toLocaleDateString("pt-BR")}
+                    {new Date(l.created_at).toLocaleDateString("pt-BR")} {new Date(l.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                   </TableCell>
                 </TableRow>
               ))}
