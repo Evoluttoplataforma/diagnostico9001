@@ -568,9 +568,13 @@ serve(async (req) => {
     
     console.log("Deal owner:", { ownerId, ownerName });
 
-    // Build UTM section only if any UTM param exists
-    const hasUtm = leadData.utm_source || leadData.utm_medium || leadData.utm_campaign || leadData.utm_content || leadData.utm_term;
-    const utmSection = hasUtm ? `
+    // Only create notes if we have actual diagnosis data (not a registration-only call)
+    const hasDiagnosisData = leadData.score > 0 && leadData.diagnosis_level !== "pending" && Object.keys(leadData.answers || {}).length > 0;
+
+    if (hasDiagnosisData) {
+      // Build UTM section only if any UTM param exists
+      const hasUtm = leadData.utm_source || leadData.utm_medium || leadData.utm_campaign || leadData.utm_content || leadData.utm_term;
+      const utmSection = hasUtm ? `
 
 🎯 **Origem (UTM)**
 ${leadData.utm_source ? `- Source: ${leadData.utm_source}` : ""}
@@ -579,44 +583,44 @@ ${leadData.utm_campaign ? `- Campaign: ${leadData.utm_campaign}` : ""}
 ${leadData.utm_content ? `- Content: ${leadData.utm_content}` : ""}
 ${leadData.utm_term ? `- Term: ${leadData.utm_term}` : ""}`.replace(/\n+/g, '\n').trim() : "";
 
-    // Get revenue label for display
-    const revenueDisplay = leadData.revenue ? (revenueLabels[leadData.revenue] || leadData.revenue) : "Não informado";
+      // Get revenue label for display
+      const revenueDisplay = leadData.revenue ? (revenueLabels[leadData.revenue] || leadData.revenue) : "Não informado";
 
-    // Build answers section
-    let answersSection = "\n\n📋 **RESPOSTAS DO DIAGNÓSTICO:**\n";
-    const pillars = ["Processos", "Pessoas", "Clientes", "Controle", "Crescimento"];
-    
-    pillars.forEach((pillar) => {
-      answersSection += `\n**${pillar}:**\n`;
-      const questions = pillarQuestions[pillar];
-      questions.forEach((qId) => {
-        const answer = leadData.answers?.[qId];
-        const questionText = questionTexts[qId];
-        const answerText = answer ? answerLabels[qId]?.[answer] || answer : "Não respondeu";
-        const emoji = answer === "positive" ? "✅" : answer === "neutral" ? "⚠️" : "❌";
-        answersSection += `${emoji} ${questionText}\n   → ${answerText}\n`;
+      // Build answers section
+      let answersSection = "\n\n📋 **RESPOSTAS DO DIAGNÓSTICO:**\n";
+      const pillars = ["Processos", "Pessoas", "Clientes", "Controle", "Crescimento"];
+      
+      pillars.forEach((pillar) => {
+        answersSection += `\n**${pillar}:**\n`;
+        const questions = pillarQuestions[pillar];
+        questions.forEach((qId) => {
+          const answer = leadData.answers?.[qId];
+          const questionText = questionTexts[qId];
+          const answerText = answer ? answerLabels[qId]?.[answer] || answer : "Não respondeu";
+          const emoji = answer === "positive" ? "✅" : answer === "neutral" ? "⚠️" : "❌";
+          answersSection += `${emoji} ${questionText}\n   → ${answerText}\n`;
+        });
       });
-    });
 
-    // Build pillar scores section
-    let pillarScoresSection = "\n\n📊 **PONTUAÇÃO POR PILAR:**\n";
-    if (leadData.pillar_scores && leadData.pillar_scores.length > 0) {
-      leadData.pillar_scores.forEach((pillar) => {
-        const emoji = pillar.score >= 75 ? "🟢" : pillar.score >= 50 ? "🟡" : "🔴";
-        pillarScoresSection += `${emoji} ${pillar.name}: ${pillar.score}%\n`;
-      });
-    }
+      // Build pillar scores section
+      let pillarScoresSection = "\n\n📊 **PONTUAÇÃO POR PILAR:**\n";
+      if (leadData.pillar_scores && leadData.pillar_scores.length > 0) {
+        leadData.pillar_scores.forEach((pillar) => {
+          const emoji = pillar.score >= 75 ? "🟢" : pillar.score >= 50 ? "🟡" : "🔴";
+          pillarScoresSection += `${emoji} ${pillar.name}: ${pillar.score}%\n`;
+        });
+      }
 
-    // Get sales guidance
-    const salesGuidance = getSalesGuidance(
-      leadData.score,
-      leadData.diagnosis_level,
-      leadData.pillar_scores || [],
-      leadData.answers || {}
-    );
+      // Get sales guidance
+      const salesGuidance = getSalesGuidance(
+        leadData.score,
+        leadData.diagnosis_level,
+        leadData.pillar_scores || [],
+        leadData.answers || {}
+      );
 
-    // Add a note to the deal with diagnosis details
-    const dealNote = `
+      // Add a note to the deal with diagnosis details
+      const dealNote = `
 📊 **Diagnóstico de Maturidade Empresarial**
 
 👤 **Contato:** ${leadData.name}
@@ -632,42 +636,45 @@ ${leadData.utm_term ? `- Term: ${leadData.utm_term}` : ""}`.replace(/\n+/g, '\n'
 ${pillarScoresSection}
 ${utmSection}
 ${answersSection}
-    `.trim();
+      `.trim();
 
-    const noteResponse = await fetch(
-      `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: dealNote,
-          deal_id: dealResult.data.id,
-        }),
-      }
-    );
+      const noteResponse = await fetch(
+        `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: dealNote,
+            deal_id: dealResult.data.id,
+          }),
+        }
+      );
 
-    const noteResult = await noteResponse.json();
-    console.log("Note creation result:", noteResult);
+      const noteResult = await noteResponse.json();
+      console.log("Note creation result:", noteResult);
 
-    // Add a second note with sales guidance
-    const salesNoteResponse = await fetch(
-      `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: salesGuidance,
-          deal_id: dealResult.data.id,
-        }),
-      }
-    );
+      // Add a second note with sales guidance
+      const salesNoteResponse = await fetch(
+        `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: salesGuidance,
+            deal_id: dealResult.data.id,
+          }),
+        }
+      );
 
-    const salesNoteResult = await salesNoteResponse.json();
-    console.log("Sales guidance note creation result:", salesNoteResult);
+      const salesNoteResult = await salesNoteResponse.json();
+      console.log("Sales guidance note creation result:", salesNoteResult);
+    } else {
+      console.log("Skipping notes creation - registration only (no diagnosis data yet)");
+    }
 
     return new Response(
       JSON.stringify({
