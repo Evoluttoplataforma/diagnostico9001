@@ -225,6 +225,9 @@ export const Quiz = () => {
         return;
       }
 
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({ event: "tally_form_submit" });
+
       navigate("/obrigado-diagnostico", {
         state: {
           name: contactData.name,
