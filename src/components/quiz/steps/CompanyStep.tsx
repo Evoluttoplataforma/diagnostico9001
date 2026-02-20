@@ -4,6 +4,7 @@ import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
 import { FormStepIndicator } from "../FormStepIndicator";
 import { FormInput } from "../FormInput";
+import { FormTextarea } from "../FormTextarea";
 import { RevenueSelect } from "../RevenueSelect";
 
 interface CompanyStepProps {
@@ -101,13 +102,16 @@ export const CompanyStep = ({
               delay={100}
             />
 
-            <FormInput
+            <FormTextarea
               name="segment"
               value={formData.segment}
-              onChange={handleChange}
+              onChange={(e) => setFormData((prev) => ({ ...prev, segment: e.target.value }))}
               label="Segmento de atuação"
               icon={Briefcase}
               delay={200}
+              maxLength={500}
+              placeholder="Ex: Fabricação de peças automotivas, Clínica de saúde ocupacional, Distribuidora de alimentos..."
+              hint="💡 Descreva o que sua empresa faz. Quanto mais detalhes, melhor será o diagnóstico. Ex: 'Indústria de embalagens plásticas para o setor alimentício'"
             />
 
             <FormInput
