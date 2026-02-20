@@ -21,12 +21,12 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           Líder nacional em ISO 9001
         </span>
 
-        <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
+        <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
           Sua empresa ainda vive na{" "}
           <span className="text-primary">era do improviso?</span>
         </h1>
 
-        <p className="text-sm text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
+        <p className="text-base text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
           Descubra em 5 minutos como a <strong className="text-white">ISO 9001</strong> pode transformar caos em eficiência e destravar o crescimento da sua empresa.
         </p>
 
@@ -34,7 +34,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           <QuizButton onClick={onNext}>
             Quero meu diagnóstico grátis →
           </QuizButton>
-          <p className="text-center text-[11px] text-white/40 mt-2.5">
+          <p className="text-center text-xs text-white/40 mt-2.5">
             ⏱️ 5 min • 100% gratuito • Resultado imediato
           </p>
         </div>
@@ -47,7 +47,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         <div className="max-w-sm mx-auto">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white/80">Isso parece familiar?</h2>
+            <h2 className="text-base font-bold uppercase tracking-wider text-white/80">Isso parece familiar?</h2>
           </div>
           <div className="space-y-2.5">
             {[
@@ -57,7 +57,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
               "Equipe apagando incêndio todos os dias",
               "Perda de prazos e oportunidades",
             ].map((item) => (
-              <div key={item} className="flex items-start gap-2.5 text-sm text-white/70">
+              <div key={item} className="flex items-start gap-2.5 text-base text-white/70">
                 <span className="text-primary mt-0.5 text-base leading-none">✕</span>
                 <span>{item}</span>
               </div>
@@ -69,7 +69,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       {/* What you get */}
       <section className="px-5 py-6">
         <div className="max-w-sm mx-auto">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-white/80 mb-4">Com a ISO 9001 você transforma:</h2>
+          <h2 className="text-base font-bold uppercase tracking-wider text-white/80 mb-4">Com a ISO 9001 você transforma:</h2>
           <div className="space-y-3">
             {[
               { title: "Processos claros e padronizados", desc: "Elimine a dependência de pessoas-chave" },
@@ -81,8 +81,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
                   <CheckCircle className="w-3.5 h-3.5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-white">{item.title}</p>
-                  <p className="text-xs text-white/50">{item.desc}</p>
+                  <p className="font-semibold text-base text-white">{item.title}</p>
+                  <p className="text-sm text-white/50">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -95,18 +95,18 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         <div className="max-w-sm mx-auto">
           <div className="grid grid-cols-3 gap-3 text-center mb-5">
             <div>
-              <div className="text-xl font-extrabold text-primary">+8.000</div>
-              <div className="text-[10px] text-white/50 uppercase tracking-wider">Clientes</div>
+              <div className="text-2xl font-extrabold text-primary">+8.000</div>
+              <div className="text-xs text-white/50 uppercase tracking-wider">Clientes</div>
             </div>
             <div>
-              <div className="text-xl font-extrabold text-primary">+2.000</div>
-              <div className="text-[10px] text-white/50 uppercase tracking-wider">Certificados</div>
+              <div className="text-2xl font-extrabold text-primary">+2.000</div>
+              <div className="text-xs text-white/50 uppercase tracking-wider">Certificados</div>
             </div>
             <div>
-              <div className="text-xl font-extrabold text-primary flex items-center justify-center gap-0.5">
-                4,9 <Star className="w-3.5 h-3.5 fill-primary" />
+              <div className="text-2xl font-extrabold text-primary flex items-center justify-center gap-0.5">
+                4,9 <Star className="w-4 h-4 fill-primary" />
               </div>
-              <div className="text-[10px] text-white/50 uppercase tracking-wider">Google</div>
+              <div className="text-xs text-white/50 uppercase tracking-wider">Google</div>
             </div>
           </div>
 
@@ -116,17 +116,17 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
               <Shield className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="font-bold text-sm text-primary">Garantia 200%</p>
-              <p className="text-xs text-white/50">Se não certificar, devolvemos o dobro</p>
+              <p className="font-bold text-base text-primary">Garantia 200%</p>
+              <p className="text-sm text-white/50">Se não certificar, devolvemos o dobro</p>
             </div>
           </div>
 
           {/* Testimonial */}
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-sm text-white/70 italic leading-relaxed">
+            <p className="text-base text-white/70 italic leading-relaxed">
               "A Templum transformou completamente nossa gestão. Em 6 meses conseguimos a certificação ISO 9001 e já fechamos 3 contratos que antes eram impossíveis sem o selo."
             </p>
-            <p className="text-xs text-white/40 mt-2 font-medium">— Carlos Eduardo Silva • Cliente verificado</p>
+            <p className="text-sm text-white/40 mt-2 font-medium">— Carlos Eduardo Silva • Cliente verificado</p>
           </div>
         </div>
       </section>
@@ -136,11 +136,11 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         <div className="max-w-sm mx-auto">
           <div className="flex items-center gap-2 mb-1 justify-center">
             <MapPin className="w-3.5 h-3.5 text-primary" />
-            <p className="text-xs text-white/50">Atendemos todo o Brasil • 800+ cidades</p>
+            <p className="text-sm text-white/50">Atendemos todo o Brasil • 800+ cidades</p>
           </div>
           <div className="flex items-center gap-2 mb-4 justify-center">
             <TrendingUp className="w-4 h-4 text-primary" />
-            <p className="text-sm font-semibold text-white/80">Descubra onde sua empresa trava.</p>
+            <p className="text-base font-semibold text-white/80">Descubra onde sua empresa trava.</p>
           </div>
           <QuizButton onClick={onNext}>
             Fazer meu diagnóstico grátis →
