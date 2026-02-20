@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { ResultStep } from "@/components/quiz/steps/ResultStep";
 import { AnswerValue, PillarScore } from "@/components/quiz/quizData";
@@ -19,6 +20,12 @@ const Obrigado = () => {
   const location = useLocation();
   const state = location.state as LocationState | null;
 
+  useEffect(() => {
+    if (state) {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({ event: "tally_form_submit" });
+    }
+  }, []);
   // If no state, redirect to home
   if (
     !state ||

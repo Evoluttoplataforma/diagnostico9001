@@ -176,9 +176,6 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
 
       setData((prev) => ({ ...prev, company: companyData }));
 
-      (window as any).dataLayer = (window as any).dataLayer || [];
-      (window as any).dataLayer.push({ event: "tally_form_submit" });
-
       navigate("/obrigado-diagnostico", {
         state: {
           name: contactData.name,
