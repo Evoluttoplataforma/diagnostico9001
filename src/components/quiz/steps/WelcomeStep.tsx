@@ -1,6 +1,6 @@
 import { QuizButton } from "../QuizButton";
 import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin } from "lucide-react";
-import templumLogo from "@/assets/templum-logo-header.png";
+import templumLogo from "@/assets/logo-templum.jpeg";
 
 interface WelcomeStepProps {
   onNext: () => void;
