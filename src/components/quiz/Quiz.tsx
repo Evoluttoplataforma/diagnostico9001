@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
 import { CompanyStep, CompanyData } from "./steps/CompanyStep";
+import { WelcomeStep } from "./steps/WelcomeStep";
 import { DynamicQuestion, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,7 +11,7 @@ import { useUTM } from "@/hooks/use-utm";
 import { DiagnosisLoading } from "./results/DiagnosisLoading";
 import { QuestionsLoading } from "./results/QuestionsLoading";
 
-type Step = "contact" | "company" | "generating" | "questions";
+type Step = "welcome" | "contact" | "company" | "generating" | "questions";
 
 interface QuizData {
   answers: Record<string, AnswerValue>;
@@ -21,7 +22,7 @@ interface QuizData {
 export const Quiz = () => {
   const navigate = useNavigate();
   const utmParams = useUTM();
-  const [currentStep, setCurrentStep] = useState<Step>("contact");
+  const [currentStep, setCurrentStep] = useState<Step>("welcome");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [dynamicQuestions, setDynamicQuestions] = useState<DynamicQuestion[]>([]);
   const [data, setData] = useState<QuizData>({
@@ -42,7 +43,9 @@ export const Quiz = () => {
     setCurrentStep("company");
   };
 
-  const handleContactBack = () => {};
+  const handleContactBack = () => {
+    setCurrentStep("welcome");
+  };
 
   // --- Company step: create lead + generate questions ---
   const handleCompanyNext = async (companyData: CompanyData) => {
@@ -252,6 +255,11 @@ export const Quiz = () => {
   }
 
   switch (currentStep) {
+    case "welcome":
+      return (
+        <WelcomeStep onNext={() => setCurrentStep("contact")} />
+      );
+
     case "contact":
       return (
         <ContactStep

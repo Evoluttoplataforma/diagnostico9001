@@ -1,147 +1,139 @@
 import { QuizButton } from "../QuizButton";
-import { CheckCircle, TrendingUp, Users, Target, Shield, Zap } from "lucide-react";
+import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star } from "lucide-react";
+import templumLogo from "@/assets/templum-logo.png";
 
 interface WelcomeStepProps {
   onNext: () => void;
 }
 
 export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
-  const pillars = [
-    { icon: Target, label: "Processos" },
-    { icon: Users, label: "Pessoas" },
-    { icon: TrendingUp, label: "Clientes" },
-    { icon: Shield, label: "Controle" },
-    { icon: Zap, label: "Crescimento" },
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row animate-fade-in">
-      {/* Left Side - Dark Hero */}
-      <div className="lg:w-1/2 bg-[hsl(220,25%,12%)] text-white p-8 lg:p-12 flex flex-col justify-center relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/50 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
+    <div className="h-dvh flex flex-col bg-[hsl(var(--hero-dark))] text-white overflow-y-auto animate-fade-in">
+      {/* Hero Section */}
+      <section className="relative px-5 pt-8 pb-6 flex flex-col items-center text-center">
+        {/* Background glow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
         </div>
 
-        <div className="relative z-10 max-w-lg mx-auto lg:mx-0">
-          <span className="inline-block bg-primary/20 text-primary px-4 py-1.5 rounded-full text-sm font-semibold mb-6 border border-primary/30">
-            ⚡ DIAGNÓSTICO ISO 9001 GRATUITO
-          </span>
+        <img src={templumLogo} alt="Templum" className="h-8 mb-6 relative z-10 brightness-0 invert opacity-80" />
 
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-6">
-            Você está perdendo clientes por{" "}
-            <span className="text-primary">falta de gestão?</span>
-          </h1>
+        <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          Diagnóstico ISO 9001 Gratuito
+        </span>
 
-          <p className="text-lg text-white/70 mb-8 leading-relaxed">
-            Empresas sem processos claros perdem até <strong className="text-white">30% do faturamento</strong> com retrabalho e desorganização. Descubra em 5 minutos onde sua empresa está travando — baseado nos critérios da <strong className="text-white">ISO 9001</strong>.
+        <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
+          Sua empresa está{" "}
+          <span className="text-primary">perdendo dinheiro</span>{" "}
+          por falta de gestão?
+        </h1>
+
+        <p className="text-sm text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
+          Empresas sem processos claros perdem até <strong className="text-white">30% do faturamento</strong> com retrabalho. Descubra onde você está travando.
+        </p>
+
+        {/* CTA */}
+        <div className="w-full max-w-sm relative z-10 mb-3">
+          <QuizButton onClick={onNext}>
+            Quero meu diagnóstico grátis →
+          </QuizButton>
+          <p className="text-center text-[11px] text-white/40 mt-2.5">
+            ⏱️ 5 min • 100% gratuito • Resultado imediato
           </p>
+        </div>
 
-          {/* Visual Stats */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-              <div className="text-3xl font-bold text-primary mb-1">+2.000</div>
-              <div className="text-sm text-white/60">Empresas já certificadas</div>
-            </div>
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-              <div className="text-3xl font-bold text-primary mb-1">98%</div>
-              <div className="text-sm text-white/60">Taxa de aprovação</div>
-            </div>
+        <ChevronDown className="w-5 h-5 text-white/20 animate-bounce mt-2" />
+      </section>
+
+      {/* Problem Section */}
+      <section className="px-5 py-6 bg-[hsl(var(--hero-dark-accent))]">
+        <div className="max-w-sm mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangle className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-white/80">Isso parece familiar?</h2>
           </div>
-
-          {/* Pillars */}
-          <div className="hidden lg:block">
-            <p className="text-sm text-white/50 mb-3 uppercase tracking-wider">O que avaliamos:</p>
-            <div className="flex flex-wrap gap-2">
-              {pillars.map((pillar) => (
-                <div
-                  key={pillar.label}
-                  className="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10"
-                >
-                  <pillar.icon className="w-4 h-4 text-primary" />
-                  <span className="text-sm text-white/80">{pillar.label}</span>
-                </div>
-              ))}
-            </div>
+          <div className="space-y-2.5">
+            {[
+              "Processos que dependem de uma só pessoa",
+              "Retrabalho constante e reclamações de clientes",
+              "Crescimento travado sem saber o motivo",
+              "Equipe desalinhada e sem padrão",
+            ].map((item) => (
+              <div key={item} className="flex items-start gap-2.5 text-sm text-white/70">
+                <span className="text-primary mt-0.5 text-base leading-none">✕</span>
+                <span>{item}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Right Side - Light Content */}
-      <div className="lg:w-1/2 bg-background p-8 lg:p-12 flex flex-col justify-center">
-        <div className="max-w-md mx-auto w-full">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-foreground mb-2">
-              Onde sua empresa está travando?
-            </h2>
-            <p className="text-muted-foreground">
-              Responda perguntas rápidas e descubra os gargalos que impedem seu crescimento.
-            </p>
-          </div>
-
-          {/* Benefits */}
-          <div className="space-y-4 mb-8">
-            <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider">
-              O que você recebe de graça:
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-4 h-4 text-primary" />
+      {/* What you get */}
+      <section className="px-5 py-6">
+        <div className="max-w-sm mx-auto">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-white/80 mb-4">O que você recebe de graça:</h2>
+          <div className="space-y-3">
+            {[
+              { title: "Nota ISO 9001", desc: "Score de 0 a 100% em 5 pilares" },
+              { title: "Raio-X dos gargalos", desc: "Veja onde sua empresa trava" },
+              { title: "Plano de ação", desc: "Passos práticos para destravar o crescimento" },
+            ].map((item) => (
+              <div key={item.title} className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <CheckCircle className="w-3.5 h-3.5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">Nota ISO 9001</p>
-                  <p className="text-sm text-muted-foreground">Score de 0 a 100% em 5 pilares de gestão</p>
+                  <p className="font-semibold text-sm text-white">{item.title}</p>
+                  <p className="text-xs text-white/50">{item.desc}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Raio-X dos Gargalos</p>
-                  <p className="text-sm text-muted-foreground">Veja exatamente onde você perde dinheiro</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Plano de Ação</p>
-                  <p className="text-sm text-muted-foreground">Recomendações práticas com um especialista</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="space-y-4">
-            <QuizButton onClick={onNext}>
-              Quero Meu Diagnóstico Gratuito →
-            </QuizButton>
-            <p className="text-center text-xs text-muted-foreground">
-              ⏱️ 5 minutos • 100% gratuito • Resultado imediato
-            </p>
-          </div>
-
-          {/* Mobile Pillars */}
-          <div className="lg:hidden mt-8 pt-8 border-t border-border">
-            <p className="text-sm text-muted-foreground mb-3">O que avaliamos:</p>
-            <div className="flex flex-wrap gap-2">
-              {pillars.map((pillar) => (
-                <span
-                  key={pillar.label}
-                  className="bg-muted px-3 py-1.5 rounded-full text-xs font-medium text-foreground"
-                >
-                  {pillar.label}
-                </span>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Social Proof */}
+      <section className="px-5 py-6 bg-[hsl(var(--hero-dark-accent))]">
+        <div className="max-w-sm mx-auto">
+          <div className="grid grid-cols-3 gap-3 text-center mb-5">
+            <div>
+              <div className="text-xl font-extrabold text-primary">+2.000</div>
+              <div className="text-[10px] text-white/50 uppercase tracking-wider">Certificadas</div>
+            </div>
+            <div>
+              <div className="text-xl font-extrabold text-primary">98%</div>
+              <div className="text-[10px] text-white/50 uppercase tracking-wider">Aprovação</div>
+            </div>
+            <div>
+              <div className="text-xl font-extrabold text-primary flex items-center justify-center gap-0.5">
+                4,9 <Star className="w-3.5 h-3.5 fill-primary" />
+              </div>
+              <div className="text-[10px] text-white/50 uppercase tracking-wider">Google</div>
+            </div>
+          </div>
+
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <p className="text-sm text-white/70 italic leading-relaxed">
+              "A Templum nos mostrou exatamente onde estávamos perdendo tempo e dinheiro. Em 6 meses, certificamos na ISO 9001."
+            </p>
+            <p className="text-xs text-white/40 mt-2 font-medium">— Diretor Industrial, SP</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="px-5 py-6 pb-8">
+        <div className="max-w-sm mx-auto">
+          <div className="flex items-center gap-2 mb-4 justify-center">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <p className="text-sm font-semibold text-white/80">Comece agora. É rápido e gratuito.</p>
+          </div>
+          <QuizButton onClick={onNext}>
+            Fazer meu diagnóstico →
+          </QuizButton>
+        </div>
+      </section>
     </div>
   );
 };
