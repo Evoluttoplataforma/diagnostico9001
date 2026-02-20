@@ -117,7 +117,7 @@ export const VendorCompanyStep = ({
               name="segment"
               value={formData.segment}
               onChange={(e) => setFormData((prev) => ({ ...prev, segment: e.target.value }))}
-              label="Segmento de atuação"
+              label="O que sua empresa faz?"
               icon={Briefcase}
               delay={100}
               maxLength={500}
