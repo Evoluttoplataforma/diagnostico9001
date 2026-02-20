@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Briefcase } from "lucide-react";
 import { QuizButton } from "../QuizButton";
-import { FormInput } from "../FormInput";
+import { FormTextarea } from "../FormTextarea";
 
 interface VendorSegmentStepProps {
   onSubmit: (segment: string) => void;
@@ -26,14 +26,16 @@ export const VendorSegmentStep = ({ onSubmit }: VendorSegmentStepProps) => {
         </div>
 
         <div className="mb-8">
-          <FormInput
+          <FormTextarea
             name="segment"
             value={segment}
             onChange={(e) => setSegment(e.target.value)}
             label="Segmento de atuação"
             icon={Briefcase}
             delay={200}
-            placeholder="Ex: Indústria, Tecnologia, Saúde..."
+            maxLength={500}
+            placeholder="Ex: Fabricação de peças automotivas, Clínica de saúde ocupacional, Distribuidora de alimentos..."
+            hint="💡 Descreva o que sua empresa faz. Quanto mais detalhes, melhor será o diagnóstico. Ex: 'Indústria de embalagens plásticas para o setor alimentício'"
           />
         </div>
 
