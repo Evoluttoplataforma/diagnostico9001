@@ -1,6 +1,5 @@
 import { QuizButton } from "../QuizButton";
-import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star } from "lucide-react";
-
+import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin } from "lucide-react";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -11,29 +10,24 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
     <div className="h-dvh flex flex-col bg-[hsl(var(--hero-dark))] text-white overflow-y-auto animate-fade-in">
       {/* Hero Section */}
       <section className="relative px-5 pt-8 pb-6 flex flex-col items-center text-center">
-        {/* Background glow */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
         </div>
 
-        
-
         <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          Diagnóstico ISO 9001 Gratuito
+          <Award className="w-3.5 h-3.5" />
+          Líder nacional em ISO 9001
         </span>
 
         <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
-          Sua empresa está{" "}
-          <span className="text-primary">perdendo dinheiro</span>{" "}
-          por falta de gestão?
+          Sua empresa ainda vive na{" "}
+          <span className="text-primary">era do improviso?</span>
         </h1>
 
         <p className="text-sm text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
-          Empresas sem processos claros perdem até <strong className="text-white">30% do faturamento</strong> com retrabalho. Descubra onde você está travando.
+          Descubra em 5 minutos como a <strong className="text-white">ISO 9001</strong> pode transformar caos em eficiência e destravar o crescimento da sua empresa.
         </p>
 
-        {/* CTA */}
         <div className="w-full max-w-sm relative z-10 mb-3">
           <QuizButton onClick={onNext}>
             Quero meu diagnóstico grátis →
@@ -55,10 +49,11 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           </div>
           <div className="space-y-2.5">
             {[
-              "Processos que dependem de uma só pessoa",
-              "Retrabalho constante e reclamações de clientes",
-              "Crescimento travado sem saber o motivo",
-              "Equipe desalinhada e sem padrão",
+              "Planilhas espalhadas por toda parte",
+              "Retrabalho constante e erros repetidos",
+              "Reuniões que não geram resultado",
+              "Equipe apagando incêndio todos os dias",
+              "Perda de prazos e oportunidades",
             ].map((item) => (
               <div key={item} className="flex items-start gap-2.5 text-sm text-white/70">
                 <span className="text-primary mt-0.5 text-base leading-none">✕</span>
@@ -72,12 +67,12 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       {/* What you get */}
       <section className="px-5 py-6">
         <div className="max-w-sm mx-auto">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-white/80 mb-4">O que você recebe de graça:</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-white/80 mb-4">Com a ISO 9001 você transforma:</h2>
           <div className="space-y-3">
             {[
-              { title: "Nota ISO 9001", desc: "Score de 0 a 100% em 5 pilares" },
-              { title: "Raio-X dos gargalos", desc: "Veja onde sua empresa trava" },
-              { title: "Plano de ação", desc: "Passos práticos para destravar o crescimento" },
+              { title: "Processos claros e padronizados", desc: "Elimine a dependência de pessoas-chave" },
+              { title: "Gestão profissionalizada", desc: "Decisões baseadas em fatos e indicadores" },
+              { title: "Portas que estavam fechadas", desc: "Licitações, grandes empresas e novos contratos" },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                 <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -93,17 +88,17 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         </div>
       </section>
 
-      {/* Social Proof */}
+      {/* Social Proof Numbers */}
       <section className="px-5 py-6 bg-[hsl(var(--hero-dark-accent))]">
         <div className="max-w-sm mx-auto">
           <div className="grid grid-cols-3 gap-3 text-center mb-5">
             <div>
-              <div className="text-xl font-extrabold text-primary">+2.000</div>
-              <div className="text-[10px] text-white/50 uppercase tracking-wider">Certificadas</div>
+              <div className="text-xl font-extrabold text-primary">+8.000</div>
+              <div className="text-[10px] text-white/50 uppercase tracking-wider">Clientes</div>
             </div>
             <div>
-              <div className="text-xl font-extrabold text-primary">98%</div>
-              <div className="text-[10px] text-white/50 uppercase tracking-wider">Aprovação</div>
+              <div className="text-xl font-extrabold text-primary">+2.000</div>
+              <div className="text-[10px] text-white/50 uppercase tracking-wider">Certificados</div>
             </div>
             <div>
               <div className="text-xl font-extrabold text-primary flex items-center justify-center gap-0.5">
@@ -113,11 +108,23 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             </div>
           </div>
 
+          {/* Guarantee Badge */}
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/25 mb-5">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Shield className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-primary">Garantia 200%</p>
+              <p className="text-xs text-white/50">Se não certificar, devolvemos o dobro</p>
+            </div>
+          </div>
+
+          {/* Testimonial */}
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
             <p className="text-sm text-white/70 italic leading-relaxed">
-              "A Templum nos mostrou exatamente onde estávamos perdendo tempo e dinheiro. Em 6 meses, certificamos na ISO 9001."
+              "A Templum transformou completamente nossa gestão. Em 6 meses conseguimos a certificação ISO 9001 e já fechamos 3 contratos que antes eram impossíveis sem o selo."
             </p>
-            <p className="text-xs text-white/40 mt-2 font-medium">— Diretor Industrial, SP</p>
+            <p className="text-xs text-white/40 mt-2 font-medium">— Carlos Eduardo Silva • Cliente verificado</p>
           </div>
         </div>
       </section>
@@ -125,12 +132,16 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       {/* Bottom CTA */}
       <section className="px-5 py-6 pb-8">
         <div className="max-w-sm mx-auto">
+          <div className="flex items-center gap-2 mb-1 justify-center">
+            <MapPin className="w-3.5 h-3.5 text-primary" />
+            <p className="text-xs text-white/50">Atendemos todo o Brasil • 800+ cidades</p>
+          </div>
           <div className="flex items-center gap-2 mb-4 justify-center">
             <TrendingUp className="w-4 h-4 text-primary" />
-            <p className="text-sm font-semibold text-white/80">Comece agora. É rápido e gratuito.</p>
+            <p className="text-sm font-semibold text-white/80">Descubra onde sua empresa trava.</p>
           </div>
           <QuizButton onClick={onNext}>
-            Fazer meu diagnóstico →
+            Fazer meu diagnóstico grátis →
           </QuizButton>
         </div>
       </section>
