@@ -1,6 +1,6 @@
 import { QuizButton } from "../QuizButton";
 import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star } from "lucide-react";
-import templumLogo from "@/assets/templum-logo-white.png";
+
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -16,7 +16,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
         </div>
 
-        <img src={templumLogo} alt="Templum" className="h-9 mb-6 relative z-10" />
+        
 
         <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider">
           <ShieldCheck className="w-3.5 h-3.5" />
