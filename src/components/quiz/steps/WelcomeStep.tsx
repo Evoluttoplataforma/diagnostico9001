@@ -26,27 +26,27 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
         <div className="relative z-10 max-w-lg mx-auto lg:mx-0">
           <span className="inline-block bg-primary/20 text-primary px-4 py-1.5 rounded-full text-sm font-semibold mb-6 border border-primary/30">
-            DIAGNÓSTICO GRATUITO
+            ⚡ DIAGNÓSTICO ISO 9001 GRATUITO
           </span>
 
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-6">
-            Sua empresa está pronta para{" "}
-            <span className="text-primary">crescer sem perder o controle?</span>
+            Você está perdendo clientes por{" "}
+            <span className="text-primary">falta de gestão?</span>
           </h1>
 
           <p className="text-lg text-white/70 mb-8 leading-relaxed">
-            Descubra em 5 minutos como sua gestão se compara ao padrão <strong className="text-white">ISO 9001</strong> — usado por empresas organizadas e escaláveis.
+            Empresas sem processos claros perdem até <strong className="text-white">30% do faturamento</strong> com retrabalho e desorganização. Descubra em 5 minutos onde sua empresa está travando — baseado nos critérios da <strong className="text-white">ISO 9001</strong>.
           </p>
 
           {/* Visual Stats */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
               <div className="text-3xl font-bold text-primary mb-1">+2.000</div>
-              <div className="text-sm text-white/60">Empresas certificadas</div>
+              <div className="text-sm text-white/60">Empresas já certificadas</div>
             </div>
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-              <div className="text-3xl font-bold text-primary mb-1">30+</div>
-              <div className="text-sm text-white/60">Anos de experiência</div>
+              <div className="text-3xl font-bold text-primary mb-1">98%</div>
+              <div className="text-sm text-white/60">Taxa de aprovação</div>
             </div>
           </div>
 
@@ -73,17 +73,17 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         <div className="max-w-md mx-auto w-full">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              Diagnóstico de Maturidade
+              Onde sua empresa está travando?
             </h2>
             <p className="text-muted-foreground">
-              Responda perguntas rápidas e receba um relatório personalizado.
+              Responda perguntas rápidas e descubra os gargalos que impedem seu crescimento.
             </p>
           </div>
 
           {/* Benefits */}
           <div className="space-y-4 mb-8">
             <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider">
-              Você vai receber:
+              O que você recebe de graça:
             </h3>
             <div className="space-y-3">
               <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
@@ -91,8 +91,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
                   <CheckCircle className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">Score de Maturidade</p>
-                  <p className="text-sm text-muted-foreground">Nota de 0 a 100% baseada em 5 pilares</p>
+                  <p className="font-medium text-foreground">Nota ISO 9001</p>
+                  <p className="text-sm text-muted-foreground">Score de 0 a 100% em 5 pilares de gestão</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
@@ -100,8 +100,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
                   <CheckCircle className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">Mapa de Gargalos</p>
-                  <p className="text-sm text-muted-foreground">Identifique onde sua empresa trava</p>
+                  <p className="font-medium text-foreground">Raio-X dos Gargalos</p>
+                  <p className="text-sm text-muted-foreground">Veja exatamente onde você perde dinheiro</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
@@ -109,8 +109,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
                   <CheckCircle className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">Consultoria Gratuita</p>
-                  <p className="text-sm text-muted-foreground">Leitura estratégica com especialista</p>
+                  <p className="font-medium text-foreground">Plano de Ação</p>
+                  <p className="text-sm text-muted-foreground">Recomendações práticas com um especialista</p>
                 </div>
               </div>
             </div>
@@ -119,10 +119,10 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           {/* CTA */}
           <div className="space-y-4">
             <QuizButton onClick={onNext}>
-              Começar Diagnóstico Gratuito
+              Quero Meu Diagnóstico Gratuito →
             </QuizButton>
             <p className="text-center text-xs text-muted-foreground">
-              ⏱️ Leva apenas 5 minutos • 100% gratuito
+              ⏱️ 5 minutos • 100% gratuito • Resultado imediato
             </p>
           </div>
 
