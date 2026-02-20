@@ -1,5 +1,6 @@
 import { QuizButton } from "../QuizButton";
 import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin } from "lucide-react";
+import templumLogo from "@/assets/logo-templum.jpeg";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -9,7 +10,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   return (
     <div className="h-dvh flex flex-col bg-[hsl(var(--hero-dark))] text-white overflow-y-auto animate-fade-in">
       {/* Hero Section */}
-      <section className="relative px-5 pt-8 pb-6 flex flex-col items-center text-center">
+      <section className="relative px-5 pt-6 pb-6 flex flex-col items-center text-center">
+        <img src={templumLogo} alt="Templum" className="h-10 rounded-md mb-5 relative z-10" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
         </div>
