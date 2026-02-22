@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.find-deal-by-email]
 verify_jwt = false
+
+[functions.generate-questions]
+verify_jwt = false
