@@ -67,7 +67,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
         <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
           ISO 9001 não é apenas um certificado na parede. É{" "}
-          <span className="text-primary">Gestão e processos afiados!</span>
+          <span className="text-primary">30% a mais de faturamento no seu caixa!</span>
         </h1>
 
         <p className="text-base text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
