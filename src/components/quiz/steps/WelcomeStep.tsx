@@ -91,7 +91,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 animate-fade-in">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative bg-[hsl(var(--hero-dark))] border border-white/15 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+          <div className="relative bg-[hsl(var(--hero-dark))] border border-white/15 rounded-2xl w-full max-w-md p-6 shadow-2xl mx-auto">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
@@ -119,42 +119,44 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       )}
 
       {/* Hero Section */}
-      <section className="relative px-5 pt-6 pb-6 flex flex-col items-start text-left">
-        <img src={templumLogo} alt="Templum" className="h-10 rounded-md mb-5 relative z-10" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
-        </div>
+      <section className="relative px-5 pt-6 pb-6 flex flex-col items-start text-left lg:items-center lg:text-center lg:pt-16 lg:pb-12">
+        <div className="w-full max-w-4xl mx-auto">
+          <img src={templumLogo} alt="Templum" className="h-10 rounded-md mb-5 relative z-10 lg:mx-auto" />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
+          </div>
 
-        <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider">
-          <Award className="w-3.5 h-3.5" />
-          Templum Consultoria • Líder nacional em ISO 9001
-        </span>
+          <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider">
+            <Award className="w-3.5 h-3.5" />
+            Templum Consultoria • Líder nacional em ISO 9001
+          </span>
 
-        <h1 className="text-[1.75rem] sm:text-4xl font-extrabold leading-[1.15] mb-4 relative z-10 uppercase tracking-tight">
-          ISO 9001 NÃO É APENAS UM CERTIFICADO NA PAREDE. É{" "}
-          <span className="text-primary">30% A MAIS DE FATURAMENTO NO SEU CAIXA!</span>
-        </h1>
+          <h1 className="text-[1.75rem] sm:text-4xl lg:text-5xl font-extrabold leading-[1.15] mb-4 relative z-10 uppercase tracking-tight lg:max-w-3xl lg:mx-auto">
+            ISO 9001 NÃO É APENAS UM CERTIFICADO NA PAREDE. É{" "}
+            <span className="text-primary">30% A MAIS DE FATURAMENTO NO SEU CAIXA!</span>
+          </h1>
 
-        <p className="text-[0.95rem] text-white/90 mb-6 relative z-10 leading-relaxed">
-          Empresas certificadas crescem mais, lucram mais e fecham contratos maiores.
-          Responda ao diagnóstico gratuito e veja exatamente onde está o gargalo que trava o seu crescimento.
-        </p>
-
-        <div className="w-full max-w-sm relative z-10 mb-3">
-          <QuizButton onClick={() => setShowModal(true)}>
-            QUERO MEU DIAGNÓSTICO AGORA!
-          </QuizButton>
-          <p className="text-center text-xs text-white/40 mt-2.5">
-            ⏱️ 5 min • 100% gratuito • Resultado imediato
+          <p className="text-[0.95rem] lg:text-lg text-white/90 mb-6 relative z-10 leading-relaxed lg:max-w-2xl lg:mx-auto">
+            Empresas certificadas crescem mais, lucram mais e fecham contratos maiores.
+            Responda ao diagnóstico gratuito e veja exatamente onde está o gargalo que trava o seu crescimento.
           </p>
-        </div>
 
-        <ChevronDown className="w-5 h-5 text-white/20 animate-bounce mt-2" />
+          <div className="w-full max-w-sm relative z-10 mb-3 lg:mx-auto">
+            <QuizButton onClick={() => setShowModal(true)}>
+              QUERO MEU DIAGNÓSTICO AGORA!
+            </QuizButton>
+            <p className="text-center text-xs text-white/40 mt-2.5">
+              ⏱️ 5 min • 100% gratuito • Resultado imediato
+            </p>
+          </div>
+
+          <ChevronDown className="w-5 h-5 text-white/20 animate-bounce mt-2 lg:mx-auto" />
+        </div>
       </section>
 
       {/* Problem Section */}
-      <section className="px-5 py-6 bg-[hsl(var(--hero-dark-accent))]">
-        <div className="max-w-sm mx-auto">
+      <section className="px-5 py-6 lg:py-12 bg-[hsl(var(--hero-dark-accent))]">
+        <div className="max-w-sm lg:max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-4 h-4 text-primary" />
             <h2 className="text-base font-bold uppercase tracking-wider text-white/80">Isso parece familiar?</h2>
@@ -177,8 +179,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       </section>
 
       {/* What you get */}
-      <section className="px-5 py-6">
-        <div className="max-w-sm mx-auto">
+      <section className="px-5 py-6 lg:py-12">
+        <div className="max-w-sm lg:max-w-2xl mx-auto">
           <h2 className="text-base font-bold uppercase tracking-wider text-white/80 mb-4">Com a ISO 9001 você transforma:</h2>
           <div className="space-y-3">
             {[
@@ -201,8 +203,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       </section>
 
       {/* Social Proof Numbers */}
-      <section className="px-5 py-6 bg-[hsl(var(--hero-dark-accent))]">
-        <div className="max-w-sm mx-auto">
+      <section className="px-5 py-6 lg:py-12 bg-[hsl(var(--hero-dark-accent))]">
+        <div className="max-w-sm lg:max-w-2xl mx-auto">
           <div className="grid grid-cols-3 gap-3 text-center mb-5">
             <div>
               <div className="text-2xl font-extrabold text-primary">+8.000</div>
@@ -242,8 +244,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       </section>
 
       {/* FAQ Section */}
-      <section className="px-5 py-6 bg-[hsl(var(--hero-dark-accent))]">
-        <div className="max-w-sm mx-auto">
+      <section className="px-5 py-6 lg:py-12 bg-[hsl(var(--hero-dark-accent))]">
+        <div className="max-w-sm lg:max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-5">
             <HelpCircle className="w-4 h-4 text-primary" />
             <h2 className="text-base font-bold uppercase tracking-wider text-white/80">Perguntas Frequentes</h2>
@@ -253,8 +255,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       </section>
 
       {/* Bottom CTA */}
-      <section className="px-5 py-6 pb-8">
-        <div className="max-w-sm mx-auto">
+      <section className="px-5 py-6 pb-8 lg:py-12">
+        <div className="max-w-sm lg:max-w-2xl mx-auto lg:text-center">
           <div className="flex items-center gap-2 mb-1 justify-center">
             <MapPin className="w-3.5 h-3.5 text-primary" />
             <p className="text-sm text-white/50">Atendemos todo o Brasil • 800+ cidades</p>
@@ -263,9 +265,11 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             <TrendingUp className="w-4 h-4 text-primary" />
             <p className="text-base font-semibold text-white/80">Descubra onde sua empresa trava.</p>
           </div>
-          <QuizButton onClick={() => setShowModal(true)}>
-            QUERO MEU DIAGNÓSTICO AGORA!
-          </QuizButton>
+          <div className="max-w-sm mx-auto">
+            <QuizButton onClick={() => setShowModal(true)}>
+              QUERO MEU DIAGNÓSTICO AGORA!
+            </QuizButton>
+          </div>
         </div>
       </section>
     </div>
