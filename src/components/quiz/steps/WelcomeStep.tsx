@@ -27,7 +27,9 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         </h1>
 
         <p className="text-base text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
-          Descubra com o nosso incrível diagnóstico como a <strong className="text-white">ISO 9001</strong> pode transformar o seu negócio.
+          Inicie agora sua jornada rumo à certificação <strong className="text-white">ISO 9001</strong>.
+          <br /><br />
+          Responda ao nosso diagnóstico e descubra exatamente em que nível de gestão sua empresa está — e o que falta para alcançar a certificação e melhorar seus processos.
         </p>
 
         <div className="w-full max-w-sm relative z-10 mb-3">
