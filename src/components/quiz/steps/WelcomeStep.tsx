@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { QuizButton } from "../QuizButton";
 import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Phone, Building2 } from "lucide-react";
+import { TestimonialsSection } from "./TestimonialsSection";
 import templumLogo from "@/assets/logo-templum.jpeg";
 import { FormInput } from "../FormInput";
 
@@ -227,28 +228,21 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             </div>
           </div>
 
-          <div className="lg:grid lg:grid-cols-2 lg:gap-6">
-            {/* Guarantee Badge */}
-            <div className="flex items-center gap-3 p-3 lg:p-5 rounded-xl bg-primary/10 border border-primary/25 mb-5 lg:mb-0">
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <Shield className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-bold text-base text-primary">Garantia 200%</p>
-                <p className="text-sm text-white/50">Se não certificar, devolvemos o dobro</p>
-              </div>
+          {/* Guarantee Badge */}
+          <div className="flex items-center gap-3 p-3 lg:p-5 rounded-xl bg-primary/10 border border-primary/25 max-w-lg lg:mx-auto">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Shield className="w-5 h-5 text-primary" />
             </div>
-
-            {/* Testimonial */}
-            <div className="bg-white/5 rounded-xl p-4 lg:p-5 border border-white/10">
-              <p className="text-base text-white/70 italic leading-relaxed">
-                "A Templum transformou completamente nossa gestão. Em 6 meses conseguimos a certificação ISO 9001 e já fechamos 3 contratos que antes eram impossíveis sem o selo."
-              </p>
-              <p className="text-sm text-white/40 mt-2 font-medium">— Carlos Eduardo Silva • Cliente verificado</p>
+            <div>
+              <p className="font-bold text-base text-primary">Garantia 200%</p>
+              <p className="text-sm text-white/50">Se não certificar, devolvemos o dobro</p>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
 
       {/* FAQ Section */}
       <section className="px-5 py-6 lg:py-14 lg:px-16 bg-[hsl(var(--hero-dark-accent))]">
