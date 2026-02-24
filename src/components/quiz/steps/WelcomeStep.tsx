@@ -119,9 +119,9 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       )}
 
       {/* Hero Section */}
-      <section className="relative px-5 pt-6 pb-6 flex flex-col items-start text-left lg:items-center lg:text-center lg:pt-16 lg:pb-12">
-        <div className="w-full max-w-4xl mx-auto">
-          <img src={templumLogo} alt="Templum" className="h-10 rounded-md mb-5 relative z-10 lg:mx-auto" />
+      <section className="relative px-5 pt-6 pb-6 flex flex-col items-start text-left lg:px-16 lg:pt-20 lg:pb-16">
+        <div className="w-full max-w-6xl mx-auto">
+          <img src={templumLogo} alt="Templum" className="h-10 rounded-md mb-5 relative z-10" />
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
           </div>
@@ -131,17 +131,17 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             Templum Consultoria • Líder nacional em ISO 9001
           </span>
 
-          <h1 className="text-[1.75rem] sm:text-4xl lg:text-5xl font-extrabold leading-[1.15] mb-4 relative z-10 uppercase tracking-tight lg:max-w-3xl lg:mx-auto">
+          <h1 className="text-[1.75rem] sm:text-4xl lg:text-[3.25rem] lg:leading-[1.1] font-extrabold leading-[1.15] mb-4 relative z-10 uppercase tracking-tight lg:max-w-4xl">
             ISO 9001 NÃO É APENAS UM CERTIFICADO NA PAREDE. É{" "}
             <span className="text-primary">30% A MAIS DE FATURAMENTO NO SEU CAIXA!</span>
           </h1>
 
-          <p className="text-[0.95rem] lg:text-lg text-white/90 mb-6 relative z-10 leading-relaxed lg:max-w-2xl lg:mx-auto">
+          <p className="text-[0.95rem] lg:text-lg text-white/90 mb-8 relative z-10 leading-relaxed lg:max-w-2xl">
             Empresas certificadas crescem mais, lucram mais e fecham contratos maiores.
             Responda ao diagnóstico gratuito e veja exatamente onde está o gargalo que trava o seu crescimento.
           </p>
 
-          <div className="w-full max-w-sm relative z-10 mb-3 lg:mx-auto">
+          <div className="w-full max-w-sm relative z-10 mb-3">
             <QuizButton onClick={() => setShowModal(true)}>
               QUERO MEU DIAGNÓSTICO AGORA!
             </QuizButton>
@@ -150,102 +150,109 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             </p>
           </div>
 
-          <ChevronDown className="w-5 h-5 text-white/20 animate-bounce mt-2 lg:mx-auto" />
+          <ChevronDown className="w-5 h-5 text-white/20 animate-bounce mt-2" />
         </div>
       </section>
 
-      {/* Problem Section */}
-      <section className="px-5 py-6 lg:py-12 bg-[hsl(var(--hero-dark-accent))]">
-        <div className="max-w-sm lg:max-w-2xl mx-auto">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle className="w-4 h-4 text-primary" />
-            <h2 className="text-base font-bold uppercase tracking-wider text-white/80">Isso parece familiar?</h2>
-          </div>
-          <div className="space-y-2.5">
-            {[
-              "Planilhas espalhadas por toda parte",
-              "Retrabalho constante e erros repetidos",
-              "Reuniões que não geram resultado",
-              "Equipe apagando incêndio todos os dias",
-              "Perda de prazos e oportunidades",
-            ].map((item) => (
-              <div key={item} className="flex items-start gap-2.5 text-base text-white/70">
-                <span className="text-primary mt-0.5 text-base leading-none">✕</span>
-                <span>{item}</span>
+      {/* Problem + Transform — side by side on desktop */}
+      <section className="bg-[hsl(var(--hero-dark-accent))]">
+        <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-2 lg:gap-12">
+          {/* Problem Section */}
+          <div className="px-5 py-6 lg:py-12 lg:px-0 lg:pl-16">
+            <div className="max-w-sm lg:max-w-none mx-auto">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle className="w-4 h-4 text-primary" />
+                <h2 className="text-base font-bold uppercase tracking-wider text-white/80">Isso parece familiar?</h2>
               </div>
-            ))}
+              <div className="space-y-2.5">
+                {[
+                  "Planilhas espalhadas por toda parte",
+                  "Retrabalho constante e erros repetidos",
+                  "Reuniões que não geram resultado",
+                  "Equipe apagando incêndio todos os dias",
+                  "Perda de prazos e oportunidades",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-2.5 text-base text-white/70">
+                    <span className="text-primary mt-0.5 text-base leading-none">✕</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* What you get */}
-      <section className="px-5 py-6 lg:py-12">
-        <div className="max-w-sm lg:max-w-2xl mx-auto">
-          <h2 className="text-base font-bold uppercase tracking-wider text-white/80 mb-4">Com a ISO 9001 você transforma:</h2>
-          <div className="space-y-3">
-            {[
-              { title: "Processos claros e padronizados", desc: "Elimine a dependência de pessoas-chave" },
-              { title: "Gestão profissionalizada", desc: "Decisões baseadas em fatos e indicadores" },
-              { title: "Portas que estavam fechadas", desc: "Licitações, grandes empresas e novos contratos" },
-            ].map((item) => (
-              <div key={item.title} className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <CheckCircle className="w-3.5 h-3.5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold text-base text-white">{item.title}</p>
-                  <p className="text-sm text-white/50">{item.desc}</p>
-                </div>
+          {/* What you get */}
+          <div className="px-5 py-6 lg:py-12 lg:px-0 lg:pr-16">
+            <div className="max-w-sm lg:max-w-none mx-auto">
+              <h2 className="text-base font-bold uppercase tracking-wider text-white/80 mb-4">Com a ISO 9001 você transforma:</h2>
+              <div className="space-y-3">
+                {[
+                  { title: "Processos claros e padronizados", desc: "Elimine a dependência de pessoas-chave" },
+                  { title: "Gestão profissionalizada", desc: "Decisões baseadas em fatos e indicadores" },
+                  { title: "Portas que estavam fechadas", desc: "Licitações, grandes empresas e novos contratos" },
+                ].map((item) => (
+                  <div key={item.title} className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-base text-white">{item.title}</p>
+                      <p className="text-sm text-white/50">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Social Proof Numbers */}
-      <section className="px-5 py-6 lg:py-12 bg-[hsl(var(--hero-dark-accent))]">
-        <div className="max-w-sm lg:max-w-2xl mx-auto">
-          <div className="grid grid-cols-3 gap-3 text-center mb-5">
+      <section className="px-5 py-6 lg:py-14 lg:px-16">
+        <div className="max-w-sm lg:max-w-6xl mx-auto">
+          <div className="grid grid-cols-3 gap-3 lg:gap-8 text-center mb-5 lg:mb-10">
             <div>
-              <div className="text-2xl font-extrabold text-primary">+8.000</div>
-              <div className="text-xs text-white/50 uppercase tracking-wider">Clientes</div>
+              <div className="text-2xl lg:text-4xl font-extrabold text-primary">+8.000</div>
+              <div className="text-xs lg:text-sm text-white/50 uppercase tracking-wider mt-1">Clientes</div>
             </div>
             <div>
-              <div className="text-2xl font-extrabold text-primary">+2.000</div>
-              <div className="text-xs text-white/50 uppercase tracking-wider">Certificados</div>
+              <div className="text-2xl lg:text-4xl font-extrabold text-primary">+2.000</div>
+              <div className="text-xs lg:text-sm text-white/50 uppercase tracking-wider mt-1">Certificados</div>
             </div>
             <div>
-              <div className="text-2xl font-extrabold text-primary flex items-center justify-center gap-0.5">
-                4,9 <Star className="w-4 h-4 fill-primary" />
+              <div className="text-2xl lg:text-4xl font-extrabold text-primary flex items-center justify-center gap-0.5">
+                4,9 <Star className="w-4 h-4 lg:w-6 lg:h-6 fill-primary" />
               </div>
-              <div className="text-xs text-white/50 uppercase tracking-wider">Google</div>
+              <div className="text-xs lg:text-sm text-white/50 uppercase tracking-wider mt-1">Google</div>
             </div>
           </div>
 
-          {/* Guarantee Badge */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/25 mb-5">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <Shield className="w-5 h-5 text-primary" />
+          <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+            {/* Guarantee Badge */}
+            <div className="flex items-center gap-3 p-3 lg:p-5 rounded-xl bg-primary/10 border border-primary/25 mb-5 lg:mb-0">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-bold text-base text-primary">Garantia 200%</p>
+                <p className="text-sm text-white/50">Se não certificar, devolvemos o dobro</p>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-base text-primary">Garantia 200%</p>
-              <p className="text-sm text-white/50">Se não certificar, devolvemos o dobro</p>
-            </div>
-          </div>
 
-          {/* Testimonial */}
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <p className="text-base text-white/70 italic leading-relaxed">
-              "A Templum transformou completamente nossa gestão. Em 6 meses conseguimos a certificação ISO 9001 e já fechamos 3 contratos que antes eram impossíveis sem o selo."
-            </p>
-            <p className="text-sm text-white/40 mt-2 font-medium">— Carlos Eduardo Silva • Cliente verificado</p>
+            {/* Testimonial */}
+            <div className="bg-white/5 rounded-xl p-4 lg:p-5 border border-white/10">
+              <p className="text-base text-white/70 italic leading-relaxed">
+                "A Templum transformou completamente nossa gestão. Em 6 meses conseguimos a certificação ISO 9001 e já fechamos 3 contratos que antes eram impossíveis sem o selo."
+              </p>
+              <p className="text-sm text-white/40 mt-2 font-medium">— Carlos Eduardo Silva • Cliente verificado</p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="px-5 py-6 lg:py-12 bg-[hsl(var(--hero-dark-accent))]">
-        <div className="max-w-sm lg:max-w-2xl mx-auto">
+      <section className="px-5 py-6 lg:py-14 lg:px-16 bg-[hsl(var(--hero-dark-accent))]">
+        <div className="max-w-sm lg:max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-5">
             <HelpCircle className="w-4 h-4 text-primary" />
             <h2 className="text-base font-bold uppercase tracking-wider text-white/80">Perguntas Frequentes</h2>
@@ -255,8 +262,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
       </section>
 
       {/* Bottom CTA */}
-      <section className="px-5 py-6 pb-8 lg:py-12">
-        <div className="max-w-sm lg:max-w-2xl mx-auto lg:text-center">
+      <section className="px-5 py-6 pb-8 lg:py-14 lg:px-16">
+        <div className="max-w-sm lg:max-w-6xl mx-auto lg:text-center">
           <div className="flex items-center gap-2 mb-1 justify-center">
             <MapPin className="w-3.5 h-3.5 text-primary" />
             <p className="text-sm text-white/50">Atendemos todo o Brasil • 800+ cidades</p>
