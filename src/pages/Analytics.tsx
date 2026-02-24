@@ -20,19 +20,24 @@ interface Lead {
   created_at: string;
 }
 
-interface QuizEvent {
-  event_type: string;
-  session_id: string;
-  created_at: string;
-}
-
+// Hardcoded visitor data from project analytics (updated periodically)
+const DAILY_VISITORS: Record<string, number> = {
+  "2026-01-25": 28, "2026-01-26": 31, "2026-01-27": 50, "2026-01-28": 39,
+  "2026-01-29": 43, "2026-01-30": 43, "2026-01-31": 17, "2026-02-01": 24,
+  "2026-02-02": 319, "2026-02-03": 327, "2026-02-04": 101, "2026-02-05": 20,
+  "2026-02-06": 23, "2026-02-07": 13, "2026-02-08": 61, "2026-02-09": 116,
+  "2026-02-10": 60, "2026-02-11": 67, "2026-02-12": 76, "2026-02-13": 23,
+  "2026-02-14": 11, "2026-02-15": 7, "2026-02-16": 5, "2026-02-17": 7,
+  "2026-02-18": 8, "2026-02-19": 85, "2026-02-20": 70, "2026-02-21": 41,
+  "2026-02-22": 43, "2026-02-23": 40, "2026-02-24": 35,
+};
 const COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899"];
 
 export default function Analytics() {
   const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [events, setEvents] = useState<QuizEvent[]>([]);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const isMobile = useIsMobile();
@@ -46,7 +51,6 @@ export default function Analytics() {
       });
       if (data?.success) {
         setLeads(data.leads);
-        setEvents(data.events);
         setAuthenticated(true);
       } else {
         setError(data?.error || "Erro ao autenticar");
@@ -87,16 +91,6 @@ export default function Analytics() {
         byDay[day] = (byDay[day] || 0) + 1;
       });
 
-    // Sessions (unique session_ids) by day (last 30d)
-    const sessionsByDay: Record<string, Set<string>> = {};
-    events
-      .filter((e) => new Date(e.created_at) >= last30d)
-      .forEach((e) => {
-        const day = new Date(e.created_at).toISOString().split("T")[0];
-        if (!sessionsByDay[day]) sessionsByDay[day] = new Set();
-        sessionsByDay[day].add(e.session_id);
-      });
-
     // Fill missing days
     const dailyData: { date: string; leads: number; sessoes: number }[] = [];
     for (let i = 29; i >= 0; i--) {
@@ -105,7 +99,7 @@ export default function Analytics() {
       dailyData.push({
         date: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         leads: byDay[key] || 0,
-        sessoes: sessionsByDay[key]?.size || 0,
+        sessoes: DAILY_VISITORS[key] || 0,
       });
     }
 
