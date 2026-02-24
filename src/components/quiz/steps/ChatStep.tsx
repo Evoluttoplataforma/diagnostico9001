@@ -5,9 +5,9 @@ import templumLogo from "@/assets/logo-templum.jpeg";
 
 export interface ChatStepData {
   jobTitle: string;
-  company: string;
   segment: string;
   companySize: string;
+  revenue: string;
 }
 
 interface ChatStepProps {
@@ -33,11 +33,6 @@ const CHAT_FIELDS: ChatField[] = [
     placeholder: "Ex: Diretor, Gerente, Sócio...",
   },
   {
-    key: "company",
-    question: "Qual o nome da sua empresa?",
-    placeholder: "Ex: Empresa ABC Ltda",
-  },
-  {
     key: "segment",
     question: "O que sua empresa faz? Descreva brevemente o ramo de atividade.",
     placeholder: "Ex: Fabricação de peças automotivas...",
@@ -47,6 +42,16 @@ const CHAT_FIELDS: ChatField[] = [
     question: "Quantos funcionários sua empresa possui?",
     placeholder: "Ex: 25",
     type: "number",
+  },
+  {
+    key: "revenue",
+    question: "Qual a faixa de faturamento mensal da empresa?",
+    placeholder: "",
+    type: "select",
+    options: [
+      { value: "abaixo_100k", label: "Abaixo de R$ 100 mil/mês" },
+      { value: "acima_100k", label: "Acima de R$ 100 mil/mês" },
+    ],
   },
 ];
 

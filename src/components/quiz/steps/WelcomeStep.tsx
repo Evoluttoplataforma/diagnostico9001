@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { QuizButton } from "../QuizButton";
-import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Phone } from "lucide-react";
+import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Phone, Building2 } from "lucide-react";
 import templumLogo from "@/assets/logo-templum.jpeg";
 import { FormInput } from "../FormInput";
-import { RevenueSelect } from "../RevenueSelect";
 
 export interface WelcomeFormData {
   name: string;
   email: string;
   phone: string;
-  revenue: string;
+  company: string;
 }
 
 interface WelcomeStepProps {
@@ -61,9 +60,9 @@ const FAQSection = () => {
 
 export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", revenue: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", company: "" });
 
-  const isValid = formData.name && formData.email && formData.phone && formData.revenue;
+  const isValid = formData.name && formData.email && formData.phone && formData.company;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -98,7 +97,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
               <FormInput name="name" value={formData.name} onChange={handleChange} label="Nome Completo *" icon={User} delay={0} autoComplete="name" />
               <FormInput type="email" name="email" value={formData.email} onChange={handleChange} label="Email *" icon={Mail} delay={0} autoComplete="email" />
               <FormInput type="tel" name="phone" value={formData.phone} onChange={handleChange} label="Celular com (DDD) *" icon={Phone} delay={0} autoComplete="tel" />
-              <RevenueSelect value={formData.revenue} onChange={(v) => setFormData((prev) => ({ ...prev, revenue: v }))} delay={0} />
+              <FormInput name="company" value={formData.company} onChange={handleChange} label="Nome da Empresa *" icon={Building2} delay={0} />
             </div>
 
             <QuizButton onClick={handleSubmit} disabled={!isValid}>
