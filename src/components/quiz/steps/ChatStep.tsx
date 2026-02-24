@@ -284,9 +284,13 @@ export const ChatStep = ({ userName, onComplete, onBack }: ChatStepProps) => {
           <div className="flex justify-end mb-3 animate-fade-in">
             <button
               onClick={handleStartChat}
-              className="bg-primary text-primary-foreground font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
+              className="relative bg-primary text-primary-foreground font-semibold px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity"
             >
               Vamos lá?
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive" />
+              </span>
             </button>
           </div>
         )}
