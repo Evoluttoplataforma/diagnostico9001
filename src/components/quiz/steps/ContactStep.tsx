@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Mail, Phone, Sparkles, Briefcase } from "lucide-react";
+import { User, Mail, Phone, Sparkles } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
 import { FormStepIndicator } from "../FormStepIndicator";
@@ -25,11 +25,10 @@ export const ContactStep = ({
   onNext,
   onBack,
 }: ContactStepProps) => {
-  const [formData, setFormData] = useState<ContactData>({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    jobTitle: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,11 +36,11 @@ export const ContactStep = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isValid = formData.name && formData.email && formData.phone && formData.jobTitle;
+  const isValid = formData.name && formData.email && formData.phone;
 
   const handleNext = () => {
     if (isValid) {
-      onNext(formData);
+      onNext({ ...formData, jobTitle: "" });
     }
   };
 
@@ -98,20 +97,10 @@ export const ContactStep = ({
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              label="WhatsApp"
+              label="WhatsApp (com DDD)"
               icon={Phone}
               delay={300}
               autoComplete="tel"
-            />
-
-            <FormInput
-              name="jobTitle"
-              value={formData.jobTitle}
-              onChange={handleChange}
-              label="Cargo"
-              icon={Briefcase}
-              delay={400}
-              autoComplete="organization-title"
             />
           </div>
 
