@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { QuizButton } from "../QuizButton";
 import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Phone, Building2 } from "lucide-react";
 import { TestimonialsSection } from "./TestimonialsSection";
@@ -6,12 +6,14 @@ import { TeamSection } from "./TeamSection";
 import { ProcessSection } from "./ProcessSection";
 import templumLogo from "@/assets/logo-templum.jpeg";
 import { FormInput } from "../FormInput";
+import { getSessionVariant, type CopyVariant } from "../copyVariants";
 
 export interface WelcomeFormData {
   name: string;
   email: string;
   phone: string;
   company: string;
+  copyVariant: string;
 }
 
 interface WelcomeStepProps {
@@ -65,6 +67,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   const [showModal, setShowModal] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", company: "" });
+  const variant = useMemo(() => getSessionVariant(), []);
 
   const isValid = formData.name && formData.email && formData.phone && formData.company;
 
@@ -85,7 +88,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   };
 
   const handleSubmit = () => {
-    if (isValid) onNext(formData);
+    if (isValid) onNext({ ...formData, copyVariant: variant.id });
   };
 
   useEffect(() => {
@@ -164,13 +167,12 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           </span>
 
           <h1 className="text-[1.75rem] sm:text-4xl lg:text-[3.25rem] lg:leading-[1.1] font-extrabold leading-[1.15] mb-4 relative z-10 uppercase tracking-tight lg:max-w-4xl">
-            ISO 9001 NÃO É APENAS UM CERTIFICADO NA PAREDE. É{" "}
-            <span className="text-primary">30% A MAIS DE FATURAMENTO NO SEU CAIXA!</span>
+            {variant.headline}{" "}
+            <span className="text-primary">{variant.highlightedPart}</span>
           </h1>
 
           <p className="text-[0.95rem] lg:text-lg text-white/90 mb-8 relative z-10 leading-relaxed lg:max-w-2xl">
-            Empresas certificadas crescem mais, lucram mais e fecham contratos maiores.
-            Responda ao diagnóstico gratuito e veja exatamente onde está o gargalo que trava o seu crescimento.
+            {variant.description}
           </p>
 
           <div className="w-full max-w-sm relative z-10 mb-3">

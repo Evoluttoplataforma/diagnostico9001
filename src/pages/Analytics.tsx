@@ -2,10 +2,10 @@ import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend,
 } from "recharts";
 
 interface Lead {
@@ -18,6 +18,7 @@ interface Lead {
   score: number;
   diagnosis_level: string;
   created_at: string;
+  copy_variant: string | null;
 }
 
 // Hardcoded visitor data from project analytics (updated periodically)
@@ -145,6 +146,21 @@ export default function Analytics() {
       .sort((a, b) => b[1] - a[1])
       .map(([name, value]) => ({ name, value }));
 
+    // A/B Copy Variant performance
+    const variantMap: Record<string, { count: number; label: string }> = {};
+    leads.forEach((l) => {
+      const v = l.copy_variant || "Sem variante";
+      if (!variantMap[v]) variantMap[v] = { count: 0, label: v === "Sem variante" ? v : `Copy ${v}` };
+      variantMap[v].count++;
+    });
+    const variantData = Object.entries(variantMap)
+      .map(([id, { count, label }]) => ({
+        name: label,
+        leads: count,
+        pct: Math.round((count / leads.length) * 100),
+      }))
+      .sort((a, b) => b.leads - a.leads);
+
     return {
       total: leads.length,
       leadsLast7d,
@@ -156,6 +172,7 @@ export default function Analytics() {
       segmentData,
       scoreData,
       sizeData,
+      variantData,
     };
   }, [leads]);
 
@@ -403,6 +420,44 @@ export default function Analytics() {
           </div>
         </div>
 
+        {/* A/B Copy Variant Performance */}
+        {metrics.variantData.length > 1 && (
+          <div className="rounded-xl border bg-card p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-muted-foreground" />
+              <h2 className="text-sm font-semibold text-foreground">A/B Test — Performance por Copy do Hero</h2>
+            </div>
+            <div className="grid md:grid-cols-[1fr_auto] gap-6">
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={metrics.variantData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                    <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Bar dataKey="leads" name="Leads" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-2 min-w-[160px]">
+                {metrics.variantData.map((v, i) => (
+                  <div key={v.name} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="font-medium text-foreground">{v.name}</span>
+                    <span className="text-muted-foreground">{v.leads} ({v.pct}%)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Recent leads table */}
         <div className="rounded-xl border bg-card p-4 space-y-3">
           <h2 className="text-sm font-semibold text-foreground">Últimos 10 Leads</h2>
@@ -413,6 +468,7 @@ export default function Analytics() {
                   <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Nome</th>
                   <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Empresa</th>
                   <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Score</th>
+                  <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Copy</th>
                   <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Nível</th>
                   <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Data</th>
                 </tr>
@@ -423,6 +479,7 @@ export default function Analytics() {
                     <td className="py-2 px-2 font-medium text-foreground whitespace-nowrap">{l.name}</td>
                     <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{l.company}</td>
                     <td className="py-2 px-2 text-foreground">{l.score}%</td>
+                    <td className="py-2 px-2 text-muted-foreground text-xs">{l.copy_variant || "—"}</td>
                     <td className="py-2 px-2">
                       <span
                         className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${

@@ -127,6 +127,7 @@ export type Database = {
           answers: Json
           company: string
           company_size: string | null
+          copy_variant: string | null
           created_at: string
           diagnosis_level: string
           email: string
@@ -142,6 +143,7 @@ export type Database = {
           answers: Json
           company: string
           company_size?: string | null
+          copy_variant?: string | null
           created_at?: string
           diagnosis_level: string
           email: string
@@ -157,6 +159,7 @@ export type Database = {
           answers?: Json
           company?: string
           company_size?: string | null
+          copy_variant?: string | null
           created_at?: string
           diagnosis_level?: string
           email?: string
