@@ -30,7 +30,7 @@ serve(async (req) => {
     // Fetch all leads
     const { data: leads, error: leadsError } = await supabase
       .from("quiz_leads")
-      .select("id, name, email, company, segment, company_size, score, diagnosis_level, created_at")
+      .select("id, name, email, company, segment, company_size, score, diagnosis_level, created_at, copy_variant")
       .order("created_at", { ascending: false })
       .limit(1000);
 

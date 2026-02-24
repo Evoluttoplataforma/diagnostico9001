@@ -193,6 +193,7 @@ export const Quiz = () => {
           score: score,
           answers: allAnswers,
           diagnosis_level: diagnosis.level,
+          copy_variant: welcomeData.copyVariant,
         });
 
         if (error) {
