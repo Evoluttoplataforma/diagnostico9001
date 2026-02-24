@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QuizButton } from "../QuizButton";
 import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Phone, Building2 } from "lucide-react";
 import { TestimonialsSection } from "./TestimonialsSection";
@@ -63,6 +63,7 @@ const FAQSection = () => {
 
 export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   const [showModal, setShowModal] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", company: "" });
 
   const isValid = formData.name && formData.email && formData.phone && formData.company;
@@ -87,8 +88,36 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
     if (isValid) onNext(formData);
   };
 
+  useEffect(() => {
+    const container = document.getElementById("welcome-scroll");
+    if (!container) return;
+    const handler = () => setShowStickyBar(container.scrollTop > 400);
+    container.addEventListener("scroll", handler, { passive: true });
+    return () => container.removeEventListener("scroll", handler);
+  }, []);
+
   return (
-    <div className="h-dvh flex flex-col bg-[hsl(var(--hero-dark))] text-white overflow-y-auto animate-fade-in">
+    <div id="welcome-scroll" className="h-dvh flex flex-col bg-[hsl(var(--hero-dark))] text-white overflow-y-auto animate-fade-in">
+
+      {/* Sticky CTA Bar */}
+      <div
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          showStickyBar ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+        }`}
+      >
+        <div className="bg-[hsl(var(--hero-dark))]/95 backdrop-blur-md border-b border-white/10 px-4 py-2.5">
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <img src={templumLogo} alt="Templum" className="h-7 rounded-md hidden sm:block" />
+            <p className="text-xs sm:text-sm text-white/60 hidden lg:block">Diagnóstico gratuito de gestão ISO 9001</p>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs sm:text-sm px-5 py-2 rounded-lg transition-colors whitespace-nowrap ml-auto"
+            >
+              FAZER DIAGNÓSTICO
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Modal Popup */}
       {showModal && (
