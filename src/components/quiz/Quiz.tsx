@@ -36,24 +36,60 @@ export const Quiz = () => {
   const totalQuestions = dynamicQuestions.length || 20;
   const totalSteps = totalQuestions + 2;
 
-  // --- Welcome popup submitted ---
-  const handleWelcomeNext = (welcomeFormData: WelcomeFormData) => {
+  // --- Welcome popup submitted: immediately create Pipedrive lead ---
+  const handleWelcomeNext = async (welcomeFormData: WelcomeFormData) => {
     setData((prev) => ({ ...prev, welcomeData: welcomeFormData }));
     setCurrentStep("chat");
+
+    // Fire-and-forget Pipedrive creation with initial 4 fields
+    try {
+      const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
+        body: {
+          name: welcomeFormData.name,
+          email: welcomeFormData.email,
+          phone: welcomeFormData.phone,
+          job_title: "",
+          company: "",
+          segment: "",
+          company_size: "",
+          revenue: welcomeFormData.revenue,
+          score: 0,
+          diagnosis_level: "pending",
+          utm_source: utmParams.utm_source,
+          utm_medium: utmParams.utm_medium,
+          utm_campaign: utmParams.utm_campaign,
+          utm_content: utmParams.utm_content,
+          utm_term: utmParams.utm_term,
+          answers: {},
+          pillar_scores: [],
+        },
+      });
+      if (!pipedriveResponse.error) {
+        dealIdRef.current = pipedriveResponse.data?.deal_id || null;
+        ownerNameRef.current = pipedriveResponse.data?.owner_name || null;
+      } else {
+        console.error("Pipedrive error:", pipedriveResponse.error);
+      }
+    } catch (err) {
+      console.error("Pipedrive creation error:", err);
+    }
   };
 
-  // --- Chat step complete: create lead + generate questions ---
+  // --- Chat step complete: generate questions (Pipedrive already created) ---
   const handleChatComplete = async (chatData: ChatStepData) => {
     const welcomeData = data.welcomeData!;
     setData((prev) => ({ ...prev, company: chatData }));
     setCurrentStep("generating");
 
     try {
+      // Update existing deal with chat data if available
+      const currentDealId = dealIdRef.current;
       const [, questionsResult] = await Promise.all([
-        (async () => {
+        currentDealId ? (async () => {
           try {
-            const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
+            await supabase.functions.invoke("update-pipedrive-deal", {
               body: {
+                deal_id: currentDealId,
                 name: welcomeData.name,
                 email: welcomeData.email,
                 phone: welcomeData.phone,
@@ -64,25 +100,16 @@ export const Quiz = () => {
                 revenue: welcomeData.revenue,
                 score: 0,
                 diagnosis_level: "pending",
-                utm_source: utmParams.utm_source,
-                utm_medium: utmParams.utm_medium,
-                utm_campaign: utmParams.utm_campaign,
-                utm_content: utmParams.utm_content,
-                utm_term: utmParams.utm_term,
                 answers: {},
                 pillar_scores: [],
+                questions: [],
               },
             });
-            if (!pipedriveResponse.error) {
-              dealIdRef.current = pipedriveResponse.data?.deal_id || null;
-              ownerNameRef.current = pipedriveResponse.data?.owner_name || null;
-            } else {
-              console.error("Pipedrive error:", pipedriveResponse.error);
-            }
           } catch (err) {
-            console.error("Pipedrive creation error:", err);
+            console.error("Pipedrive update error:", err);
           }
-        })(),
+        })() : Promise.resolve(),
+        // Generate personalized questions via AI
         (async () => {
           const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
             body: {
