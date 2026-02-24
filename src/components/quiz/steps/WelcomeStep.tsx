@@ -158,8 +158,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
           </div>
 
-          <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider">
-            <Award className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider self-start">
+            <Award className="w-3.5 h-3.5 shrink-0" />
             Templum Consultoria • Líder nacional em ISO 9001
           </span>
 
