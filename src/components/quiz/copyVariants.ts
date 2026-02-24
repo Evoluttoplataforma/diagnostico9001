@@ -8,38 +8,38 @@ export interface CopyVariant {
 export const COPY_VARIANTS: CopyVariant[] = [
   {
     id: "A",
-    headline: "ISO 9001 NÃO É APENAS UM CERTIFICADO NA PAREDE. É",
-    highlightedPart: "30% A MAIS DE FATURAMENTO NO SEU CAIXA!",
+    headline: "ISO 9001 NÃO É BUROCRACIA. É",
+    highlightedPart: "UMA MÁQUINA DE CRESCIMENTO PARA SUA EMPRESA.",
     description:
-      "Empresas certificadas crescem mais, lucram mais e fecham contratos maiores. Responda ao diagnóstico gratuito e veja exatamente onde está o gargalo que trava o seu crescimento.",
+      "Empresas que estruturam processos faturam mais, reduzem retrabalho e ganham competitividade no mercado. Responda ao diagnóstico gratuito e descubra onde estão os gargalos que estão travando seus resultados.",
   },
   {
     id: "B",
-    headline: "SUA EMPRESA ESTÁ PERDENDO CONTRATOS POR NÃO TER",
-    highlightedPart: "A CERTIFICAÇÃO QUE O MERCADO EXIGE!",
+    headline: "SEM PROCESSO, SUA EMPRESA",
+    highlightedPart: "PERDE OPORTUNIDADES TODOS OS DIAS.",
     description:
-      "Licitações, grandes clientes e novos mercados exigem ISO 9001. Descubra em 5 minutos o que falta para sua empresa conquistar a certificação.",
+      "A ISO 9001 não é só um certificado — é o que permite participar de grandes contratos, atender exigências de clientes e crescer com segurança. Faça o diagnóstico gratuito e veja o que falta para sua empresa avançar.",
   },
   {
     id: "C",
-    headline: "ENQUANTO VOCÊ APAGA INCÊNDIOS, SEUS CONCORRENTES",
-    highlightedPart: "JÁ ESTÃO CERTIFICADOS E FECHANDO SEUS CONTRATOS!",
+    headline: "ENQUANTO SEUS CONCORRENTES IMPROVISAM,",
+    highlightedPart: "EMPRESAS CERTIFICADAS DOMINAM O MERCADO.",
     description:
-      "Processos desorganizados custam caro. Faça o diagnóstico gratuito e descubra como a ISO 9001 pode transformar sua operação em uma máquina de resultados.",
+      "A ISO 9001 cria padrão, eficiência e confiança — três fatores que aumentam vendas e margens. Descubra gratuitamente seu nível de maturidade em gestão e os próximos passos para evoluir.",
   },
   {
     id: "D",
-    headline: "MAIS DE 2.000 EMPRESAS JÁ SE CERTIFICARAM COM A TEMPLUM.",
-    highlightedPart: "A SUA PODE SER A PRÓXIMA!",
+    headline: "PROBLEMAS REPETIDOS, ERROS E RETRABALHO NÃO SÃO NORMAIS.",
+    highlightedPart: "SÃO FALTA DE PROCESSO.",
     description:
-      "Com garantia 200% e nota 4,9 no Google, somos a consultoria líder em ISO 9001 no Brasil. Faça o diagnóstico gratuito e veja o caminho até sua certificação.",
+      "A ISO 9001 organiza sua operação, melhora resultados e prepara sua empresa para crescer sem caos. Responda ao diagnóstico gratuito e identifique seus principais pontos de melhoria.",
   },
   {
     id: "E",
-    headline: "RETRABALHO, PRAZOS PERDIDOS E CLIENTES INSATISFEITOS?",
-    highlightedPart: "A ISO 9001 RESOLVE ISSO EM MESES, NÃO ANOS!",
+    headline: "EMPRESAS ORGANIZADAS LUCRAM MAIS.",
+    highlightedPart: "EMPRESAS CERTIFICADAS LUCRAM MUITO MAIS.",
     description:
-      "Nossa metodologia acelera a certificação em 4 a 8 meses. Responda o diagnóstico gratuito e receba um plano de ação personalizado para sua empresa.",
+      "A ISO 9001 reduz desperdícios, aumenta produtividade e abre portas para novos clientes. Faça agora o diagnóstico gratuito e descubra quanto sua empresa pode evoluir.",
   },
 ];
 
