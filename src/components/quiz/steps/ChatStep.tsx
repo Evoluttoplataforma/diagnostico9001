@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Send, ArrowLeft, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import templumLogo from "@/assets/logo-templum.jpeg";
+import normaPhoto from "@/assets/norma-photo.png";
 
 export interface ChatStepData {
   jobTitle: string;
@@ -71,8 +71,8 @@ const ChatBubble = ({ children, isUser = false, animate = true }: BubbleProps) =
   >
     {!isUser && (
       <img
-        src={templumLogo}
-        alt="Templum"
+        src={normaPhoto}
+        alt="Norma"
         className="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-1"
       />
     )}
@@ -91,10 +91,10 @@ const ChatBubble = ({ children, isUser = false, animate = true }: BubbleProps) =
 
 const TypingIndicator = () => (
   <div className="flex gap-2.5 mb-3 animate-fade-in">
-    <img
-      src={templumLogo}
-      alt="Templum"
-      className="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-1"
+      <img
+        src={normaPhoto}
+        alt="Norma"
+        className="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-1"
     />
     <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
       <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -263,9 +263,9 @@ export const ChatStep = ({ userName, onComplete, onBack }: ChatStepProps) => {
         <button onClick={onBack} className="p-1.5 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-muted-foreground" />
         </button>
-        <img src={templumLogo} alt="Templum" className="w-10 h-10 rounded-full object-cover" />
+        <img src={normaPhoto} alt="Norma" className="w-10 h-10 rounded-full object-cover" />
         <div>
-          <p className="font-semibold text-foreground text-sm">Templum Consultoria</p>
+          <p className="font-semibold text-foreground text-sm">Norma</p>
           <p className="text-xs text-muted-foreground">Diagnóstico ISO 9001</p>
         </div>
       </div>
