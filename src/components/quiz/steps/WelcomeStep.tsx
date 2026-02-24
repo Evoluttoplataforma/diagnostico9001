@@ -54,7 +54,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   return (
     <div className="h-dvh flex flex-col bg-[hsl(var(--hero-dark))] text-white overflow-y-auto animate-fade-in">
       {/* Hero Section */}
-      <section className="relative px-5 pt-6 pb-6 flex flex-col items-center text-center">
+      <section className="relative px-5 pt-6 pb-6 flex flex-col items-start text-left">
         <img src={templumLogo} alt="Templum" className="h-10 rounded-md mb-5 relative z-10" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
@@ -65,14 +65,13 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           Templum Consultoria • Líder nacional em ISO 9001
         </span>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
-          ISO 9001 não é apenas um certificado na parede. É{" "}
-          <span className="text-primary">30% a mais de faturamento no seu caixa!</span>
+        <h1 className="text-[1.75rem] sm:text-4xl font-extrabold leading-[1.15] mb-4 relative z-10 uppercase tracking-tight">
+          ISO 9001 NÃO É APENAS UM CERTIFICADO NA PAREDE. É{" "}
+          <span className="text-primary">30% A MAIS DE FATURAMENTO NO SEU CAIXA!</span>
         </h1>
 
-        <p className="text-base text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
+        <p className="text-[0.95rem] text-white/70 mb-6 relative z-10 leading-relaxed">
           Inicie agora sua jornada rumo à certificação <strong className="text-white">ISO 9001</strong>.
-          <br /><br />
           Responda ao nosso diagnóstico e descubra exatamente em que nível de gestão sua empresa está — e o que falta para alcançar a certificação e melhorar seus processos.
         </p>
 
