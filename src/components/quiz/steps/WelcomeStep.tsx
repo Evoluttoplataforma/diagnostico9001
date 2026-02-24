@@ -18,7 +18,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
         <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider">
           <Award className="w-3.5 h-3.5" />
-          Líder nacional em ISO 9001
+          Templum Consultoria • Líder nacional em ISO 9001
         </span>
 
         <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
