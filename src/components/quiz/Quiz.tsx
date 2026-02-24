@@ -1,9 +1,8 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
-import { ContactStep, ContactData } from "./steps/ContactStep";
 import { ChatStep, ChatStepData } from "./steps/ChatStep";
-import { WelcomeStep } from "./steps/WelcomeStep";
+import { WelcomeStep, WelcomeFormData } from "./steps/WelcomeStep";
 import { DynamicQuestion, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -11,11 +10,11 @@ import { useUTM } from "@/hooks/use-utm";
 import { DiagnosisLoading } from "./results/DiagnosisLoading";
 import { QuestionsLoading } from "./results/QuestionsLoading";
 
-type Step = "welcome" | "contact" | "chat" | "generating" | "questions";
+type Step = "welcome" | "chat" | "generating" | "questions";
 
 interface QuizData {
   answers: Record<string, AnswerValue>;
-  contact: ContactData | null;
+  welcomeData: WelcomeFormData | null;
   company: ChatStepData | null;
 }
 
@@ -27,7 +26,7 @@ export const Quiz = () => {
   const [dynamicQuestions, setDynamicQuestions] = useState<DynamicQuestion[]>([]);
   const [data, setData] = useState<QuizData>({
     answers: {},
-    contact: null,
+    welcomeData: null,
     company: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,39 +36,32 @@ export const Quiz = () => {
   const totalQuestions = dynamicQuestions.length || 20;
   const totalSteps = totalQuestions + 2;
 
-  // --- Contact step (3 fields) ---
-  const handleContactNext = (contactData: ContactData) => {
-    setData((prev) => ({ ...prev, contact: contactData }));
+  // --- Welcome popup submitted ---
+  const handleWelcomeNext = (welcomeFormData: WelcomeFormData) => {
+    setData((prev) => ({ ...prev, welcomeData: welcomeFormData }));
     setCurrentStep("chat");
-  };
-
-  const handleContactBack = () => {
-    setCurrentStep("welcome");
   };
 
   // --- Chat step complete: create lead + generate questions ---
   const handleChatComplete = async (chatData: ChatStepData) => {
-    const contactData = data.contact!;
-    // Merge jobTitle from chat into contact
-    contactData.jobTitle = chatData.jobTitle;
-    setData((prev) => ({ ...prev, contact: contactData, company: chatData }));
+    const welcomeData = data.welcomeData!;
+    setData((prev) => ({ ...prev, company: chatData }));
     setCurrentStep("generating");
 
     try {
       const [, questionsResult] = await Promise.all([
-        // Create lead in Pipedrive
         (async () => {
           try {
             const pipedriveResponse = await supabase.functions.invoke("create-pipedrive-lead", {
               body: {
-                name: contactData.name,
-                email: contactData.email,
-                phone: contactData.phone,
+                name: welcomeData.name,
+                email: welcomeData.email,
+                phone: welcomeData.phone,
                 job_title: chatData.jobTitle,
                 company: chatData.company,
                 segment: chatData.segment,
                 company_size: chatData.companySize,
-                revenue: chatData.revenue,
+                revenue: welcomeData.revenue,
                 score: 0,
                 diagnosis_level: "pending",
                 utm_source: utmParams.utm_source,
@@ -91,13 +83,12 @@ export const Quiz = () => {
             console.error("Pipedrive creation error:", err);
           }
         })(),
-        // Generate personalized questions via AI
         (async () => {
           const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
             body: {
               segment: chatData.segment,
               companySize: chatData.companySize,
-              revenue: chatData.revenue,
+              revenue: welcomeData.revenue,
               jobTitle: chatData.jobTitle,
             },
           });
@@ -120,7 +111,7 @@ export const Quiz = () => {
   };
 
   const handleChatBack = () => {
-    setCurrentStep("contact");
+    setCurrentStep("welcome");
   };
 
   // --- Questions step ---
@@ -156,7 +147,7 @@ export const Quiz = () => {
 
     const score = getScore(allAnswers);
     const diagnosis = getDiagnosis(score);
-    const contactData = data.contact!;
+    const welcomeData = data.welcomeData!;
     const companyData = data.company!;
     const pillarScores = calculatePillarScores(allAnswers, dynamicQuestions);
     const finalSegment = companyData.segment;
@@ -166,9 +157,9 @@ export const Quiz = () => {
 
       const submitPromise = (async () => {
         const { error } = await supabase.from("quiz_leads").insert({
-          name: contactData.name,
-          email: contactData.email,
-          phone: contactData.phone,
+          name: welcomeData.name,
+          email: welcomeData.email,
+          phone: welcomeData.phone,
           company: companyData.company,
           segment: finalSegment,
           company_size: companyData.companySize,
@@ -189,14 +180,14 @@ export const Quiz = () => {
             const updateResponse = await supabase.functions.invoke("update-pipedrive-deal", {
               body: {
                 deal_id: currentDealId,
-                name: contactData.name,
-                email: contactData.email,
-                phone: contactData.phone,
-                job_title: contactData.jobTitle,
+                name: welcomeData.name,
+                email: welcomeData.email,
+                phone: welcomeData.phone,
+                job_title: companyData.jobTitle,
                 company: companyData.company,
                 segment: finalSegment,
                 company_size: companyData.companySize,
-                revenue: companyData.revenue,
+                revenue: welcomeData.revenue,
                 score: score,
                 diagnosis_level: diagnosis.level,
                 answers: allAnswers,
@@ -226,12 +217,12 @@ export const Quiz = () => {
 
       navigate("/obrigado-diagnostico", {
         state: {
-          name: contactData.name,
+          name: welcomeData.name,
           score: score,
           answers: allAnswers,
           segment: finalSegment,
           companySize: companyData.companySize,
-          revenue: companyData.revenue,
+          revenue: welcomeData.revenue,
           company: companyData.company,
           pillarScores: pillarScores,
           ownerName: ownerNameRef.current,
@@ -256,23 +247,13 @@ export const Quiz = () => {
   switch (currentStep) {
     case "welcome":
       return (
-        <WelcomeStep onNext={() => setCurrentStep("contact")} />
-      );
-
-    case "contact":
-      return (
-        <ContactStep
-          currentStep={1}
-          totalSteps={totalSteps}
-          onNext={handleContactNext}
-          onBack={handleContactBack}
-        />
+        <WelcomeStep onNext={handleWelcomeNext} />
       );
 
     case "chat":
       return (
         <ChatStep
-          userName={data.contact?.name || ""}
+          userName={data.welcomeData?.name || ""}
           onComplete={handleChatComplete}
           onBack={handleChatBack}
         />

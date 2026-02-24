@@ -1,10 +1,19 @@
 import { useState } from "react";
 import { QuizButton } from "../QuizButton";
-import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle } from "lucide-react";
+import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Phone } from "lucide-react";
 import templumLogo from "@/assets/logo-templum.jpeg";
+import { FormInput } from "../FormInput";
+import { RevenueSelect } from "../RevenueSelect";
+
+export interface WelcomeFormData {
+  name: string;
+  email: string;
+  phone: string;
+  revenue: string;
+}
 
 interface WelcomeStepProps {
-  onNext: () => void;
+  onNext: (data: WelcomeFormData) => void;
 }
 
 const faqItems = [
@@ -51,8 +60,54 @@ const FAQSection = () => {
 
 
 export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", revenue: "" });
+
+  const isValid = formData.name && formData.email && formData.phone && formData.revenue;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = () => {
+    if (isValid) onNext(formData);
+  };
+
   return (
     <div className="h-dvh flex flex-col bg-[hsl(var(--hero-dark))] text-white overflow-y-auto animate-fade-in">
+
+      {/* Modal Popup */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 animate-fade-in">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative bg-[hsl(var(--hero-dark))] border border-white/15 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
+
+            <h3 className="text-lg font-bold text-primary text-center mb-1">
+              Preencha os campos abaixo para iniciar seu diagnóstico:
+            </h3>
+            <p className="text-sm text-white/50 text-center mb-6">100% gratuito • Resultado imediato</p>
+
+            <div className="space-y-4 mb-6">
+              <FormInput name="name" value={formData.name} onChange={handleChange} label="Nome Completo *" icon={User} delay={0} autoComplete="name" />
+              <FormInput type="email" name="email" value={formData.email} onChange={handleChange} label="Email *" icon={Mail} delay={0} autoComplete="email" />
+              <FormInput type="tel" name="phone" value={formData.phone} onChange={handleChange} label="Celular com (DDD) *" icon={Phone} delay={0} autoComplete="tel" />
+              <RevenueSelect value={formData.revenue} onChange={(v) => setFormData((prev) => ({ ...prev, revenue: v }))} delay={0} />
+            </div>
+
+            <QuizButton onClick={handleSubmit} disabled={!isValid}>
+              CONTINUAR MEU DIAGNÓSTICO
+            </QuizButton>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative px-5 pt-6 pb-6 flex flex-col items-start text-left">
         <img src={templumLogo} alt="Templum" className="h-10 rounded-md mb-5 relative z-10" />
@@ -76,7 +131,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         </p>
 
         <div className="w-full max-w-sm relative z-10 mb-3">
-          <QuizButton onClick={onNext}>
+          <QuizButton onClick={() => setShowModal(true)}>
             QUERO MEU DIAGNÓSTICO AGORA!
           </QuizButton>
           <p className="text-center text-xs text-white/40 mt-2.5">
@@ -198,7 +253,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             <TrendingUp className="w-4 h-4 text-primary" />
             <p className="text-base font-semibold text-white/80">Descubra onde sua empresa trava.</p>
           </div>
-          <QuizButton onClick={onNext}>
+          <QuizButton onClick={() => setShowModal(true)}>
             QUERO MEU DIAGNÓSTICO AGORA!
           </QuizButton>
         </div>
