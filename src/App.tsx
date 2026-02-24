@@ -9,6 +9,7 @@ import VendorQuiz from "./pages/VendorQuiz";
 import GenerateLink from "./pages/GenerateLink";
 import NotFound from "./pages/NotFound";
 import Leads from "./pages/Leads";
+import Analytics from "./pages/Analytics";
 import { captureUTMsFromURL } from "@/hooks/use-utm";
 
 // Capturar UTMs imediatamente na inicialização do app (antes de qualquer render)
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/d/:dealId" element={<VendorQuiz />} />
           <Route path="/link" element={<GenerateLink />} />
           <Route path="/leads" element={<Leads />} />
+          <Route path="/analytics" element={<Analytics />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
