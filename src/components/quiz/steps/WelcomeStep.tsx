@@ -22,12 +22,12 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         </span>
 
         <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
-          Sua empresa ainda vive na{" "}
-          <span className="text-primary">era do improviso?</span>
+          ISO 9001 não é apenas um certificado na parede. É{" "}
+          <span className="text-primary">Gestão e processos redondos!</span>
         </h1>
 
         <p className="text-base text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
-          Descubra em 5 minutos como a <strong className="text-white">ISO 9001</strong> pode transformar caos em eficiência e destravar o crescimento da sua empresa.
+          Descubra com o nosso incrível diagnóstico como a <strong className="text-white">ISO 9001</strong> pode transformar o seu negócio.
         </p>
 
         <div className="w-full max-w-sm relative z-10 mb-3">
