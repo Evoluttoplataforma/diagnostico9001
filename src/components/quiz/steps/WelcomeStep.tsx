@@ -2,6 +2,8 @@ import { useState } from "react";
 import { QuizButton } from "../QuizButton";
 import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Phone, Building2 } from "lucide-react";
 import { TestimonialsSection } from "./TestimonialsSection";
+import { TeamSection } from "./TeamSection";
+import { ProcessSection } from "./ProcessSection";
 import templumLogo from "@/assets/logo-templum.jpeg";
 import { FormInput } from "../FormInput";
 
@@ -243,6 +245,12 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
       {/* Testimonials Section */}
       <TestimonialsSection />
+
+      {/* Team Section */}
+      <TeamSection />
+
+      {/* Process Section */}
+      <ProcessSection />
 
       {/* FAQ Section */}
       <section className="px-5 py-6 lg:py-14 lg:px-16 bg-[hsl(var(--hero-dark-accent))]">
