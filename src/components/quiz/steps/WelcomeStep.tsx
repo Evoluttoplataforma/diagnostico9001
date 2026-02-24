@@ -1,10 +1,54 @@
+import { useState } from "react";
 import { QuizButton } from "../QuizButton";
-import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin } from "lucide-react";
+import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle } from "lucide-react";
 import templumLogo from "@/assets/logo-templum.jpeg";
 
 interface WelcomeStepProps {
   onNext: () => void;
 }
+
+const faqItems = [
+  { q: "O que é a ISO 9001?", a: "É a norma internacional de Sistema de Gestão da Qualidade mais reconhecida no mundo. Ela define requisitos para padronizar processos, reduzir erros e aumentar a satisfação do cliente." },
+  { q: "Minha empresa precisa da ISO 9001?", a: "Se você quer conquistar novos clientes, participar de licitações, reduzir retrabalho e profissionalizar a gestão, sim. A ISO 9001 é indicada para empresas de qualquer porte ou segmento." },
+  { q: "Quanto tempo leva para certificar?", a: "Com a Templum, o processo leva em média de 4 a 8 meses, dependendo do porte e complexidade da empresa. Nossa metodologia acelera cada etapa." },
+  { q: "Qual o investimento para certificar?", a: "O investimento varia conforme o tamanho da empresa e escopo. Entre em contato para uma proposta personalizada. Lembre-se: o retorno costuma superar o investimento já nos primeiros meses." },
+  { q: "O que é a Templum Consultoria?", a: "Somos a maior consultoria de ISO 9001 do Brasil, com mais de 8.000 clientes atendidos e mais de 2.000 empresas certificadas. Nota 4,9 no Google." },
+  { q: "O que é a Garantia 200% da Templum?", a: "Se sua empresa não conseguir a certificação seguindo nossa metodologia, devolvemos o dobro do valor investido. É a nossa confiança na entrega de resultados." },
+  { q: "A Templum atende minha região?", a: "Sim! Atendemos todo o Brasil, em mais de 800 cidades, com consultoria presencial e remota combinadas para máxima eficiência." },
+  { q: "O diagnóstico é realmente gratuito?", a: "Sim, 100% gratuito e sem compromisso. Em 5 minutos você recebe um raio-X completo do nível de gestão da sua empresa." },
+  { q: "Preciso parar minha operação para implantar?", a: "Não. Nossa metodologia é desenhada para se encaixar na rotina da empresa, sem interromper a operação. A implantação acontece de forma gradual e prática." },
+  { q: "Quais os benefícios reais da certificação?", a: "Acesso a licitações e grandes clientes, redução de custos operacionais, processos claros, menos retrabalho, maior satisfação dos clientes e credibilidade no mercado." },
+];
+
+const FAQSection = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <div className="space-y-2">
+      {faqItems.map((item, i) => (
+        <div key={i} className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+          <button
+            onClick={() => setOpenIndex(openIndex === i ? null : i)}
+            className="w-full flex items-center justify-between gap-3 p-4 text-left"
+          >
+            <span className="text-sm font-medium text-white/90">{item.q}</span>
+            <ChevronDown
+              className={`w-4 h-4 text-white/40 shrink-0 transition-transform duration-200 ${
+                openIndex === i ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {openIndex === i && (
+            <div className="px-4 pb-4 text-sm text-white/60 leading-relaxed animate-fade-in">
+              {item.a}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 
 export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   return (
@@ -133,6 +177,17 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="px-5 py-6 bg-[hsl(var(--hero-dark-accent))]">
+        <div className="max-w-sm mx-auto">
+          <div className="flex items-center gap-2 mb-5">
+            <HelpCircle className="w-4 h-4 text-primary" />
+            <h2 className="text-base font-bold uppercase tracking-wider text-white/80">Perguntas Frequentes</h2>
+          </div>
+          <FAQSection />
+        </div>
+      </section>
+
       {/* Bottom CTA */}
       <section className="px-5 py-6 pb-8">
         <div className="max-w-sm mx-auto">
@@ -145,7 +200,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             <p className="text-base font-semibold text-white/80">Descubra onde sua empresa trava.</p>
           </div>
           <QuizButton onClick={onNext}>
-            Fazer meu diagnóstico grátis →
+            QUERO MEU DIAGNÓSTICO AGORA!
           </QuizButton>
         </div>
       </section>
