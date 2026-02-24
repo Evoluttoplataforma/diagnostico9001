@@ -23,7 +23,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
         <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight mb-4 relative z-10 max-w-md">
           ISO 9001 não é apenas um certificado na parede. É{" "}
-          <span className="text-primary">Gestão e processos redondos!</span>
+          <span className="text-primary">Gestão e processos afiados!</span>
         </h1>
 
         <p className="text-base text-white/60 mb-6 relative z-10 max-w-sm leading-relaxed">
@@ -32,7 +32,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
         <div className="w-full max-w-sm relative z-10 mb-3">
           <QuizButton onClick={onNext}>
-            Quero meu diagnóstico grátis →
+            QUERO MEU DIAGNÓSTICO AGORA!
           </QuizButton>
           <p className="text-center text-xs text-white/40 mt-2.5">
             ⏱️ 5 min • 100% gratuito • Resultado imediato
