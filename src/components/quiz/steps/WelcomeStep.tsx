@@ -71,8 +71,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         </h1>
 
         <p className="text-[0.95rem] text-white/70 mb-6 relative z-10 leading-relaxed">
-          Inicie agora sua jornada rumo à certificação <strong className="text-white">ISO 9001</strong>.
-          Responda ao nosso diagnóstico e descubra exatamente em que nível de gestão sua empresa está — e o que falta para alcançar a certificação e melhorar seus processos.
+          Empresas certificadas crescem mais, lucram mais e fecham contratos maiores.
+          Responda ao diagnóstico gratuito e veja exatamente onde está o gargalo que trava o seu crescimento.
         </p>
 
         <div className="w-full max-w-sm relative z-10 mb-3">
