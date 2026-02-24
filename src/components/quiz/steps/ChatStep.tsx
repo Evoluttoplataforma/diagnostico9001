@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import templumLogo from "@/assets/logo-templum.jpeg";
 
@@ -298,15 +298,33 @@ export const ChatStep = ({ userName, onComplete, onBack }: ChatStepProps) => {
         {/* Select options */}
         {showOptions && currentField?.options && (
           <div className="flex flex-col gap-2 ml-12 mb-3 animate-fade-in">
-            {currentField.options.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => handleSelectOption(opt.value, opt.label)}
-                className="text-left bg-card border-2 border-border hover:border-primary text-foreground px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md"
-              >
-                {opt.label}
-              </button>
-            ))}
+            {currentField.options.map((opt) => {
+              const isRevenue = currentField.key === "revenue";
+              const isRed = opt.value === "abaixo_100k";
+              const Icon = isRed ? TrendingDown : TrendingUp;
+
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => handleSelectOption(opt.value, opt.label)}
+                  className={cn(
+                    "text-left bg-card border-2 border-border hover:border-primary px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md flex items-center gap-3",
+                    isRevenue && isRed && "hover:border-destructive hover:bg-destructive/5",
+                    isRevenue && !isRed && "hover:border-blue-500 hover:bg-blue-500/5"
+                  )}
+                >
+                  {isRevenue && (
+                    <>
+                      <span className={cn("w-3 h-3 rounded-full flex-shrink-0", isRed ? "bg-destructive" : "bg-blue-500")} />
+                      <Icon className={cn("w-5 h-5 flex-shrink-0", isRed ? "text-destructive" : "text-blue-500")} />
+                    </>
+                  )}
+                  <span className={cn(isRevenue && (isRed ? "text-destructive" : "text-blue-600"))}>
+                    {opt.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
