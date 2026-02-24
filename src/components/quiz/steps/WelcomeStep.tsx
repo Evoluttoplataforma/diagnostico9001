@@ -70,7 +70,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           <span className="text-primary">30% A MAIS DE FATURAMENTO NO SEU CAIXA!</span>
         </h1>
 
-        <p className="text-[0.95rem] text-white/70 mb-6 relative z-10 leading-relaxed">
+        <p className="text-[0.95rem] text-white/90 mb-6 relative z-10 leading-relaxed">
           Empresas certificadas crescem mais, lucram mais e fecham contratos maiores.
           Responda ao diagnóstico gratuito e veja exatamente onde está o gargalo que trava o seu crescimento.
         </p>
