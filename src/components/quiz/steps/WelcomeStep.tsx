@@ -281,6 +281,18 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           </div>
         </div>
       </section>
+
+      {/* Fixed bottom CTA button */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[hsl(var(--hero-dark))] via-[hsl(var(--hero-dark))]/95 to-transparent pt-4 pb-4 px-5 lg:pb-5">
+        <div className="max-w-sm mx-auto">
+          <QuizButton onClick={() => setShowModal(true)}>
+            QUERO MEU DIAGNÓSTICO AGORA!
+          </QuizButton>
+        </div>
+      </div>
+
+      {/* Spacer for fixed button */}
+      <div className="h-20" />
     </div>
   );
 };
