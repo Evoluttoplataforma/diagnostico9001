@@ -41,7 +41,7 @@ serve(async (req) => {
       .from("quiz_events")
       .select("event_type, session_id, created_at")
       .order("created_at", { ascending: false })
-      .limit(5000);
+      .limit(10000);
 
     if (eventsError) throw eventsError;
 

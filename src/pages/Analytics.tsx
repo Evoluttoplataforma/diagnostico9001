@@ -87,14 +87,25 @@ export default function Analytics() {
         byDay[day] = (byDay[day] || 0) + 1;
       });
 
+    // Sessions (unique session_ids) by day (last 30d)
+    const sessionsByDay: Record<string, Set<string>> = {};
+    events
+      .filter((e) => new Date(e.created_at) >= last30d)
+      .forEach((e) => {
+        const day = new Date(e.created_at).toISOString().split("T")[0];
+        if (!sessionsByDay[day]) sessionsByDay[day] = new Set();
+        sessionsByDay[day].add(e.session_id);
+      });
+
     // Fill missing days
-    const dailyData: { date: string; leads: number }[] = [];
+    const dailyData: { date: string; leads: number; sessoes: number }[] = [];
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const key = d.toISOString().split("T")[0];
       dailyData.push({
         date: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         leads: byDay[key] || 0,
+        sessoes: sessionsByDay[key]?.size || 0,
       });
     }
 
@@ -242,7 +253,11 @@ export default function Analytics() {
         <div className="rounded-xl border bg-card p-4 space-y-3">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">Leads por Dia (últimos 30 dias)</h2>
+            <h2 className="text-sm font-semibold text-foreground">Leads & Tráfego por Dia (últimos 30 dias)</h2>
+          </div>
+          <div className="flex gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-primary inline-block rounded" /> Leads</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ backgroundColor: "#8b5cf6" }} /> Sessões</span>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -264,7 +279,17 @@ export default function Analytics() {
                 />
                 <Line
                   type="monotone"
+                  dataKey="sessoes"
+                  name="Sessões"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  dot={{ r: 2 }}
+                  activeDot={{ r: 4 }}
+                />
+                <Line
+                  type="monotone"
                   dataKey="leads"
+                  name="Leads"
                   stroke="hsl(var(--primary))"
                   strokeWidth={2}
                   dot={{ r: 3 }}
