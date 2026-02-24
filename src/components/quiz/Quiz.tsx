@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
 import { ContactStep, ContactData } from "./steps/ContactStep";
-import { CompanyStep, CompanyData } from "./steps/CompanyStep";
+import { ChatStep, ChatStepData } from "./steps/ChatStep";
 import { WelcomeStep } from "./steps/WelcomeStep";
 import { DynamicQuestion, AnswerValue, getScore, getDiagnosis, calculatePillarScores } from "./quizData";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,12 +11,12 @@ import { useUTM } from "@/hooks/use-utm";
 import { DiagnosisLoading } from "./results/DiagnosisLoading";
 import { QuestionsLoading } from "./results/QuestionsLoading";
 
-type Step = "welcome" | "contact" | "company" | "generating" | "questions";
+type Step = "welcome" | "contact" | "chat" | "generating" | "questions";
 
 interface QuizData {
   answers: Record<string, AnswerValue>;
   contact: ContactData | null;
-  company: CompanyData | null;
+  company: ChatStepData | null;
 }
 
 export const Quiz = () => {
@@ -37,24 +37,25 @@ export const Quiz = () => {
   const totalQuestions = dynamicQuestions.length || 20;
   const totalSteps = totalQuestions + 2;
 
-  // --- Contact step ---
+  // --- Contact step (3 fields) ---
   const handleContactNext = (contactData: ContactData) => {
     setData((prev) => ({ ...prev, contact: contactData }));
-    setCurrentStep("company");
+    setCurrentStep("chat");
   };
 
   const handleContactBack = () => {
     setCurrentStep("welcome");
   };
 
-  // --- Company step: create lead + generate questions ---
-  const handleCompanyNext = async (companyData: CompanyData) => {
+  // --- Chat step complete: create lead + generate questions ---
+  const handleChatComplete = async (chatData: ChatStepData) => {
     const contactData = data.contact!;
-    setData((prev) => ({ ...prev, company: companyData }));
+    // Merge jobTitle from chat into contact
+    contactData.jobTitle = chatData.jobTitle;
+    setData((prev) => ({ ...prev, contact: contactData, company: chatData }));
     setCurrentStep("generating");
 
     try {
-      // Run Pipedrive creation and question generation in parallel
       const [, questionsResult] = await Promise.all([
         // Create lead in Pipedrive
         (async () => {
@@ -64,11 +65,11 @@ export const Quiz = () => {
                 name: contactData.name,
                 email: contactData.email,
                 phone: contactData.phone,
-                job_title: contactData.jobTitle,
-                company: companyData.company,
-                segment: companyData.segment,
-                company_size: companyData.companySize,
-                revenue: companyData.revenue,
+                job_title: chatData.jobTitle,
+                company: chatData.company,
+                segment: chatData.segment,
+                company_size: chatData.companySize,
+                revenue: chatData.revenue,
                 score: 0,
                 diagnosis_level: "pending",
                 utm_source: utmParams.utm_source,
@@ -94,10 +95,10 @@ export const Quiz = () => {
         (async () => {
           const { data: questionsData, error } = await supabase.functions.invoke("generate-questions", {
             body: {
-              segment: companyData.segment,
-              companySize: companyData.companySize,
-              revenue: companyData.revenue,
-              jobTitle: contactData.jobTitle,
+              segment: chatData.segment,
+              companySize: chatData.companySize,
+              revenue: chatData.revenue,
+              jobTitle: chatData.jobTitle,
             },
           });
           if (error) throw error;
@@ -114,11 +115,11 @@ export const Quiz = () => {
     } catch (err) {
       console.error("Error generating questions:", err);
       toast.error("Erro ao gerar perguntas. Tente novamente.");
-      setCurrentStep("company");
+      setCurrentStep("chat");
     }
   };
 
-  const handleCompanyBack = () => {
+  const handleChatBack = () => {
     setCurrentStep("contact");
   };
 
@@ -143,7 +144,7 @@ export const Quiz = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
     } else {
-      setCurrentStep("company");
+      setCurrentStep("chat");
     }
   };
 
@@ -164,7 +165,6 @@ export const Quiz = () => {
       const minLoadingPromise = new Promise((resolve) => setTimeout(resolve, 8000));
 
       const submitPromise = (async () => {
-        // Save to database
         const { error } = await supabase.from("quiz_leads").insert({
           name: contactData.name,
           email: contactData.email,
@@ -183,7 +183,6 @@ export const Quiz = () => {
           return false;
         }
 
-        // Update existing Pipedrive deal with diagnosis results
         const currentDealId = dealIdRef.current;
         if (currentDealId) {
           try {
@@ -270,13 +269,12 @@ export const Quiz = () => {
         />
       );
 
-    case "company":
+    case "chat":
       return (
-        <CompanyStep
-          currentStep={2}
-          totalSteps={totalSteps}
-          onSubmit={handleCompanyNext}
-          onBack={handleCompanyBack}
+        <ChatStep
+          userName={data.contact?.name || ""}
+          onComplete={handleChatComplete}
+          onBack={handleChatBack}
         />
       );
 
