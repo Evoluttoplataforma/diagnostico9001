@@ -44,6 +44,11 @@ export default function Analytics() {
   const [error, setError] = useState("");
   const [variantSort, setVariantSort] = useState<"leads" | "score">("leads");
   const [copyOrder, setCopyOrder] = useState<string[] | null>(null);
+  const [sectionOrder, setSectionOrder] = useState<string[]>([
+    "stats", "daily", "pie-charts", "seg-size", "ab-test", "copys-ref", "recent-leads"
+  ]);
+  const dragSection = useRef<number | null>(null);
+  const dragOverSection = useRef<number | null>(null);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
   const isMobile = useIsMobile();
@@ -262,358 +267,280 @@ export default function Analytics() {
           <p className="text-sm text-muted-foreground">Diagnóstico ISO 9001 — Templum Consultoria</p>
         </div>
 
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={Users} label="Total de Leads" value={metrics.total} sub="Desde o início" />
-          <StatCard icon={Calendar} label="Últimos 7 dias" value={metrics.leadsLast7d} />
-          <StatCard
-            icon={TrendingUp}
-            label="Últimos 30 dias"
-            value={metrics.leadsLast30d}
-            trend={metrics.growthRate}
-            sub="vs 30 dias anteriores"
-          />
-          <StatCard icon={Target} label="Score Médio" value={`${metrics.avgScore}%`} />
-        </div>
+        {(() => {
+          const handleSectionDragStart = (idx: number) => { dragSection.current = idx; };
+          const handleSectionDragEnter = (idx: number) => { dragOverSection.current = idx; };
+          const handleSectionDragEnd = () => {
+            if (dragSection.current === null || dragOverSection.current === null) return;
+            const newOrder = [...sectionOrder];
+            const [removed] = newOrder.splice(dragSection.current, 1);
+            newOrder.splice(dragOverSection.current, 0, removed);
+            setSectionOrder(newOrder);
+            dragSection.current = null;
+            dragOverSection.current = null;
+          };
 
-        {/* Leads por dia (line chart) */}
-        <div className="rounded-xl border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">Leads & Tráfego por Dia (últimos 30 dias)</h2>
-          </div>
-          <div className="flex gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-primary inline-block rounded" /> Leads</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ backgroundColor: "#8b5cf6" }} /> Sessões</span>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={metrics.dailyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                  interval={isMobile ? 6 : 2}
-                />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null;
-                    const item = payload.find((p: any) => p.dataKey === "leads");
-                    const sessItem = payload.find((p: any) => p.dataKey === "sessoes");
-                    const variants: Record<string, number> = (item?.payload as any)?.variants || {};
-                    const variantEntries = Object.entries(variants).sort((a, b) => a[0].localeCompare(b[0]));
-                    return (
-                      <div style={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                        fontSize: "12px",
-                        padding: "8px 12px",
-                      }}>
-                        <p style={{ fontWeight: 600, marginBottom: 4 }}>{label}</p>
-                        {sessItem && <p style={{ color: "#8b5cf6" }}>Sessões: {sessItem.value}</p>}
-                        {item && <p style={{ color: "hsl(var(--primary))" }}>Leads: {item.value}</p>}
-                        {variantEntries.length > 0 && (
-                          <div style={{ marginTop: 4, borderTop: "1px solid hsl(var(--border))", paddingTop: 4 }}>
-                            {variantEntries.map(([v, count]) => (
-                              <p key={v} style={{ color: "hsl(var(--muted-foreground))" }}>
-                                Copy {v}: {count}
-                              </p>
-                            ))}
-                          </div>
-                        )}
+          const DragHandle = () => (
+            <GripVertical className="w-4 h-4 text-muted-foreground/40 cursor-grab active:cursor-grabbing" />
+          );
+
+          const sections: Record<string, React.ReactNode> = {
+            "stats": (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <StatCard icon={Users} label="Total de Leads" value={metrics.total} sub="Desde o início" />
+                <StatCard icon={Calendar} label="Últimos 7 dias" value={metrics.leadsLast7d} />
+                <StatCard icon={TrendingUp} label="Últimos 30 dias" value={metrics.leadsLast30d} trend={metrics.growthRate} sub="vs 30 dias anteriores" />
+                <StatCard icon={Target} label="Score Médio" value={`${metrics.avgScore}%`} />
+              </div>
+            ),
+            "daily": (
+              <div className="rounded-xl border bg-card p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <DragHandle />
+                  <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="text-sm font-semibold text-foreground">Leads & Tráfego por Dia (últimos 30 dias)</h2>
+                </div>
+                <div className="flex gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-primary inline-block rounded" /> Leads</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ backgroundColor: "#8b5cf6" }} /> Sessões</span>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={metrics.dailyData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={isMobile ? 6 : 2} />
+                      <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                      <Tooltip
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null;
+                          const item = payload.find((p: any) => p.dataKey === "leads");
+                          const sessItem = payload.find((p: any) => p.dataKey === "sessoes");
+                          const variants: Record<string, number> = (item?.payload as any)?.variants || {};
+                          const variantEntries = Object.entries(variants).sort((a, b) => a[0].localeCompare(b[0]));
+                          return (
+                            <div style={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px", padding: "8px 12px" }}>
+                              <p style={{ fontWeight: 600, marginBottom: 4 }}>{label}</p>
+                              {sessItem && <p style={{ color: "#8b5cf6" }}>Sessões: {sessItem.value}</p>}
+                              {item && <p style={{ color: "hsl(var(--primary))" }}>Leads: {item.value}</p>}
+                              {variantEntries.length > 0 && (
+                                <div style={{ marginTop: 4, borderTop: "1px solid hsl(var(--border))", paddingTop: 4 }}>
+                                  {variantEntries.map(([v, count]) => (
+                                    <p key={v} style={{ color: "hsl(var(--muted-foreground))" }}>Copy {v}: {count}</p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }}
+                      />
+                      <Line type="monotone" dataKey="sessoes" name="Sessões" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="leads" name="Leads" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            ),
+            "pie-charts": (
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-xl border bg-card p-4 space-y-3">
+                  <div className="flex items-center gap-2"><DragHandle /><h2 className="text-sm font-semibold text-foreground">Nível de Diagnóstico</h2></div>
+                  <div className="h-56 flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={metrics.levelData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                          {metrics.levelData.map((_: any, i: number) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="rounded-xl border bg-card p-4 space-y-3">
+                  <div className="flex items-center gap-2"><DragHandle /><h2 className="text-sm font-semibold text-foreground">Distribuição de Score</h2></div>
+                  <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={metrics.scoreData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="range" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                        <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                        <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            ),
+            "seg-size": (
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-xl border bg-card p-4 space-y-3">
+                  <div className="flex items-center gap-2"><DragHandle /><h2 className="text-sm font-semibold text-foreground">Top Segmentos</h2></div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={metrics.segmentData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                        <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 150} />
+                        <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                        <Bar dataKey="value" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="rounded-xl border bg-card p-4 space-y-3">
+                  <div className="flex items-center gap-2"><DragHandle /><h2 className="text-sm font-semibold text-foreground">Porte da Empresa</h2></div>
+                  <div className="h-64 flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={metrics.sizeData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                          {metrics.sizeData.map((_: any, i: number) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            ),
+            "ab-test": metrics.variantData.length > 1 ? (
+              <div className="rounded-xl border bg-card p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <DragHandle />
+                  <FlaskConical className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="text-sm font-semibold text-foreground">A/B Test — Performance por Copy do Hero</h2>
+                </div>
+                <div className="grid md:grid-cols-[1fr_auto] gap-6">
+                  <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={metrics.variantData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                        <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                        <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                        <Bar dataKey="leads" name="Leads" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="space-y-3 min-w-[220px]">
+                    {metrics.variantData.map((v) => (
+                      <div key={v.name} className="flex items-center justify-between gap-3 text-sm">
+                        <span className="font-medium text-foreground">{v.name}</span>
+                        <span className="text-muted-foreground text-xs">{v.leads} leads ({v.pct}%)</span>
                       </div>
-                    );
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="sessoes"
-                  name="Sessões"
-                  stroke="#8b5cf6"
-                  strokeWidth={2}
-                  dot={{ r: 2 }}
-                  activeDot={{ r: 4 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="leads"
-                  name="Leads"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Row: Pie charts */}
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* Nível de Diagnóstico */}
-          <div className="rounded-xl border bg-card p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-foreground">Nível de Diagnóstico</h2>
-            <div className="h-56 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={metrics.levelData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {metrics.levelData.map((_: any, i: number) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Distribuição de Score */}
-          <div className="rounded-xl border bg-card p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-foreground">Distribuição de Score</h2>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={metrics.scoreData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="range" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* Row: Segment & Size */}
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* Top Segmentos */}
-          <div className="rounded-xl border bg-card p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-foreground">Top Segmentos</h2>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={metrics.segmentData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                    width={isMobile ? 80 : 150}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Bar dataKey="value" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Porte da Empresa */}
-          <div className="rounded-xl border bg-card p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-foreground">Porte da Empresa</h2>
-            <div className="h-64 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={metrics.sizeData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {metrics.sizeData.map((_: any, i: number) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* A/B Copy Variant Performance */}
-        {metrics.variantData.length > 1 && (
-          <div className="rounded-xl border bg-card p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold text-foreground">A/B Test — Performance por Copy do Hero</h2>
-            </div>
-            <div className="grid md:grid-cols-[1fr_auto] gap-6">
-              <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={metrics.variantData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                    <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                        fontSize: "12px",
-                      }}
-                    />
-                    <Bar dataKey="leads" name="Leads" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-3 min-w-[220px]">
-                {metrics.variantData.map((v) => (
-                  <div key={v.name} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="font-medium text-foreground">{v.name}</span>
-                    <span className="text-muted-foreground text-xs">{v.leads} leads ({v.pct}%)</span>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            ) : null,
+            "copys-ref": (
+              <div className="rounded-xl border bg-card p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <DragHandle />
+                  <FlaskConical className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="text-sm font-semibold text-foreground">Copys em Rotação (A/B Test)</h2>
+                </div>
+                <div className="grid gap-3">
+                  {(() => {
+                    const variantLeadCount: Record<string, number> = {};
+                    leads.forEach((l) => {
+                      if (l.copy_variant && ["A","B","C","D","E"].includes(l.copy_variant)) {
+                        variantLeadCount[l.copy_variant] = (variantLeadCount[l.copy_variant] || 0) + 1;
+                      }
+                    });
+                    const defaultSorted = [...COPY_VARIANTS].sort((a, b) => (variantLeadCount[b.id] || 0) - (variantLeadCount[a.id] || 0));
+                    const orderedIds = copyOrder || defaultSorted.map(v => v.id);
+                    const ordered = orderedIds.map(id => COPY_VARIANTS.find(v => v.id === id)!).filter(Boolean);
+                    const handleCopyDragStart = (idx: number) => { dragItem.current = idx; };
+                    const handleCopyDragEnter = (idx: number) => { dragOverItem.current = idx; };
+                    const handleCopyDragEnd = () => {
+                      if (dragItem.current === null || dragOverItem.current === null) return;
+                      const newOrder = [...orderedIds];
+                      const [removed] = newOrder.splice(dragItem.current, 1);
+                      newOrder.splice(dragOverItem.current, 0, removed);
+                      setCopyOrder(newOrder);
+                      dragItem.current = null;
+                      dragOverItem.current = null;
+                    };
+                    const medalColors = ["#FFD700", "#C0C0C0", "#CD7F32"];
+                    const medalLabels = ["🥇", "🥈", "🥉"];
+                    return ordered.map((v, idx) => {
+                      const count = variantLeadCount[v.id] || 0;
+                      const medalBorder = idx < 3 ? medalColors[idx] : undefined;
+                      return (
+                        <div key={v.id} draggable onDragStart={(e) => { e.stopPropagation(); handleCopyDragStart(idx); }} onDragEnter={(e) => { e.stopPropagation(); handleCopyDragEnter(idx); }} onDragEnd={(e) => { e.stopPropagation(); handleCopyDragEnd(); }} onDragOver={(e) => e.preventDefault()} className="rounded-lg border p-3 space-y-1 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md" style={{ borderColor: medalBorder || "hsl(var(--border))", borderWidth: idx < 3 ? 2 : 1, backgroundColor: idx < 3 ? `${medalColors[idx]}08` : "hsl(var(--muted) / 0.3)" }}>
+                          <div className="flex items-center gap-2">
+                            <GripVertical className="w-4 h-4 text-muted-foreground/50" />
+                            {idx < 3 && <span className="text-base">{medalLabels[idx]}</span>}
+                            <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">Copy {v.id}</span>
+                            <span className="text-xs font-semibold text-foreground">{count} leads</span>
+                          </div>
+                          <p className="text-sm font-semibold text-foreground leading-snug">{v.headline} <span className="text-primary">{v.highlightedPart}</span></p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{v.description}</p>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            ),
+            "recent-leads": (
+              <div className="rounded-xl border bg-card p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <DragHandle />
+                  <h2 className="text-sm font-semibold text-foreground">Últimos 10 Leads</h2>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Nome</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Empresa</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Score</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Copy</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Nível</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Data</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leads.slice(0, 10).map((l) => (
+                        <tr key={l.id} className="border-b border-border/50">
+                          <td className="py-2 px-2 font-medium text-foreground whitespace-nowrap">{l.name}</td>
+                          <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{l.company}</td>
+                          <td className="py-2 px-2 text-foreground">{l.score}%</td>
+                          <td className="py-2 px-2 text-muted-foreground text-xs">{l.copy_variant || "—"}</td>
+                          <td className="py-2 px-2">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${{ crítico: "bg-red-100 text-red-800", básico: "bg-orange-100 text-orange-800", intermediário: "bg-yellow-100 text-yellow-800", avançado: "bg-green-100 text-green-800" }[l.diagnosis_level.toLowerCase()] || "bg-muted text-muted-foreground"}`}>
+                              {l.diagnosis_level}
+                            </span>
+                          </td>
+                          <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{new Date(l.created_at).toLocaleDateString("pt-BR")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ),
+          };
 
-        {/* Referência das Copys */}
-        <div className="rounded-xl border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <FlaskConical className="w-4 h-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">Copys em Rotação (A/B Test)</h2>
-          </div>
-          <div className="grid gap-3">
-            {(() => {
-              const variantLeadCount: Record<string, number> = {};
-              leads.forEach((l) => {
-                if (l.copy_variant && ["A","B","C","D","E"].includes(l.copy_variant)) {
-                  variantLeadCount[l.copy_variant] = (variantLeadCount[l.copy_variant] || 0) + 1;
-                }
-              });
-
-              // Use custom order if set, otherwise sort by leads
-              const defaultSorted = [...COPY_VARIANTS].sort((a, b) => (variantLeadCount[b.id] || 0) - (variantLeadCount[a.id] || 0));
-              const orderedIds = copyOrder || defaultSorted.map(v => v.id);
-              const ordered = orderedIds.map(id => COPY_VARIANTS.find(v => v.id === id)!).filter(Boolean);
-
-              const handleDragStart = (idx: number) => { dragItem.current = idx; };
-              const handleDragEnter = (idx: number) => { dragOverItem.current = idx; };
-              const handleDragEnd = () => {
-                if (dragItem.current === null || dragOverItem.current === null) return;
-                const newOrder = [...orderedIds];
-                const [removed] = newOrder.splice(dragItem.current, 1);
-                newOrder.splice(dragOverItem.current, 0, removed);
-                setCopyOrder(newOrder);
-                dragItem.current = null;
-                dragOverItem.current = null;
-              };
-
-              const medalColors = ["#FFD700", "#C0C0C0", "#CD7F32"];
-              const medalLabels = ["🥇", "🥈", "🥉"];
-
-              return ordered.map((v, idx) => {
-                const count = variantLeadCount[v.id] || 0;
-                const medalBorder = idx < 3 ? medalColors[idx] : undefined;
-                return (
-                  <div
-                    key={v.id}
-                    draggable
-                    onDragStart={() => handleDragStart(idx)}
-                    onDragEnter={() => handleDragEnter(idx)}
-                    onDragEnd={handleDragEnd}
-                    onDragOver={(e) => e.preventDefault()}
-                    className="rounded-lg border p-3 space-y-1 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md"
-                    style={{
-                      borderColor: medalBorder || "hsl(var(--border))",
-                      borderWidth: idx < 3 ? 2 : 1,
-                      backgroundColor: idx < 3 ? `${medalColors[idx]}08` : "hsl(var(--muted) / 0.3)",
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <GripVertical className="w-4 h-4 text-muted-foreground/50" />
-                      {idx < 3 && <span className="text-base">{medalLabels[idx]}</span>}
-                      <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
-                        Copy {v.id}
-                      </span>
-                      <span className="text-xs font-semibold text-foreground">{count} leads</span>
-                    </div>
-                    <p className="text-sm font-semibold text-foreground leading-snug">
-                      {v.headline} <span className="text-primary">{v.highlightedPart}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{v.description}</p>
-                  </div>
-                );
-              });
-            })()}
-          </div>
-        </div>
-
-        {/* Recent leads table */}
-        <div className="rounded-xl border bg-card p-4 space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">Últimos 10 Leads</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Nome</th>
-                  <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Empresa</th>
-                  <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Score</th>
-                  <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Copy</th>
-                  <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Nível</th>
-                  <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leads.slice(0, 10).map((l) => (
-                  <tr key={l.id} className="border-b border-border/50">
-                    <td className="py-2 px-2 font-medium text-foreground whitespace-nowrap">{l.name}</td>
-                    <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{l.company}</td>
-                    <td className="py-2 px-2 text-foreground">{l.score}%</td>
-                    <td className="py-2 px-2 text-muted-foreground text-xs">{l.copy_variant || "—"}</td>
-                    <td className="py-2 px-2">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                          {
-                            crítico: "bg-red-100 text-red-800",
-                            básico: "bg-orange-100 text-orange-800",
-                            intermediário: "bg-yellow-100 text-yellow-800",
-                            avançado: "bg-green-100 text-green-800",
-                          }[l.diagnosis_level.toLowerCase()] || "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {l.diagnosis_level}
-                      </span>
-                    </td>
-                    <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">
-                      {new Date(l.created_at).toLocaleDateString("pt-BR")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          return sectionOrder.map((key, idx) => {
+            const content = sections[key];
+            if (!content) return null;
+            return (
+              <div
+                key={key}
+                draggable
+                onDragStart={() => handleSectionDragStart(idx)}
+                onDragEnter={() => handleSectionDragEnter(idx)}
+                onDragEnd={handleSectionDragEnd}
+                onDragOver={(e) => e.preventDefault()}
+                className="transition-shadow"
+              >
+                {content}
+              </div>
+            );
+          });
+        })()}
       </div>
     </div>
   );
