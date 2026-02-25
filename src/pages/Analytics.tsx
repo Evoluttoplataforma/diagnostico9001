@@ -762,7 +762,13 @@ export default function Analytics() {
                         return (
                         <tr key={l.id} className="border-b border-border/50">
                           <td className="py-2 px-2 font-medium text-foreground whitespace-nowrap">{l.name}</td>
-                          <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{l.company}</td>
+                          <td className="py-2 px-2 whitespace-nowrap">
+                            {pd?.deal_id ? (
+                              <a href={`https://app.pipedrive.com/deal/${pd.deal_id}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1">
+                                {l.company} <ExternalLink className="w-3 h-3" />
+                              </a>
+                            ) : <span className="text-muted-foreground">{l.company}</span>}
+                          </td>
                           <td className="py-2 px-2 text-foreground">{l.score}%</td>
                           <td className="py-2 px-2">
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${{ crítico: "bg-red-100 text-red-800", básico: "bg-orange-100 text-orange-800", intermediário: "bg-yellow-100 text-yellow-800", avançado: "bg-green-100 text-green-800" }[l.diagnosis_level.toLowerCase()] || "bg-muted text-muted-foreground"}`}>
