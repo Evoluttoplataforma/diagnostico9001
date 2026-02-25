@@ -269,25 +269,31 @@ export default function Analytics() {
       }))
       .sort((a, b) => b.leads - a.leads);
 
-    // UTM analytics
-    const utmSourceMap: Record<string, number> = {};
-    const utmMediumMap: Record<string, number> = {};
-    const utmCampaignMap: Record<string, number> = {};
-    const utmContentMap: Record<string, number> = {};
-    filteredLeads.forEach((l) => {
-      const src = l.utm_source || "(direto)";
-      const med = l.utm_medium || "(nenhum)";
-      const camp = l.utm_campaign || "(nenhuma)";
-      const cont = l.utm_content || "(nenhum)";
-      utmSourceMap[src] = (utmSourceMap[src] || 0) + 1;
-      utmMediumMap[med] = (utmMediumMap[med] || 0) + 1;
-      utmCampaignMap[camp] = (utmCampaignMap[camp] || 0) + 1;
-      utmContentMap[cont] = (utmContentMap[cont] || 0) + 1;
-    });
-    const utmSourceData = Object.entries(utmSourceMap).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
-    const utmMediumData = Object.entries(utmMediumMap).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
-    const utmCampaignData = Object.entries(utmCampaignMap).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, value]) => ({ name: name.length > 25 ? name.slice(0, 25) + "…" : name, value }));
-    const utmContentData = Object.entries(utmContentMap).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, value]) => ({ name: name.length > 25 ? name.slice(0, 25) + "…" : name, value }));
+    // UTM analytics with avg score
+    type UtmEntry = { name: string; leads: number; avgScore: number; pct: number };
+    const buildUtmData = (getter: (l: Lead) => string, fallback: string): UtmEntry[] => {
+      const map: Record<string, { count: number; totalScore: number }> = {};
+      filteredLeads.forEach((l) => {
+        const key = getter(l) || fallback;
+        if (!map[key]) map[key] = { count: 0, totalScore: 0 };
+        map[key].count++;
+        map[key].totalScore += l.score;
+      });
+      const total = filteredLeads.length || 1;
+      return Object.entries(map)
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 10)
+        .map(([name, { count, totalScore }]) => ({
+          name: name.length > 30 ? name.slice(0, 30) + "…" : name,
+          leads: count,
+          avgScore: Math.round(totalScore / count),
+          pct: Math.round((count / total) * 100),
+        }));
+    };
+    const utmSourceData = buildUtmData((l) => l.utm_source || "", "(direto)");
+    const utmMediumData = buildUtmData((l) => l.utm_medium || "", "(nenhum)");
+    const utmCampaignData = buildUtmData((l) => l.utm_campaign || "", "(nenhuma)");
+    const utmContentData = buildUtmData((l) => l.utm_content || "", "(nenhum)");
 
     return {
       total: filteredLeads.length,
@@ -677,75 +683,49 @@ export default function Analytics() {
                 </div>
               </div>
             ),
-            "utm-analytics": (
+             "utm-analytics": (
               <div className="rounded-xl border bg-card p-4 space-y-4">
                 <div className="flex items-center gap-2">
                   <DragHandle />
                   <TrendingUp className="w-4 h-4 text-muted-foreground" />
                   <h2 className="text-sm font-semibold text-foreground">UTM — Origem dos Leads</h2>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {/* Source */}
-                  <div className="space-y-2">
-                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Source (Origem)</h3>
-                    <div className="h-48">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={metrics.utmSourceData} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                          <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 120} />
-                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
-                          <Bar dataKey="value" name="Leads" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
+                {[
+                  { title: "Source (Origem)", data: metrics.utmSourceData, color: "#3b82f6" },
+                  { title: "Medium (Meio)", data: metrics.utmMediumData, color: "#8b5cf6" },
+                  { title: "Campaign (Campanha)", data: metrics.utmCampaignData, color: "#22c55e" },
+                  { title: "Content (Criativo)", data: metrics.utmContentData, color: "#f97316" },
+                ].map(({ title, data: utmData, color }) => (
+                  utmData.length > 0 && utmData[0].name !== "(direto)" && utmData[0].name !== "(nenhum)" && utmData[0].name !== "(nenhuma)" ? (
+                    <div key={title} className="space-y-2">
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {utmData.map((item, i) => (
+                          <div
+                            key={item.name}
+                            className="rounded-lg border p-3 space-y-1 transition-shadow hover:shadow-md"
+                            style={{ borderLeftWidth: 3, borderLeftColor: color }}
+                          >
+                            <p className="text-xs font-semibold text-foreground truncate" title={item.name}>
+                              {i === 0 && "🥇 "}{i === 1 && "🥈 "}{i === 2 && "🥉 "}
+                              {item.name}
+                            </p>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-lg font-bold text-foreground">{item.leads}</span>
+                              <span className="text-[10px] text-muted-foreground">leads ({item.pct}%)</span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">Score médio: <span className="font-medium text-foreground">{item.avgScore}%</span></p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  {/* Medium */}
-                  <div className="space-y-2">
-                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Medium (Meio)</h3>
-                    <div className="h-48">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={metrics.utmMediumData} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                          <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 120} />
-                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
-                          <Bar dataKey="value" name="Leads" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
+                  ) : (
+                    <div key={title} className="space-y-2">
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</h3>
+                      <p className="text-xs text-muted-foreground italic">Sem dados de UTM ainda — leads futuros com UTMs aparecerão aqui.</p>
                     </div>
-                  </div>
-                  {/* Campaign */}
-                  <div className="space-y-2">
-                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Campaign (Campanha)</h3>
-                    <div className="h-48">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={metrics.utmCampaignData} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                          <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 120} />
-                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
-                          <Bar dataKey="value" name="Leads" fill="#22c55e" radius={[0, 4, 4, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                  {/* Content (Criativo) */}
-                  <div className="space-y-2">
-                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Content (Criativo)</h3>
-                    <div className="h-48">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={metrics.utmContentData} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                          <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 120} />
-                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
-                          <Bar dataKey="value" name="Leads" fill="#f97316" radius={[0, 4, 4, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
+                  )
+                ))}
               </div>
             ),
             "recent-leads": (
