@@ -25,6 +25,11 @@ interface Lead {
   diagnosis_level: string;
   created_at: string;
   copy_variant: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  utm_term: string | null;
 }
 
 // Hardcoded visitor data from project analytics (updated periodically)
@@ -85,7 +90,7 @@ export default function Analytics() {
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [periodOpen, setPeriodOpen] = useState(false);
-  const defaultSections = ["stats", "daily", "pie-charts", "seg-size", "ab-test", "copys-ref", "recent-leads"];
+  const defaultSections = ["stats", "daily", "utm-analytics", "pie-charts", "seg-size", "ab-test", "copys-ref", "recent-leads"];
   const [sectionOrder, setSectionOrder] = useState<string[]>(defaultSections);
   const passwordRef = useRef("");
   const dragSection = useRef<number | null>(null);
@@ -264,6 +269,26 @@ export default function Analytics() {
       }))
       .sort((a, b) => b.leads - a.leads);
 
+    // UTM analytics
+    const utmSourceMap: Record<string, number> = {};
+    const utmMediumMap: Record<string, number> = {};
+    const utmCampaignMap: Record<string, number> = {};
+    const utmContentMap: Record<string, number> = {};
+    filteredLeads.forEach((l) => {
+      const src = l.utm_source || "(direto)";
+      const med = l.utm_medium || "(nenhum)";
+      const camp = l.utm_campaign || "(nenhuma)";
+      const cont = l.utm_content || "(nenhum)";
+      utmSourceMap[src] = (utmSourceMap[src] || 0) + 1;
+      utmMediumMap[med] = (utmMediumMap[med] || 0) + 1;
+      utmCampaignMap[camp] = (utmCampaignMap[camp] || 0) + 1;
+      utmContentMap[cont] = (utmContentMap[cont] || 0) + 1;
+    });
+    const utmSourceData = Object.entries(utmSourceMap).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
+    const utmMediumData = Object.entries(utmMediumMap).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
+    const utmCampaignData = Object.entries(utmCampaignMap).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, value]) => ({ name: name.length > 25 ? name.slice(0, 25) + "…" : name, value }));
+    const utmContentData = Object.entries(utmContentMap).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, value]) => ({ name: name.length > 25 ? name.slice(0, 25) + "…" : name, value }));
+
     return {
       total: filteredLeads.length,
       totalAll: leads.length,
@@ -275,6 +300,10 @@ export default function Analytics() {
       scoreData,
       sizeData,
       variantData,
+      utmSourceData,
+      utmMediumData,
+      utmCampaignData,
+      utmContentData,
     };
   }, [leads, dateRange]);
 
@@ -648,6 +677,77 @@ export default function Analytics() {
                 </div>
               </div>
             ),
+            "utm-analytics": (
+              <div className="rounded-xl border bg-card p-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <DragHandle />
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="text-sm font-semibold text-foreground">UTM — Origem dos Leads</h2>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Source */}
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Source (Origem)</h3>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={metrics.utmSourceData} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                          <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 120} />
+                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                          <Bar dataKey="value" name="Leads" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  {/* Medium */}
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Medium (Meio)</h3>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={metrics.utmMediumData} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                          <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 120} />
+                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                          <Bar dataKey="value" name="Leads" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  {/* Campaign */}
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Campaign (Campanha)</h3>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={metrics.utmCampaignData} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                          <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 120} />
+                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                          <Bar dataKey="value" name="Leads" fill="#22c55e" radius={[0, 4, 4, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  {/* Content (Criativo) */}
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Content (Criativo)</h3>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={metrics.utmContentData} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                          <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={isMobile ? 80 : 120} />
+                          <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
+                          <Bar dataKey="value" name="Leads" fill="#f97316" radius={[0, 4, 4, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ),
             "recent-leads": (
               <div className="rounded-xl border bg-card p-4 space-y-3">
                 <div className="flex items-center gap-2">
@@ -666,7 +766,7 @@ export default function Analytics() {
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Proprietário</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Etapa</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Motivo Perda</th>
-                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Data</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Source</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Data</th>
                       </tr>
                     </thead>
@@ -698,6 +798,9 @@ export default function Analytics() {
                           </td>
                           <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
                             {pipedriveLoading ? <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" /> : pd?.lost_reason || "—"}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {l.utm_source || "—"}
                           </td>
                           <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{new Date(l.created_at).toLocaleDateString("pt-BR")}</td>
                         </tr>

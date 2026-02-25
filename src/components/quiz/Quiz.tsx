@@ -194,6 +194,11 @@ export const Quiz = () => {
           answers: allAnswers,
           diagnosis_level: diagnosis.level,
           copy_variant: welcomeData.copyVariant,
+          utm_source: utmParams.utm_source || "",
+          utm_medium: utmParams.utm_medium || "",
+          utm_campaign: utmParams.utm_campaign || "",
+          utm_content: utmParams.utm_content || "",
+          utm_term: utmParams.utm_term || "",
         });
 
         if (error) {
