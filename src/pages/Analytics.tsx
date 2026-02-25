@@ -107,7 +107,12 @@ export default function Analytics() {
         body: { password },
       });
       if (data?.success) {
-        setLeads(data.leads);
+        const isTestLead = (l: Lead) => {
+          const t = [l.name, l.email, l.company, l.segment || ""].map(s => s.toLowerCase());
+          return t.some(s => s.includes("test") || s.includes("teste"));
+        };
+        const cleanLeads = (data.leads as Lead[]).filter(l => !isTestLead(l));
+        setLeads(cleanLeads);
         passwordRef.current = password;
         // Load saved dashboard settings
         if (data.settings) {
