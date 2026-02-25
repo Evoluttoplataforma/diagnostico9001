@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { COPY_VARIANTS } from "@/components/quiz/copyVariants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical } from "lucide-react";
+import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical, GripVertical } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend,
@@ -43,6 +43,9 @@ export default function Analytics() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [variantSort, setVariantSort] = useState<"leads" | "score">("leads");
+  const [copyOrder, setCopyOrder] = useState<string[] | null>(null);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
   const isMobile = useIsMobile();
 
   const handleLogin = async () => {
@@ -502,23 +505,45 @@ export default function Analytics() {
           </div>
           <div className="grid gap-3">
             {(() => {
-              // Build lead count per variant and sort by leads desc
               const variantLeadCount: Record<string, number> = {};
               leads.forEach((l) => {
                 if (l.copy_variant && ["A","B","C","D","E"].includes(l.copy_variant)) {
                   variantLeadCount[l.copy_variant] = (variantLeadCount[l.copy_variant] || 0) + 1;
                 }
               });
-              const sorted = [...COPY_VARIANTS].sort((a, b) => (variantLeadCount[b.id] || 0) - (variantLeadCount[a.id] || 0));
+
+              // Use custom order if set, otherwise sort by leads
+              const defaultSorted = [...COPY_VARIANTS].sort((a, b) => (variantLeadCount[b.id] || 0) - (variantLeadCount[a.id] || 0));
+              const orderedIds = copyOrder || defaultSorted.map(v => v.id);
+              const ordered = orderedIds.map(id => COPY_VARIANTS.find(v => v.id === id)!).filter(Boolean);
+
+              const handleDragStart = (idx: number) => { dragItem.current = idx; };
+              const handleDragEnter = (idx: number) => { dragOverItem.current = idx; };
+              const handleDragEnd = () => {
+                if (dragItem.current === null || dragOverItem.current === null) return;
+                const newOrder = [...orderedIds];
+                const [removed] = newOrder.splice(dragItem.current, 1);
+                newOrder.splice(dragOverItem.current, 0, removed);
+                setCopyOrder(newOrder);
+                dragItem.current = null;
+                dragOverItem.current = null;
+              };
+
               const medalColors = ["#FFD700", "#C0C0C0", "#CD7F32"];
               const medalLabels = ["🥇", "🥈", "🥉"];
-              return sorted.map((v, idx) => {
+
+              return ordered.map((v, idx) => {
                 const count = variantLeadCount[v.id] || 0;
                 const medalBorder = idx < 3 ? medalColors[idx] : undefined;
                 return (
                   <div
                     key={v.id}
-                    className="rounded-lg border p-3 space-y-1"
+                    draggable
+                    onDragStart={() => handleDragStart(idx)}
+                    onDragEnter={() => handleDragEnter(idx)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e) => e.preventDefault()}
+                    className="rounded-lg border p-3 space-y-1 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md"
                     style={{
                       borderColor: medalBorder || "hsl(var(--border))",
                       borderWidth: idx < 3 ? 2 : 1,
@@ -526,6 +551,7 @@ export default function Analytics() {
                     }}
                   >
                     <div className="flex items-center gap-2">
+                      <GripVertical className="w-4 h-4 text-muted-foreground/50" />
                       {idx < 3 && <span className="text-base">{medalLabels[idx]}</span>}
                       <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
                         Copy {v.id}
