@@ -68,17 +68,22 @@ const VideoTestimonialsCarousel = () => {
         </>
       )}
 
-      <div className="flex justify-center gap-2 mt-4">
-        {videoTestimonials.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-              index === currentIndex ? "bg-primary scale-110" : "bg-white/20 hover:bg-white/40"
-            }`}
-            aria-label={`Ir para vídeo ${index + 1}`}
-          />
-        ))}
+      <div className="flex items-center justify-center gap-4 mt-4">
+        <button
+          onClick={() => setCurrentIndex((p) => (p === 0 ? videoTestimonials.length - 1 : p - 1))}
+          className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white hover:bg-primary hover:text-white transition-all lg:hidden"
+          aria-label="Vídeo anterior"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <span className="text-xs text-white/40 font-medium">{currentIndex + 1} / {videoTestimonials.length}</span>
+        <button
+          onClick={() => setCurrentIndex((p) => (p === videoTestimonials.length - 1 ? 0 : p + 1))}
+          className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white hover:bg-primary hover:text-white transition-all lg:hidden"
+          aria-label="Próximo vídeo"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );
