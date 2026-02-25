@@ -83,17 +83,21 @@ export default function Analytics() {
 
     const avgScore = Math.round(leads.reduce((s, l) => s + l.score, 0) / leads.length);
 
-    // Leads by day (last 30d)
+    // Leads by day (last 30d) with variant breakdown
     const byDay: Record<string, number> = {};
+    const byDayVariant: Record<string, Record<string, number>> = {};
     leads
       .filter((l) => new Date(l.created_at) >= last30d)
       .forEach((l) => {
         const day = new Date(l.created_at).toISOString().split("T")[0];
         byDay[day] = (byDay[day] || 0) + 1;
+        if (!byDayVariant[day]) byDayVariant[day] = {};
+        const v = l.copy_variant || "?";
+        byDayVariant[day][v] = (byDayVariant[day][v] || 0) + 1;
       });
 
     // Fill missing days
-    const dailyData: { date: string; leads: number; sessoes: number }[] = [];
+    const dailyData: { date: string; leads: number; sessoes: number; variants: Record<string, number> }[] = [];
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const key = d.toISOString().split("T")[0];
@@ -101,6 +105,7 @@ export default function Analytics() {
         date: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         leads: byDay[key] || 0,
         sessoes: DAILY_VISITORS[key] || 0,
+        variants: byDayVariant[key] || {},
       });
     }
 
@@ -281,11 +286,34 @@ export default function Analytics() {
                 />
                 <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    fontSize: "12px",
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
+                    const item = payload.find((p: any) => p.dataKey === "leads");
+                    const sessItem = payload.find((p: any) => p.dataKey === "sessoes");
+                    const variants: Record<string, number> = (item?.payload as any)?.variants || {};
+                    const variantEntries = Object.entries(variants).sort((a, b) => a[0].localeCompare(b[0]));
+                    return (
+                      <div style={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        padding: "8px 12px",
+                      }}>
+                        <p style={{ fontWeight: 600, marginBottom: 4 }}>{label}</p>
+                        {sessItem && <p style={{ color: "#8b5cf6" }}>Sessões: {sessItem.value}</p>}
+                        {item && <p style={{ color: "hsl(var(--primary))" }}>Leads: {item.value}</p>}
+                        {variantEntries.length > 0 && (
+                          <div style={{ marginTop: 4, borderTop: "1px solid hsl(var(--border))", paddingTop: 4 }}>
+                            {variantEntries.map(([v, count]) => (
+                              <p key={v} style={{ color: "hsl(var(--muted-foreground))" }}>
+                                Copy {v}: {count}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
                   }}
                 />
                 <Line
