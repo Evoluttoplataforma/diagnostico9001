@@ -1,9 +1,14 @@
 import { useState, useMemo, useRef, useCallback } from "react";
+import { format, subDays, startOfDay, endOfDay, startOfMonth, subMonths, startOfWeek, endOfWeek, startOfYear } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { COPY_VARIANTS } from "@/components/quiz/copyVariants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical, GripVertical } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical, GripVertical, CalendarIcon, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend,
@@ -35,6 +40,36 @@ const DAILY_VISITORS: Record<string, number> = {
 };
 const COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899"];
 
+type PeriodPreset = "today" | "yesterday" | "7d" | "30d" | "this-month" | "last-month" | "90d" | "all" | "custom";
+
+const PERIOD_PRESETS: { id: PeriodPreset; label: string }[] = [
+  { id: "today", label: "Hoje" },
+  { id: "yesterday", label: "Ontem" },
+  { id: "7d", label: "Últimos 7 dias" },
+  { id: "30d", label: "Últimos 30 dias" },
+  { id: "this-month", label: "Este mês" },
+  { id: "last-month", label: "Mês passado" },
+  { id: "90d", label: "Últimos 90 dias" },
+  { id: "all", label: "Todo o período" },
+  { id: "custom", label: "Personalizado" },
+];
+
+function getPresetRange(preset: PeriodPreset): { from: Date; to: Date } {
+  const now = new Date();
+  const today = startOfDay(now);
+  switch (preset) {
+    case "today": return { from: today, to: endOfDay(now) };
+    case "yesterday": return { from: startOfDay(subDays(now, 1)), to: endOfDay(subDays(now, 1)) };
+    case "7d": return { from: subDays(today, 6), to: endOfDay(now) };
+    case "30d": return { from: subDays(today, 29), to: endOfDay(now) };
+    case "this-month": return { from: startOfMonth(now), to: endOfDay(now) };
+    case "last-month": { const lm = subMonths(now, 1); return { from: startOfMonth(lm), to: endOfDay(new Date(lm.getFullYear(), lm.getMonth() + 1, 0)) }; }
+    case "90d": return { from: subDays(today, 89), to: endOfDay(now) };
+    case "all": return { from: new Date("2020-01-01"), to: endOfDay(now) };
+    case "custom": return { from: subDays(today, 29), to: endOfDay(now) };
+  }
+}
+
 export default function Analytics() {
   const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
@@ -44,6 +79,10 @@ export default function Analytics() {
   const [error, setError] = useState("");
   const [variantSort, setVariantSort] = useState<"leads" | "score">("leads");
   const [copyOrder, setCopyOrder] = useState<string[] | null>(null);
+  const [periodPreset, setPeriodPreset] = useState<PeriodPreset>("30d");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>();
+  const [customTo, setCustomTo] = useState<Date | undefined>();
+  const [periodOpen, setPeriodOpen] = useState(false);
   const [sectionOrder, setSectionOrder] = useState<string[]>([
     "stats", "daily", "pie-charts", "seg-size", "ab-test", "copys-ref", "recent-leads"
   ]);
@@ -73,43 +112,61 @@ export default function Analytics() {
     }
   };
 
+  // ── Period range ──
+  const dateRange = useMemo(() => {
+    if (periodPreset === "custom" && customFrom && customTo) {
+      return { from: startOfDay(customFrom), to: endOfDay(customTo) };
+    }
+    return getPresetRange(periodPreset);
+  }, [periodPreset, customFrom, customTo]);
+
+  const periodLabel = useMemo(() => {
+    if (periodPreset === "custom" && customFrom && customTo) {
+      return `${format(customFrom, "dd/MM/yyyy")} - ${format(customTo, "dd/MM/yyyy")}`;
+    }
+    return PERIOD_PRESETS.find(p => p.id === periodPreset)?.label || "Período";
+  }, [periodPreset, customFrom, customTo]);
+
   // ── Computed metrics ──
   const metrics = useMemo(() => {
     if (!leads.length) return null;
 
-    const now = new Date();
-    const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const last30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const prev30d = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    const { from: rangeFrom, to: rangeTo } = dateRange;
+    const rangeDays = Math.max(1, Math.round((rangeTo.getTime() - rangeFrom.getTime()) / (24 * 60 * 60 * 1000)));
 
-    const leadsLast7d = leads.filter((l) => new Date(l.created_at) >= last7d).length;
-    const leadsLast30d = leads.filter((l) => new Date(l.created_at) >= last30d).length;
-    const leadsPrev30d = leads.filter((l) => {
+    // Filter leads in range
+    const filteredLeads = leads.filter((l) => {
       const d = new Date(l.created_at);
-      return d >= prev30d && d < last30d;
-    }).length;
+      return d >= rangeFrom && d <= rangeTo;
+    });
 
-    const growthRate = leadsPrev30d > 0 ? ((leadsLast30d - leadsPrev30d) / leadsPrev30d) * 100 : 0;
+    // Previous period for comparison
+    const prevFrom = new Date(rangeFrom.getTime() - rangeDays * 24 * 60 * 60 * 1000);
+    const prevTo = new Date(rangeFrom.getTime() - 1);
+    const prevLeads = leads.filter((l) => {
+      const d = new Date(l.created_at);
+      return d >= prevFrom && d <= prevTo;
+    });
 
-    const avgScore = Math.round(leads.reduce((s, l) => s + l.score, 0) / leads.length);
+    const growthRate = prevLeads.length > 0 ? ((filteredLeads.length - prevLeads.length) / prevLeads.length) * 100 : 0;
 
-    // Leads by day (last 30d) with variant breakdown
+    const avgScore = filteredLeads.length > 0 ? Math.round(filteredLeads.reduce((s, l) => s + l.score, 0) / filteredLeads.length) : 0;
+
+    // Leads by day with variant breakdown
     const byDay: Record<string, number> = {};
     const byDayVariant: Record<string, Record<string, number>> = {};
-    leads
-      .filter((l) => new Date(l.created_at) >= last30d)
-      .forEach((l) => {
-        const day = new Date(l.created_at).toISOString().split("T")[0];
-        byDay[day] = (byDay[day] || 0) + 1;
-        if (!byDayVariant[day]) byDayVariant[day] = {};
-        const v = l.copy_variant || "?";
-        byDayVariant[day][v] = (byDayVariant[day][v] || 0) + 1;
-      });
+    filteredLeads.forEach((l) => {
+      const day = new Date(l.created_at).toISOString().split("T")[0];
+      byDay[day] = (byDay[day] || 0) + 1;
+      if (!byDayVariant[day]) byDayVariant[day] = {};
+      const v = l.copy_variant || "?";
+      byDayVariant[day][v] = (byDayVariant[day][v] || 0) + 1;
+    });
 
-    // Fill missing days
+    // Fill days in range
     const dailyData: { date: string; leads: number; sessoes: number; variants: Record<string, number> }[] = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    for (let i = rangeDays - 1; i >= 0; i--) {
+      const d = new Date(rangeTo.getTime() - i * 24 * 60 * 60 * 1000);
       const key = d.toISOString().split("T")[0];
       dailyData.push({
         date: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
@@ -121,7 +178,7 @@ export default function Analytics() {
 
     // By diagnosis level
     const byLevel: Record<string, number> = {};
-    leads.forEach((l) => {
+    filteredLeads.forEach((l) => {
       const level = l.diagnosis_level.toLowerCase();
       byLevel[level] = (byLevel[level] || 0) + 1;
     });
@@ -129,7 +186,7 @@ export default function Analytics() {
 
     // By segment
     const bySegment: Record<string, number> = {};
-    leads.forEach((l) => {
+    filteredLeads.forEach((l) => {
       const seg = l.segment || "Não informado";
       bySegment[seg] = (bySegment[seg] || 0) + 1;
     });
@@ -148,12 +205,12 @@ export default function Analytics() {
     ];
     const scoreData = scoreRanges.map((r) => ({
       range: r.range,
-      count: leads.filter((l) => l.score >= r.min && l.score <= r.max).length,
+      count: filteredLeads.filter((l) => l.score >= r.min && l.score <= r.max).length,
     }));
 
     // By company size
     const bySize: Record<string, number> = {};
-    leads.forEach((l) => {
+    filteredLeads.forEach((l) => {
       const size = l.company_size || "Não informado";
       bySize[size] = (bySize[size] || 0) + 1;
     });
@@ -165,7 +222,7 @@ export default function Analytics() {
     const validVariants = ["A", "B", "C", "D", "E"];
     const variantMap: Record<string, { count: number; label: string; totalScore: number }> = {};
     let variantTotal = 0;
-    leads.forEach((l) => {
+    filteredLeads.forEach((l) => {
       const v = l.copy_variant;
       if (!v || !validVariants.includes(v)) return;
       if (!variantMap[v]) variantMap[v] = { count: 0, label: `Copy ${v}`, totalScore: 0 };
@@ -183,9 +240,8 @@ export default function Analytics() {
       .sort((a, b) => b.leads - a.leads);
 
     return {
-      total: leads.length,
-      leadsLast7d,
-      leadsLast30d,
+      total: filteredLeads.length,
+      totalAll: leads.length,
       growthRate,
       avgScore,
       dailyData,
@@ -195,7 +251,7 @@ export default function Analytics() {
       sizeData,
       variantData,
     };
-  }, [leads]);
+  }, [leads, dateRange]);
 
   // ── Login screen ──
   if (!authenticated) {
@@ -262,9 +318,91 @@ export default function Analytics() {
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">📊 Dashboard de Analytics</h1>
-          <p className="text-sm text-muted-foreground">Diagnóstico ISO 9001 — Templum Consultoria</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">📊 Dashboard de Analytics</h1>
+            <p className="text-sm text-muted-foreground">Diagnóstico ISO 9001 — Templum Consultoria</p>
+          </div>
+
+          {/* Period Selector */}
+          <Popover open={periodOpen} onOpenChange={setPeriodOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2 min-w-[180px] justify-between">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm">{periodLabel}</span>
+                </div>
+                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <div className="flex flex-col sm:flex-row">
+                {/* Presets */}
+                <div className="border-b sm:border-b-0 sm:border-r border-border p-2 min-w-[160px]">
+                  {PERIOD_PRESETS.filter(p => p.id !== "custom").map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setPeriodPreset(p.id);
+                        if (p.id !== "custom") setPeriodOpen(false);
+                      }}
+                      className={cn(
+                        "w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
+                        periodPreset === p.id
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                  <div className="border-t border-border mt-1 pt-1">
+                    <button
+                      onClick={() => setPeriodPreset("custom")}
+                      className={cn(
+                        "w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors",
+                        periodPreset === "custom"
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      Personalizado
+                    </button>
+                  </div>
+                </div>
+
+                {/* Custom date pickers */}
+                {periodPreset === "custom" && (
+                  <div className="p-3 space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>De</span>
+                      <Input
+                        type="date"
+                        value={customFrom ? format(customFrom, "yyyy-MM-dd") : ""}
+                        onChange={(e) => setCustomFrom(e.target.value ? new Date(e.target.value + "T00:00:00") : undefined)}
+                        className="h-8 text-xs w-[140px]"
+                      />
+                      <span>até</span>
+                      <Input
+                        type="date"
+                        value={customTo ? format(customTo, "yyyy-MM-dd") : ""}
+                        onChange={(e) => setCustomTo(e.target.value ? new Date(e.target.value + "T00:00:00") : undefined)}
+                        className="h-8 text-xs w-[140px]"
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      disabled={!customFrom || !customTo}
+                      onClick={() => setPeriodOpen(false)}
+                    >
+                      Aplicar
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {(() => {
@@ -287,10 +425,10 @@ export default function Analytics() {
           const sections: Record<string, React.ReactNode> = {
             "stats": (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard icon={Users} label="Total de Leads" value={metrics.total} sub="Desde o início" />
-                <StatCard icon={Calendar} label="Últimos 7 dias" value={metrics.leadsLast7d} />
-                <StatCard icon={TrendingUp} label="Últimos 30 dias" value={metrics.leadsLast30d} trend={metrics.growthRate} sub="vs 30 dias anteriores" />
+                <StatCard icon={Users} label="Leads no Período" value={metrics.total} sub={`${metrics.totalAll} no total`} />
+                <StatCard icon={TrendingUp} label="Variação" value={`${metrics.growthRate >= 0 ? "+" : ""}${metrics.growthRate.toFixed(0)}%`} trend={metrics.growthRate} sub="vs período anterior" />
                 <StatCard icon={Target} label="Score Médio" value={`${metrics.avgScore}%`} />
+                <StatCard icon={Calendar} label="Período" value={periodLabel} />
               </div>
             ),
             "daily": (
@@ -298,7 +436,7 @@ export default function Analytics() {
                 <div className="flex items-center gap-2">
                   <DragHandle />
                   <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                  <h2 className="text-sm font-semibold text-foreground">Leads & Tráfego por Dia (últimos 30 dias)</h2>
+                  <h2 className="text-sm font-semibold text-foreground">Leads & Tráfego por Dia</h2>
                 </div>
                 <div className="flex gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-primary inline-block rounded" /> Leads</span>
