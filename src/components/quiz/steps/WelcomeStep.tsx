@@ -161,30 +161,91 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/15 blur-3xl" />
           </div>
 
-          <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider self-start">
-            <Award className="w-3.5 h-3.5 shrink-0" />
-            Templum Consultoria • Líder nacional em ISO 9001
-          </span>
+          <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
+            {/* Left: Text */}
+            <div>
+              <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-5 border border-primary/25 relative z-10 uppercase tracking-wider self-start">
+                <Award className="w-3.5 h-3.5 shrink-0" />
+                Templum Consultoria • Líder nacional em ISO 9001
+              </span>
 
-          <h1 className="text-[1.75rem] sm:text-4xl lg:text-[3.25rem] lg:leading-[1.1] font-extrabold leading-[1.15] mb-4 relative z-10 uppercase tracking-tight lg:max-w-4xl">
-            {variant.headline}{" "}
-            <span className="text-primary">{variant.highlightedPart}</span>
-          </h1>
+              <h1 className="text-[1.75rem] sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12] font-extrabold leading-[1.15] mb-4 relative z-10 uppercase tracking-tight">
+                {variant.headline}{" "}
+                <span className="text-primary">{variant.highlightedPart}</span>
+              </h1>
 
-          <p className="text-[0.95rem] lg:text-lg text-white/90 mb-8 relative z-10 leading-relaxed lg:max-w-2xl">
-            {variant.description}
-          </p>
+              <p className="text-[0.95rem] lg:text-lg text-white/90 mb-8 relative z-10 leading-relaxed">
+                {variant.description}
+              </p>
 
-          <div className="w-full max-w-sm relative z-10 mb-3">
-            <QuizButton onClick={() => setShowModal(true)}>
-              QUERO MEU DIAGNÓSTICO AGORA!
-            </QuizButton>
-            <p className="text-center text-xs text-white/40 mt-2.5">
-              ⏱️ 5 min • 100% gratuito • Resultado imediato
-            </p>
+              <div className="w-full max-w-sm relative z-10 mb-3">
+                <QuizButton onClick={() => setShowModal(true)}>
+                  QUERO MEU DIAGNÓSTICO AGORA!
+                </QuizButton>
+                <p className="text-center text-xs text-white/40 mt-2.5">
+                  ⏱️ 5 min • 100% gratuito • Resultado imediato
+                </p>
+              </div>
+
+              <ChevronDown className="w-5 h-5 text-white/20 animate-bounce mt-2 hidden lg:block" />
+            </div>
+
+            {/* Right: Visual element (desktop only) */}
+            <div className="hidden lg:flex flex-col items-center justify-center gap-6 relative z-10">
+              <div className="w-full max-w-md space-y-4">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <ShieldCheck className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-sm">Diagnóstico Gratuito</p>
+                      <p className="text-xs text-white/40">Resultado imediato e personalizado</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { label: "Nível de Gestão", value: "Avançado", pct: 78 },
+                      { label: "Processos", value: "Intermediário", pct: 55 },
+                      { label: "Indicadores", value: "Básico", pct: 30 },
+                    ].map((item) => (
+                      <div key={item.label}>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-white/60">{item.label}</span>
+                          <span className="text-primary font-semibold">{item.value}</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-1000"
+                            style={{ width: `${item.pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+                    <div className="text-xl font-extrabold text-primary">+8.000</div>
+                    <div className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Clientes</div>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+                    <div className="text-xl font-extrabold text-primary">+2.000</div>
+                    <div className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Certificados</div>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+                    <div className="text-xl font-extrabold text-primary flex items-center justify-center gap-0.5">
+                      4,9 <Star className="w-3.5 h-3.5 fill-primary" />
+                    </div>
+                    <div className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Google</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <ChevronDown className="w-5 h-5 text-white/20 animate-bounce mt-2" />
+          <ChevronDown className="w-5 h-5 text-white/20 animate-bounce mt-2 lg:hidden" />
         </div>
       </section>
 
@@ -243,7 +304,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
       {/* Social Proof Numbers */}
       <section className="px-5 py-6 lg:py-14 lg:px-16">
-        <div className="max-w-sm lg:max-w-6xl mx-auto">
+        <div className="max-w-sm lg:max-w-3xl mx-auto">
           <div className="grid grid-cols-3 gap-3 lg:gap-8 text-center mb-5 lg:mb-10">
             <div>
               <div className="text-2xl lg:text-4xl font-extrabold text-primary">+8.000</div>
@@ -262,7 +323,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           </div>
 
           {/* Guarantee Badge */}
-          <div className="flex items-center gap-3 p-3 lg:p-5 rounded-xl bg-primary/10 border border-primary/25 max-w-lg lg:mx-auto">
+          <div className="flex items-center gap-3 p-3 lg:p-5 rounded-xl bg-primary/10 border border-primary/25 lg:mx-auto">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
               <Shield className="w-5 h-5 text-primary" />
             </div>
@@ -285,7 +346,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
       {/* FAQ Section */}
       <section className="px-5 py-6 lg:py-14 lg:px-16 bg-[hsl(var(--hero-dark-accent))]">
-        <div className="max-w-sm lg:max-w-4xl mx-auto">
+        <div className="max-w-sm lg:max-w-3xl mx-auto">
           <div className="flex items-center gap-2 mb-5">
             <HelpCircle className="w-4 h-4 text-primary" />
             <h2 className="text-base font-bold uppercase tracking-wider text-white/80">Perguntas Frequentes</h2>
@@ -296,7 +357,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
       {/* Bottom CTA */}
       <section className="px-5 py-6 pb-8 lg:py-14 lg:px-16">
-        <div className="max-w-sm lg:max-w-6xl mx-auto lg:text-center">
+        <div className="max-w-sm lg:max-w-3xl mx-auto lg:text-center">
           <div className="flex items-center gap-2 mb-1 justify-center">
             <MapPin className="w-3.5 h-3.5 text-primary" />
             <p className="text-sm text-white/50">Atendemos todo o Brasil • 800+ cidades</p>
