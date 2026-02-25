@@ -417,8 +417,8 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
           <div className="border-t border-white/10 pt-5 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-3">
             <p className="text-xs text-white/30">© 2026 Templum. Todos os direitos reservados.</p>
             <div className="flex gap-4">
-              <a href="https://templum.com.br/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="text-xs text-white/30 hover:text-white/60 transition-colors">Política de Privacidade</a>
-              <a href="https://templum.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="text-xs text-white/30 hover:text-white/60 transition-colors">Termos de Uso</a>
+              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="text-xs text-white/30 hover:text-white/60 transition-colors">Política de Privacidade</a>
+              <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="text-xs text-white/30 hover:text-white/60 transition-colors">Termos de Uso</a>
             </div>
           </div>
         </div>
