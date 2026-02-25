@@ -340,7 +340,7 @@ export const ChatStep = ({ userName, onComplete, onBack }: ChatStepProps) => {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={currentField?.placeholder}
-              className="flex-1 bg-muted rounded-full px-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30"
+              className="flex-1 bg-muted rounded-full px-4 py-2.5 text-base text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30"
               autoFocus
               min={currentField?.type === "number" ? 0 : undefined}
             />
