@@ -302,6 +302,9 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
         </div>
       </section>
 
+      {/* Process Section */}
+      <ProcessSection />
+
       {/* Social Proof Numbers */}
       <section className="px-5 py-6 lg:py-14 lg:px-16">
         <div className="max-w-sm lg:max-w-3xl mx-auto">
@@ -340,9 +343,6 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
       {/* Team Section */}
       <TeamSection />
-
-      {/* Process Section */}
-      <ProcessSection />
 
       {/* FAQ Section */}
       <section className="px-5 py-6 lg:py-14 lg:px-16 bg-[hsl(var(--hero-dark-accent))]">
