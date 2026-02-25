@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { COPY_VARIANTS } from "@/components/quiz/copyVariants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical } from "lucide-react";
@@ -485,6 +486,29 @@ export default function Analytics() {
             </div>
           </div>
         )}
+
+        {/* Referência das Copys */}
+        <div className="rounded-xl border bg-card p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <FlaskConical className="w-4 h-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">Copys em Rotação (A/B Test)</h2>
+          </div>
+          <div className="grid gap-3">
+            {COPY_VARIANTS.map((v) => (
+              <div key={v.id} className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                    Copy {v.id}
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-foreground leading-snug">
+                  {v.headline} <span className="text-primary">{v.highlightedPart}</span>
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{v.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Recent leads table */}
         <div className="rounded-xl border bg-card p-4 space-y-3">
