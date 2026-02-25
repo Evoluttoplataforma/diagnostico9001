@@ -78,17 +78,14 @@ export default function Analytics() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [variantSort, setVariantSort] = useState<"leads" | "score">("leads");
-  const [copyOrder, setCopyOrder] = useState<string[] | null>(() => {
-    try { const s = localStorage.getItem("analytics_copy_order"); return s ? JSON.parse(s) : null; } catch { return null; }
-  });
+  const [copyOrder, setCopyOrder] = useState<string[] | null>(null);
   const [periodPreset, setPeriodPreset] = useState<PeriodPreset>("30d");
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [periodOpen, setPeriodOpen] = useState(false);
   const defaultSections = ["stats", "daily", "pie-charts", "seg-size", "ab-test", "copys-ref", "recent-leads"];
-  const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
-    try { const s = localStorage.getItem("analytics_section_order"); if (s) { const parsed = JSON.parse(s); if (Array.isArray(parsed)) return parsed; } } catch {} return defaultSections;
-  });
+  const [sectionOrder, setSectionOrder] = useState<string[]>(defaultSections);
+  const passwordRef = useRef("");
   const dragSection = useRef<number | null>(null);
   const dragOverSection = useRef<number | null>(null);
   const dragItem = useRef<number | null>(null);
@@ -104,6 +101,12 @@ export default function Analytics() {
       });
       if (data?.success) {
         setLeads(data.leads);
+        passwordRef.current = password;
+        // Load saved dashboard settings
+        if (data.settings) {
+          if (Array.isArray(data.settings.section_order)) setSectionOrder(data.settings.section_order);
+          if (Array.isArray(data.settings.copy_order)) setCopyOrder(data.settings.copy_order);
+        }
         setAuthenticated(true);
       } else {
         setError(data?.error || "Erro ao autenticar");
@@ -113,6 +116,13 @@ export default function Analytics() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const saveSettings = async (newSectionOrder?: string[], newCopyOrder?: string[] | null) => {
+    const body: Record<string, unknown> = { password: passwordRef.current };
+    if (newSectionOrder !== undefined) body.section_order = newSectionOrder;
+    if (newCopyOrder !== undefined) body.copy_order = newCopyOrder;
+    supabase.functions.invoke("save-dashboard-settings", { body });
   };
 
   // ── Period range ──
@@ -417,7 +427,7 @@ export default function Analytics() {
             const [removed] = newOrder.splice(dragSection.current, 1);
             newOrder.splice(dragOverSection.current, 0, removed);
             setSectionOrder(newOrder);
-            localStorage.setItem("analytics_section_order", JSON.stringify(newOrder));
+            saveSettings(newOrder, undefined);
             dragSection.current = null;
             dragOverSection.current = null;
           };
@@ -600,7 +610,7 @@ export default function Analytics() {
                       const [removed] = newOrder.splice(dragItem.current, 1);
                       newOrder.splice(dragOverItem.current, 0, removed);
                       setCopyOrder(newOrder);
-                      localStorage.setItem("analytics_copy_order", JSON.stringify(newOrder));
+                      saveSettings(undefined, newOrder);
                       dragItem.current = null;
                       dragOverItem.current = null;
                     };
