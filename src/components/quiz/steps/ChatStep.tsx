@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, ArrowLeft, TrendingDown, TrendingUp } from "lucide-react";
+import { Send, ArrowLeft, TrendingDown, TrendingUp, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import normaPhoto from "@/assets/norma-photo.png";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface ChatStepData {
   jobTitle: string;
@@ -59,9 +60,10 @@ interface BubbleProps {
   children: React.ReactNode;
   isUser?: boolean;
   animate?: boolean;
+  onAvatarClick?: () => void;
 }
 
-const ChatBubble = ({ children, isUser = false, animate = true }: BubbleProps) => (
+const ChatBubble = ({ children, isUser = false, animate = true, onAvatarClick }: BubbleProps) => (
   <div
     className={cn(
       "flex gap-2.5 mb-3",
@@ -73,7 +75,8 @@ const ChatBubble = ({ children, isUser = false, animate = true }: BubbleProps) =
       <img
         src={normaPhoto}
         alt="Norma"
-        className="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-1"
+        className="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-1 cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={onAvatarClick}
       />
     )}
     <div
@@ -111,6 +114,7 @@ export const ChatStep = ({ userName, onComplete, onBack }: ChatStepProps) => {
   const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([]);
   const [isTyping, setIsTyping] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -263,7 +267,7 @@ export const ChatStep = ({ userName, onComplete, onBack }: ChatStepProps) => {
         <button onClick={onBack} className="p-1.5 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-muted-foreground" />
         </button>
-        <img src={normaPhoto} alt="Norma" className="w-10 h-10 rounded-full object-cover" />
+        <img src={normaPhoto} alt="Norma" className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setShowPhotoModal(true)} />
         <div>
           <p className="font-semibold text-foreground text-sm">Norma</p>
           <p className="text-xs text-muted-foreground">Diagnóstico ISO 9001</p>
@@ -273,7 +277,7 @@ export const ChatStep = ({ userName, onComplete, onBack }: ChatStepProps) => {
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
         {messages.map((msg, i) => (
-          <ChatBubble key={i} isUser={msg.isUser}>
+          <ChatBubble key={i} isUser={msg.isUser} onAvatarClick={() => setShowPhotoModal(true)}>
             {renderText(msg.text)}
           </ChatBubble>
         ))}
@@ -363,6 +367,23 @@ export const ChatStep = ({ userName, onComplete, onBack }: ChatStepProps) => {
           </div>
         </div>
       )}
+      {/* Photo Modal */}
+      <Dialog open={showPhotoModal} onOpenChange={setShowPhotoModal}>
+        <DialogContent className="bg-black/95 border-none p-0 max-w-[90vw] max-h-[90vh] flex items-center justify-center sm:rounded-xl overflow-hidden">
+          <DialogTitle className="sr-only">Foto da Norma</DialogTitle>
+          <button
+            onClick={() => setShowPhotoModal(false)}
+            className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <img
+            src={normaPhoto}
+            alt="Norma"
+            className="max-w-full max-h-[80vh] object-contain"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
