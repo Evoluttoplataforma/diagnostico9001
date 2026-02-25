@@ -128,16 +128,73 @@ serve(async (req) => {
           }
         }
 
-        // Person found but possibly no deals
+        // Person found - try to get deals
         if (personId) {
+          console.log(`[${cleanEmail}] Found personId=${personId}, fetching deals...`);
+          
           // Get deals for this person (include all statuses)
           const dealsRes = await fetch(
             `https://api.pipedrive.com/v1/persons/${personId}/deals?api_token=${apiToken}&status=all_not_deleted`
           );
           const dealsData = await dealsRes.json();
+          console.log(`[${cleanEmail}] Person deals response: success=${dealsData.success}, count=${dealsData.data?.length || 0}`);
 
-          if (!dealsData.success || !dealsData.data?.length) {
-            // Person exists in Pipedrive but has no deals
+          let allDeals = dealsData.success && dealsData.data?.length ? dealsData.data : [];
+
+          // If no deals on person, try organization-linked deals
+          if (!allDeals.length) {
+            try {
+              const personRes = await fetch(
+                `https://api.pipedrive.com/v1/persons/${personId}?api_token=${apiToken}`
+              );
+              const personData = await personRes.json();
+              const orgId = personData.success && personData.data?.org_id
+                ? (typeof personData.data.org_id === "object" ? personData.data.org_id.value : personData.data.org_id)
+                : null;
+              if (orgId) {
+                console.log(`[${cleanEmail}] No deals on person, trying org ${orgId}`);
+                const orgDealsRes = await fetch(
+                  `https://api.pipedrive.com/v1/organizations/${orgId}/deals?api_token=${apiToken}&status=all_not_deleted`
+                );
+                const orgDealsData = await orgDealsRes.json();
+                if (orgDealsData.success && orgDealsData.data?.length) {
+                  allDeals = orgDealsData.data;
+                }
+              }
+            } catch (e) {
+              console.error(`[${cleanEmail}] org deals lookup error:`, e);
+            }
+          }
+
+          // Also try searching deals by person name
+          if (!allDeals.length) {
+            try {
+              const personRes2 = await fetch(
+                `https://api.pipedrive.com/v1/persons/${personId}?api_token=${apiToken}`
+              );
+              const personData2 = await personRes2.json();
+              const personName = personData2.success ? personData2.data?.name : null;
+              if (personName) {
+                console.log(`[${cleanEmail}] Trying deal search by name: ${personName}`);
+                const nameSearchRes = await fetch(
+                  `https://api.pipedrive.com/v1/itemSearch?term=${encodeURIComponent(personName)}&item_types=deal&api_token=${apiToken}`
+                );
+                const nameSearchData = await nameSearchRes.json();
+                if (nameSearchData.success && nameSearchData.data?.items?.length) {
+                  const dealId = nameSearchData.data.items[0].item.id;
+                  const dealRes = await fetch(`https://api.pipedrive.com/v1/deals/${dealId}?api_token=${apiToken}`);
+                  const dealData = await dealRes.json();
+                  if (dealData.success && dealData.data) {
+                    allDeals = [dealData.data];
+                  }
+                }
+              }
+            } catch (e) {
+              console.error(`[${cleanEmail}] name deal search error:`, e);
+            }
+          }
+
+          if (!allDeals.length) {
             results[cleanEmail] = {
               status: "Sem negócio",
               owner: "",
@@ -148,7 +205,7 @@ serve(async (req) => {
           }
 
           // Get most recent deal
-          const deals = dealsData.data.sort((a: any, b: any) =>
+          const deals = allDeals.sort((a: any, b: any) =>
             new Date(b.add_time).getTime() - new Date(a.add_time).getTime()
           );
           const deal = deals[0];
