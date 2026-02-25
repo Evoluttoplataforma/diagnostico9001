@@ -42,6 +42,7 @@ export default function Analytics() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [variantSort, setVariantSort] = useState<"leads" | "score">("leads");
   const isMobile = useIsMobile();
 
   const handleLogin = async () => {
@@ -153,17 +154,19 @@ export default function Analytics() {
       .map(([name, value]) => ({ name, value }));
 
     // A/B Copy Variant performance
-    const variantMap: Record<string, { count: number; label: string }> = {};
+    const variantMap: Record<string, { count: number; label: string; totalScore: number }> = {};
     leads.forEach((l) => {
       const v = l.copy_variant || "Sem variante";
-      if (!variantMap[v]) variantMap[v] = { count: 0, label: v === "Sem variante" ? v : `Copy ${v}` };
+      if (!variantMap[v]) variantMap[v] = { count: 0, label: v === "Sem variante" ? v : `Copy ${v}`, totalScore: 0 };
       variantMap[v].count++;
+      variantMap[v].totalScore += l.score;
     });
     const variantData = Object.entries(variantMap)
-      .map(([id, { count, label }]) => ({
+      .map(([id, { count, label, totalScore }]) => ({
         name: label,
         leads: count,
         pct: Math.round((count / leads.length) * 100),
+        avgScore: Math.round(totalScore / count),
       }))
       .sort((a, b) => b.leads - a.leads);
 
@@ -475,11 +478,30 @@ export default function Analytics() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="space-y-2 min-w-[160px]">
-                {metrics.variantData.map((v, i) => (
+              <div className="space-y-3 min-w-[220px]">
+                <div className="flex gap-1 text-[10px]">
+                  <button
+                    onClick={() => setVariantSort("leads")}
+                    className={`px-2 py-1 rounded-md font-medium transition-colors ${variantSort === "leads" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Por Leads
+                  </button>
+                  <button
+                    onClick={() => setVariantSort("score")}
+                    className={`px-2 py-1 rounded-md font-medium transition-colors ${variantSort === "score" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Por Score
+                  </button>
+                </div>
+                {[...metrics.variantData]
+                  .sort((a, b) => variantSort === "score" ? b.avgScore - a.avgScore : b.leads - a.leads)
+                  .map((v) => (
                   <div key={v.name} className="flex items-center justify-between gap-3 text-sm">
                     <span className="font-medium text-foreground">{v.name}</span>
-                    <span className="text-muted-foreground">{v.leads} ({v.pct}%)</span>
+                    <div className="flex gap-3 text-muted-foreground text-xs">
+                      <span>{v.leads} leads ({v.pct}%)</span>
+                      <span className="font-semibold text-foreground">{v.avgScore}%</span>
+                    </div>
                   </div>
                 ))}
               </div>
