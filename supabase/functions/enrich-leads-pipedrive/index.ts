@@ -38,7 +38,7 @@ serve(async (req) => {
       }
     }
 
-    const results: Record<string, { status: string; owner: string; stage: string; lost_reason: string } | null> = {};
+    const results: Record<string, { status: string; owner: string; stage: string; lost_reason: string; deal_id: number | null } | null> = {};
 
     // Process each email
     for (const email of emails.slice(0, 10)) {
@@ -123,6 +123,7 @@ serve(async (req) => {
               owner: ownerName,
               stage: stageName,
               lost_reason: lostReason,
+              deal_id: deal.id || null,
             };
             continue;
           }
@@ -200,6 +201,7 @@ serve(async (req) => {
               owner: "",
               stage: "",
               lost_reason: "",
+              deal_id: null,
             };
             continue;
           }
@@ -239,6 +241,7 @@ serve(async (req) => {
             owner: ownerName,
             stage: stageName,
             lost_reason: lostReason,
+            deal_id: deal.id || null,
           };
         } else {
           // Not found in Pipedrive at all

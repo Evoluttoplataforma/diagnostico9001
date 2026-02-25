@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical, GripVertical, CalendarIcon, ChevronDown } from "lucide-react";
+import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical, GripVertical, CalendarIcon, ChevronDown, ExternalLink } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend,
@@ -82,7 +82,7 @@ export default function Analytics() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [pipedriveData, setPipedriveData] = useState<Record<string, { status: string; owner: string; stage: string; lost_reason?: string } | null>>({});
+  const [pipedriveData, setPipedriveData] = useState<Record<string, { status: string; owner: string; stage: string; lost_reason?: string; deal_id?: number | null } | null>>({});
   const [pipedriveLoading, setPipedriveLoading] = useState(false);
   const [variantSort, setVariantSort] = useState<"leads" | "score">("leads");
   const [copyOrder, setCopyOrder] = useState<string[] | null>(null);
@@ -751,6 +751,7 @@ export default function Analytics() {
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Proprietário</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Etapa</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Motivo Perda</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Pipedrive</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Source</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Data</th>
                       </tr>
@@ -783,6 +784,19 @@ export default function Analytics() {
                           </td>
                           <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
                             {pipedriveLoading ? <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" /> : pd?.lost_reason || "—"}
+                          </td>
+                          <td className="py-2 px-2 text-xs whitespace-nowrap">
+                            {pipedriveLoading ? <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" /> : pd?.deal_id ? (
+                              <a
+                                href={`https://app.pipedrive.com/deal/${pd.deal_id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Abrir
+                              </a>
+                            ) : <span className="text-muted-foreground">—</span>}
                           </td>
                           <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
                             {l.utm_source || "—"}
