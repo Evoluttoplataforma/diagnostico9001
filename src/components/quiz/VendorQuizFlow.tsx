@@ -138,6 +138,7 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
         score: score,
         answers: data.answers,
         diagnosis_level: diagnosis.level,
+        copy_variant: "V",
       });
 
       if (error) {
