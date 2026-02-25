@@ -483,23 +483,7 @@ export default function Analytics() {
                 </ResponsiveContainer>
               </div>
               <div className="space-y-3 min-w-[220px]">
-                <div className="flex gap-1 text-[10px]">
-                  <button
-                    onClick={() => setVariantSort("leads")}
-                    className={`px-2 py-1 rounded-md font-medium transition-colors ${variantSort === "leads" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}
-                  >
-                    Por Leads
-                  </button>
-                  <button
-                    onClick={() => setVariantSort("score")}
-                    className={`px-2 py-1 rounded-md font-medium transition-colors ${variantSort === "score" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}
-                  >
-                    Por Score
-                  </button>
-                </div>
-                {[...metrics.variantData]
-                  .sort((a, b) => variantSort === "score" ? b.avgScore - a.avgScore : b.leads - a.leads)
-                  .map((v) => (
+                {metrics.variantData.map((v) => (
                   <div key={v.name} className="flex items-center justify-between gap-3 text-sm">
                     <span className="font-medium text-foreground">{v.name}</span>
                     <span className="text-muted-foreground text-xs">{v.leads} leads ({v.pct}%)</span>
