@@ -501,19 +501,45 @@ export default function Analytics() {
             <h2 className="text-sm font-semibold text-foreground">Copys em Rotação (A/B Test)</h2>
           </div>
           <div className="grid gap-3">
-            {COPY_VARIANTS.map((v) => (
-              <div key={v.id} className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
-                    Copy {v.id}
-                  </span>
-                </div>
-                <p className="text-sm font-semibold text-foreground leading-snug">
-                  {v.headline} <span className="text-primary">{v.highlightedPart}</span>
-                </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{v.description}</p>
-              </div>
-            ))}
+            {(() => {
+              // Build lead count per variant and sort by leads desc
+              const variantLeadCount: Record<string, number> = {};
+              leads.forEach((l) => {
+                if (l.copy_variant && ["A","B","C","D","E"].includes(l.copy_variant)) {
+                  variantLeadCount[l.copy_variant] = (variantLeadCount[l.copy_variant] || 0) + 1;
+                }
+              });
+              const sorted = [...COPY_VARIANTS].sort((a, b) => (variantLeadCount[b.id] || 0) - (variantLeadCount[a.id] || 0));
+              const medalColors = ["#FFD700", "#C0C0C0", "#CD7F32"];
+              const medalLabels = ["🥇", "🥈", "🥉"];
+              return sorted.map((v, idx) => {
+                const count = variantLeadCount[v.id] || 0;
+                const medalBorder = idx < 3 ? medalColors[idx] : undefined;
+                return (
+                  <div
+                    key={v.id}
+                    className="rounded-lg border p-3 space-y-1"
+                    style={{
+                      borderColor: medalBorder || "hsl(var(--border))",
+                      borderWidth: idx < 3 ? 2 : 1,
+                      backgroundColor: idx < 3 ? `${medalColors[idx]}08` : "hsl(var(--muted) / 0.3)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      {idx < 3 && <span className="text-base">{medalLabels[idx]}</span>}
+                      <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                        Copy {v.id}
+                      </span>
+                      <span className="text-xs font-semibold text-foreground">{count} leads</span>
+                    </div>
+                    <p className="text-sm font-semibold text-foreground leading-snug">
+                      {v.headline} <span className="text-primary">{v.highlightedPart}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{v.description}</p>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
 
