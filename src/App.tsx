@@ -8,6 +8,8 @@ import Obrigado from "./pages/Obrigado";
 import VendorQuiz from "./pages/VendorQuiz";
 import GenerateLink from "./pages/GenerateLink";
 import NotFound from "./pages/NotFound";
+import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
+import TermosDeUso from "./pages/TermosDeUso";
 import Leads from "./pages/Leads";
 import Analytics from "./pages/Analytics";
 import { captureUTMsFromURL } from "@/hooks/use-utm";
@@ -30,6 +32,8 @@ const App = () => (
           <Route path="/link" element={<GenerateLink />} />
           <Route path="/leads" element={<Leads />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
+          <Route path="/termos-de-uso" element={<TermosDeUso />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
