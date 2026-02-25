@@ -97,6 +97,27 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_settings: {
+        Row: {
+          copy_order: Json | null
+          id: string
+          section_order: Json | null
+          updated_at: string
+        }
+        Insert: {
+          copy_order?: Json | null
+          id?: string
+          section_order?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          copy_order?: Json | null
+          id?: string
+          section_order?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quiz_events: {
         Row: {
           created_at: string

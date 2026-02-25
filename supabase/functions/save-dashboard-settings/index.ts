@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { password } = await req.json();
+    const { password, section_order, copy_order } = await req.json();
 
     if (password !== ADMIN_PASSWORD) {
       return new Response(
@@ -27,29 +27,19 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Fetch all leads
-    const { data: leads, error: leadsError } = await supabase
-      .from("quiz_leads")
-      .select("id, name, email, company, segment, company_size, score, diagnosis_level, created_at, copy_variant")
-      .order("created_at", { ascending: false })
-      .limit(1000);
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (section_order !== undefined) updates.section_order = section_order;
+    if (copy_order !== undefined) updates.copy_order = copy_order;
 
-    if (leadsError) throw leadsError;
-
-    // Fetch dashboard settings
-    const { data: settings } = await supabase
+    const { error } = await supabase
       .from("dashboard_settings")
-      .select("section_order, copy_order")
-      .eq("id", "default")
-      .single();
+      .update(updates)
+      .eq("id", "default");
+
+    if (error) throw error;
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        leads: leads || [],
-        events: [],
-        settings: settings || null,
-      }),
+      JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
