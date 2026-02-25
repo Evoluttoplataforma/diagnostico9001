@@ -153,19 +153,23 @@ export default function Analytics() {
       .sort((a, b) => b[1] - a[1])
       .map(([name, value]) => ({ name, value }));
 
-    // A/B Copy Variant performance
+    // A/B Copy Variant performance (only A-E, exclude null/unknown)
+    const validVariants = ["A", "B", "C", "D", "E"];
     const variantMap: Record<string, { count: number; label: string; totalScore: number }> = {};
+    let variantTotal = 0;
     leads.forEach((l) => {
-      const v = l.copy_variant || "Sem variante";
-      if (!variantMap[v]) variantMap[v] = { count: 0, label: v === "Sem variante" ? v : `Copy ${v}`, totalScore: 0 };
+      const v = l.copy_variant;
+      if (!v || !validVariants.includes(v)) return;
+      if (!variantMap[v]) variantMap[v] = { count: 0, label: `Copy ${v}`, totalScore: 0 };
       variantMap[v].count++;
       variantMap[v].totalScore += l.score;
+      variantTotal++;
     });
     const variantData = Object.entries(variantMap)
       .map(([id, { count, label, totalScore }]) => ({
         name: label,
         leads: count,
-        pct: Math.round((count / leads.length) * 100),
+        pct: variantTotal > 0 ? Math.round((count / variantTotal) * 100) : 0,
         avgScore: Math.round(totalScore / count),
       }))
       .sort((a, b) => b.leads - a.leads);
@@ -499,7 +503,7 @@ export default function Analytics() {
                   <div key={v.name} className="flex items-center justify-between gap-3 text-sm">
                     <span className="font-medium text-foreground">{v.name}</span>
                     <div className="flex gap-3 text-xs">
-                      <span className="text-muted-foreground">{v.leads} leads</span>
+                      <span className="text-muted-foreground">{v.leads} leads ({v.pct}%)</span>
                       <span className="font-semibold text-foreground">Score: {v.avgScore}%</span>
                     </div>
                   </div>
