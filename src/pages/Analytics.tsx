@@ -498,9 +498,9 @@ export default function Analytics() {
                   .map((v) => (
                   <div key={v.name} className="flex items-center justify-between gap-3 text-sm">
                     <span className="font-medium text-foreground">{v.name}</span>
-                    <div className="flex gap-3 text-muted-foreground text-xs">
-                      <span>{v.leads} leads ({v.pct}%)</span>
-                      <span className="font-semibold text-foreground">{v.avgScore}%</span>
+                    <div className="flex gap-3 text-xs">
+                      <span className="text-muted-foreground">{v.leads} leads</span>
+                      <span className="font-semibold text-foreground">Score: {v.avgScore}%</span>
                     </div>
                   </div>
                 ))}
