@@ -1,3 +1,4 @@
+// v2 - with lost_reason and "Sem negócio" status
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -37,7 +38,7 @@ serve(async (req) => {
       }
     }
 
-    const results: Record<string, { status: string; owner: string; stage: string } | null> = {};
+    const results: Record<string, { status: string; owner: string; stage: string; lost_reason: string } | null> = {};
 
     // Process each email
     for (const email of emails.slice(0, 10)) {
@@ -54,7 +55,6 @@ serve(async (req) => {
             `https://api.pipedrive.com/v1/persons/search?term=${encodeURIComponent(cleanEmail)}&fields=email&api_token=${apiToken}`
           );
           const searchData = await searchRes.json();
-          console.log(`[${cleanEmail}] persons/search result: found=${searchData.data?.items?.length || 0}`);
           if (searchData.success && searchData.data?.items?.length) {
             personId = searchData.data.items[0].item.id;
           }
@@ -69,7 +69,6 @@ serve(async (req) => {
               `https://api.pipedrive.com/v1/itemSearch?term=${encodeURIComponent(cleanEmail)}&item_types=person&api_token=${apiToken}`
             );
             const searchData = await searchRes.json();
-            console.log(`[${cleanEmail}] itemSearch person result: found=${searchData.data?.items?.length || 0}`);
             if (searchData.success && searchData.data?.items?.length) {
               personId = searchData.data.items[0].item.id;
             }
@@ -85,7 +84,6 @@ serve(async (req) => {
               `https://api.pipedrive.com/v1/itemSearch?term=${encodeURIComponent(cleanEmail)}&item_types=deal&api_token=${apiToken}`
             );
             const searchData = await searchRes.json();
-            console.log(`[${cleanEmail}] itemSearch deal result: found=${searchData.data?.items?.length || 0}`);
             if (searchData.success && searchData.data?.items?.length) {
               dealFromSearch = searchData.data.items[0].item;
             }
@@ -94,23 +92,7 @@ serve(async (req) => {
           }
         }
 
-        // Strategy 4: Search using v2 persons API with email filter
-        if (!personId && !dealFromSearch) {
-          try {
-            const searchRes = await fetch(
-              `https://api.pipedrive.com/api/v2/persons/search?term=${encodeURIComponent(cleanEmail)}&fields=email&api_token=${apiToken}`
-            );
-            const searchData = await searchRes.json();
-            console.log(`[${cleanEmail}] v2 persons/search result: found=${searchData.data?.items?.length || 0}`);
-            if (searchData.success && searchData.data?.items?.length) {
-              personId = searchData.data.items[0].item?.id || searchData.data.items[0].id;
-            }
-          } catch (e) {
-            console.log(`[${cleanEmail}] v2 search not available, skipping`);
-          }
-        }
-
-        // If we found a deal directly, use it
+        // If we found a deal directly from search, use it
         if (!personId && dealFromSearch) {
           const dealId = dealFromSearch.id;
           const dealRes = await fetch(
@@ -135,71 +117,76 @@ serve(async (req) => {
               }
             }
             const stageName = deal.stage_id ? stageMap[deal.stage_id] || `Etapa ${deal.stage_id}` : "";
+            const lostReason = deal.lost_reason || "";
             results[cleanEmail] = {
               status: statusMap[deal.status] || deal.status || "",
               owner: ownerName,
               stage: stageName,
+              lost_reason: lostReason,
             };
             continue;
           }
         }
 
-        if (!personId) {
-          console.log(`[${cleanEmail}] No person or deal found in any strategy`);
-          results[cleanEmail] = null;
-          continue;
-        }
+        // Person found but possibly no deals
+        if (personId) {
+          // Get deals for this person (include all statuses)
+          const dealsRes = await fetch(
+            `https://api.pipedrive.com/v1/persons/${personId}/deals?api_token=${apiToken}&status=all_not_deleted`
+          );
+          const dealsData = await dealsRes.json();
 
-        console.log(`[${cleanEmail}] Found person ID: ${personId}`);
-
-        // Get deals for this person
-        const dealsRes = await fetch(
-          `https://api.pipedrive.com/v1/persons/${personId}/deals?api_token=${apiToken}&status=all_not_deleted`
-        );
-        const dealsData = await dealsRes.json();
-
-        if (!dealsData.success || !dealsData.data?.length) {
-          console.log(`[${cleanEmail}] Person found but no deals`);
-          results[cleanEmail] = null;
-          continue;
-        }
-
-        // Get most recent deal
-        const deals = dealsData.data.sort((a: any, b: any) =>
-          new Date(b.add_time).getTime() - new Date(a.add_time).getTime()
-        );
-        const deal = deals[0];
-
-        // Status mapping
-        const statusMap: Record<string, string> = {
-          open: "Aberto",
-          won: "Ganho",
-          lost: "Perdido",
-          deleted: "Excluído",
-        };
-
-        // Owner name
-        let ownerName = "";
-        if (deal.user_id) {
-          ownerName = typeof deal.user_id === "object" ? deal.user_id.name || "" : "";
-          if (!ownerName && deal.user_id) {
-            const ownerId = typeof deal.user_id === "object" ? deal.user_id.id : deal.user_id;
-            try {
-              const userRes = await fetch(`https://api.pipedrive.com/v1/users/${ownerId}?api_token=${apiToken}`);
-              const userData = await userRes.json();
-              if (userData.success) ownerName = userData.data.name || "";
-            } catch {}
+          if (!dealsData.success || !dealsData.data?.length) {
+            // Person exists in Pipedrive but has no deals
+            results[cleanEmail] = {
+              status: "Sem negócio",
+              owner: "",
+              stage: "",
+              lost_reason: "",
+            };
+            continue;
           }
+
+          // Get most recent deal
+          const deals = dealsData.data.sort((a: any, b: any) =>
+            new Date(b.add_time).getTime() - new Date(a.add_time).getTime()
+          );
+          const deal = deals[0];
+
+          const statusMap: Record<string, string> = {
+            open: "Aberto",
+            won: "Ganho",
+            lost: "Perdido",
+            deleted: "Excluído",
+          };
+
+          // Owner name
+          let ownerName = "";
+          if (deal.user_id) {
+            ownerName = typeof deal.user_id === "object" ? deal.user_id.name || "" : "";
+            if (!ownerName && deal.user_id) {
+              const ownerId = typeof deal.user_id === "object" ? deal.user_id.id : deal.user_id;
+              try {
+                const userRes = await fetch(`https://api.pipedrive.com/v1/users/${ownerId}?api_token=${apiToken}`);
+                const userData = await userRes.json();
+                if (userData.success) ownerName = userData.data.name || "";
+              } catch {}
+            }
+          }
+
+          const stageName = deal.stage_id ? stageMap[deal.stage_id] || `Etapa ${deal.stage_id}` : "";
+          const lostReason = deal.lost_reason || "";
+
+          results[cleanEmail] = {
+            status: statusMap[deal.status] || deal.status || "",
+            owner: ownerName,
+            stage: stageName,
+            lost_reason: lostReason,
+          };
+        } else {
+          // Not found in Pipedrive at all
+          results[cleanEmail] = null;
         }
-
-        // Stage name
-        const stageName = deal.stage_id ? stageMap[deal.stage_id] || `Etapa ${deal.stage_id}` : "";
-
-        results[cleanEmail] = {
-          status: statusMap[deal.status] || deal.status || "",
-          owner: ownerName,
-          stage: stageName,
-        };
       } catch (err) {
         console.error(`Error processing ${email}:`, err);
         results[String(email).trim().toLowerCase()] = null;
