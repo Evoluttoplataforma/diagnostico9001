@@ -77,6 +77,8 @@ export default function Analytics() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [pipedriveData, setPipedriveData] = useState<Record<string, { status: string; owner: string; stage: string } | null>>({});
+  const [pipedriveLoading, setPipedriveLoading] = useState(false);
   const [variantSort, setVariantSort] = useState<"leads" | "score">("leads");
   const [copyOrder, setCopyOrder] = useState<string[] | null>(null);
   const [periodPreset, setPeriodPreset] = useState<PeriodPreset>("30d");
@@ -108,6 +110,16 @@ export default function Analytics() {
           if (Array.isArray(data.settings.copy_order)) setCopyOrder(data.settings.copy_order);
         }
         setAuthenticated(true);
+        // Enrich recent leads with Pipedrive data
+        const recentEmails = data.leads.slice(0, 10).map((l: Lead) => l.email);
+        setPipedriveLoading(true);
+        supabase.functions.invoke("enrich-leads-pipedrive", {
+          body: { emails: recentEmails, password },
+        }).then(({ data: enrichData }) => {
+          if (enrichData?.success && enrichData.results) {
+            setPipedriveData(enrichData.results);
+          }
+        }).finally(() => setPipedriveLoading(false));
       } else {
         setError(data?.error || "Erro ao autenticar");
       }
@@ -644,31 +656,48 @@ export default function Analytics() {
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead>
+                     <thead>
                       <tr className="border-b">
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Nome</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Empresa</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Score</th>
-                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Copy</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Nível</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Status</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Proprietário</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Etapa</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Data</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {leads.slice(0, 10).map((l) => (
+                      {leads.slice(0, 10).map((l) => {
+                        const pd = pipedriveData[l.email.trim().toLowerCase()];
+                        return (
                         <tr key={l.id} className="border-b border-border/50">
                           <td className="py-2 px-2 font-medium text-foreground whitespace-nowrap">{l.name}</td>
                           <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{l.company}</td>
                           <td className="py-2 px-2 text-foreground">{l.score}%</td>
-                          <td className="py-2 px-2 text-muted-foreground text-xs">{l.copy_variant || "—"}</td>
                           <td className="py-2 px-2">
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${{ crítico: "bg-red-100 text-red-800", básico: "bg-orange-100 text-orange-800", intermediário: "bg-yellow-100 text-yellow-800", avançado: "bg-green-100 text-green-800" }[l.diagnosis_level.toLowerCase()] || "bg-muted text-muted-foreground"}`}>
                               {l.diagnosis_level}
                             </span>
                           </td>
+                          <td className="py-2 px-2 text-xs whitespace-nowrap">
+                            {pipedriveLoading ? <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" /> : pd ? (
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${pd.status === "Aberto" ? "bg-blue-100 text-blue-800" : pd.status === "Ganho" ? "bg-green-100 text-green-800" : pd.status === "Perdido" ? "bg-red-100 text-red-800" : "bg-muted text-muted-foreground"}`}>
+                                {pd.status}
+                              </span>
+                            ) : <span className="text-muted-foreground">—</span>}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {pipedriveLoading ? <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" /> : pd?.owner || "—"}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {pipedriveLoading ? <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" /> : pd?.stage || "—"}
+                          </td>
                           <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{new Date(l.created_at).toLocaleDateString("pt-BR")}</td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
