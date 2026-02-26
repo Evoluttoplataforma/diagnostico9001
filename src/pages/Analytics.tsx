@@ -754,6 +754,10 @@ export default function Analytics() {
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Motivo Perda</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Pipedrive</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Source</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Medium</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Campaign</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Content</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Term</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Data</th>
                       </tr>
                     </thead>
@@ -807,6 +811,18 @@ export default function Analytics() {
                           </td>
                           <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
                             {l.utm_source || "—"}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {l.utm_medium || "—"}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {l.utm_campaign || "—"}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {l.utm_content || "—"}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {l.utm_term || "—"}
                           </td>
                           <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{new Date(l.created_at).toLocaleDateString("pt-BR")}</td>
                         </tr>
