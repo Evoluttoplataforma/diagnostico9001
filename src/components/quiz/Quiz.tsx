@@ -38,6 +38,11 @@ export const Quiz = () => {
 
   // --- Welcome popup submitted: immediately create Pipedrive lead ---
   const handleWelcomeNext = async (welcomeFormData: WelcomeFormData) => {
+    // Disparar evento GTM imediatamente após submissão do formulário
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).dataLayer.push({ event: "form_submit_success" });
+    console.log("[GTM] Evento disparado: form_submit_success");
+
     setData((prev) => ({ ...prev, welcomeData: welcomeFormData }));
     setCurrentStep("chat");
 
