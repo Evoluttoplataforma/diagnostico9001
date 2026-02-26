@@ -42,6 +42,7 @@ const DAILY_VISITORS: Record<string, number> = {
   "2026-02-14": 11, "2026-02-15": 7, "2026-02-16": 5, "2026-02-17": 7,
   "2026-02-18": 8, "2026-02-19": 85, "2026-02-20": 70, "2026-02-21": 41,
   "2026-02-22": 43, "2026-02-23": 40, "2026-02-24": 35,
+  "2026-02-25": 38, "2026-02-26": 32,
 };
 const COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899"];
 
@@ -191,7 +192,7 @@ export default function Analytics() {
     const byDay: Record<string, number> = {};
     const byDayVariant: Record<string, Record<string, number>> = {};
     filteredLeads.forEach((l) => {
-      const day = new Date(l.created_at).toISOString().split("T")[0];
+      const day = format(new Date(l.created_at), "yyyy-MM-dd");
       byDay[day] = (byDay[day] || 0) + 1;
       if (!byDayVariant[day]) byDayVariant[day] = {};
       const v = l.copy_variant || "?";
@@ -202,7 +203,7 @@ export default function Analytics() {
     const dailyData: { date: string; leads: number; sessoes: number; variants: Record<string, number> }[] = [];
     for (let i = rangeDays - 1; i >= 0; i--) {
       const d = new Date(rangeTo.getTime() - i * 24 * 60 * 60 * 1000);
-      const key = d.toISOString().split("T")[0];
+      const key = format(d, "yyyy-MM-dd");
       dailyData.push({
         date: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         leads: byDay[key] || 0,
