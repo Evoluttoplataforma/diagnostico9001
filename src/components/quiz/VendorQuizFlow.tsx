@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { QuestionStep } from "./steps/QuestionStep";
 import { VendorContactStep, VendorContactData } from "./steps/VendorContactStep";
@@ -8,6 +8,7 @@ import { DynamicQuestion, AnswerValue, getScore, getDiagnosis, calculatePillarSc
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { QuestionsLoading } from "./results/QuestionsLoading";
+import { getSessionId } from "@/lib/session";
 
 type Step = "segment" | "generating" | "questions" | "contact" | "company";
 
@@ -34,6 +35,7 @@ interface QuizData {
 
 export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlowProps) => {
   const navigate = useNavigate();
+  const pageStartTime = useRef(Date.now());
   const hasInitialSegment = !!(initialData.segment && initialData.segment.trim());
   const [currentStep, setCurrentStep] = useState<Step>(hasInitialSegment ? "generating" : "segment");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -108,8 +110,22 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
   };
 
   const handleContactNext = (contactData: VendorContactData) => {
+    const nameParts = contactData.name.trim().split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+    const phoneDigitsOnly = contactData.phone.replace(/\D/g, "");
+
     (window as any).dataLayer = (window as any).dataLayer || [];
-    (window as any).dataLayer.push({ event: "form_submit_success" });
+    (window as any).dataLayer.push({
+      event: "form_submit_success",
+      session_id: getSessionId(),
+      lead_name: contactData.name,
+      lead_email: contactData.email,
+      lead_phone: phoneDigitsOnly,
+      lead_first_name: firstName,
+      lead_last_name: lastName,
+      time_on_page_at_submit: Math.round((Date.now() - pageStartTime.current) / 1000),
+    });
     console.log("[GTM] Evento disparado: form_submit_success (vendor)");
 
     setData((prev) => ({ ...prev, contact: contactData }));

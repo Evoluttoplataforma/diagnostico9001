@@ -25,6 +25,13 @@ const Obrigado = () => {
       (window as any).dataLayer = (window as any).dataLayer || [];
       (window as any).dataLayer.push({ event: "tally_form_submit" });
       console.log("[GTM] Evento disparado: tally_form_submit");
+
+      (window as any).dataLayer.push({
+        event: "thank_you_page_view",
+        page_url: window.location.href,
+        page_path: window.location.pathname,
+      });
+      console.log("[GTM] Evento disparado: thank_you_page_view");
     } else {
       console.warn("[GTM] State não encontrado — eventos NÃO disparados");
     }
