@@ -29,7 +29,7 @@ serve(async (req) => {
 
     const { data, error } = await supabase
       .from("quiz_leads")
-      .select("id, name, email, phone, company, company_size, segment, score, diagnosis_level, created_at")
+      .select("id, name, email, phone, company, company_size, segment, score, diagnosis_level, created_at, answers, pillar_scores, ai_diagnosis")
       .order("created_at", { ascending: false })
       .limit(500);
 

@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, Loader2, Download, Search, ArrowUpDown, X, ChevronDown } from "lucide-react";
+import { Lock, Loader2, Download, Search, ArrowUpDown, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -10,6 +10,12 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { LeadDetailPanel } from "@/components/leads/LeadDetailPanel";
+import { PillarScore } from "@/components/quiz/quizData";
 
 interface Lead {
   id: string;
@@ -22,6 +28,12 @@ interface Lead {
   score: number;
   diagnosis_level: string;
   created_at: string;
+  answers: Record<string, number> | null;
+  pillar_scores: PillarScore[] | null;
+  ai_diagnosis: {
+    summary?: { paragraph1?: string; paragraph2?: string };
+    checklist?: Record<string, string[]>;
+  } | null;
 }
 
 const diagnosisColors: Record<string, string> = {
@@ -41,6 +53,19 @@ const sortLabels: Record<SortKey, string> = {
 };
 
 type SortDir = "asc" | "desc";
+
+// Helper to detect issues with a lead
+function getLeadIssueCount(lead: Lead): number {
+  let count = 0;
+  const answers = lead.answers || {};
+  const totalAnswered = Object.keys(answers).length;
+  if (totalAnswered === 0) count++;
+  else if (totalAnswered < 20) count++;
+  if (!lead.ai_diagnosis?.summary) count++;
+  if (!lead.pillar_scores?.length) count++;
+  if (totalAnswered > 0 && Object.values(answers).every(v => v === 0)) count++;
+  return count;
+}
 
 export default function Leads() {
   const [password, setPassword] = useState("");
@@ -155,7 +180,7 @@ export default function Leads() {
     );
   }
 
-  // ── Mobile layout: full viewport, no outer scroll ──
+  // ── Mobile layout ──
   if (isMobile) {
     return (
       <div className="h-dvh flex flex-col bg-background overflow-hidden">
@@ -175,16 +200,9 @@ export default function Leads() {
           </div>
         </div>
 
-        {/* Search bar (collapsible) */}
         {showSearch && (
           <div className="px-3 py-2 border-b bg-card shrink-0">
-            <Input
-              placeholder="Buscar..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-8 text-sm"
-              autoFocus
-            />
+            <Input placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-8 text-sm" autoFocus />
           </div>
         )}
 
@@ -195,74 +213,63 @@ export default function Leads() {
               key={key}
               onClick={() => toggleSort(key)}
               className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${
-                sortKey === key
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
+                sortKey === key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
               }`}
             >
               {sortLabels[key]}
-              {sortKey === key && (
-                <span className="text-[9px]">{sortDir === "asc" ? "↑" : "↓"}</span>
-              )}
+              {sortKey === key && <span className="text-[9px]">{sortDir === "asc" ? "↑" : "↓"}</span>}
             </button>
           ))}
         </div>
 
-        {/* Lead cards – scrollable area */}
+        {/* Lead cards */}
         <div className="flex-1 overflow-y-auto">
           {filtered.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-              Nenhum lead encontrado
-            </div>
+            <div className="flex items-center justify-center h-full text-sm text-muted-foreground">Nenhum lead encontrado</div>
           ) : (
             <div className="divide-y">
-              {filtered.map((l) => (
-                <Sheet key={l.id}>
-                  <SheetTrigger asChild>
-                    <button
-                      className="w-full text-left px-3 py-2.5 flex items-center gap-3 active:bg-muted/50 transition-colors"
-                      onClick={() => setSelectedLead(l)}
-                    >
-                      {/* Score circle */}
-                      <div className="shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                        <span className="text-xs font-bold text-foreground">{l.score}%</span>
-                      </div>
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-medium text-foreground truncate">{l.name}</span>
-                          <span
-                            className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${
-                              diagnosisColors[l.diagnosis_level.toLowerCase()] || "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {l.diagnosis_level}
-                          </span>
+              {filtered.map((l) => {
+                const issueCount = getLeadIssueCount(l);
+                return (
+                  <Sheet key={l.id}>
+                    <SheetTrigger asChild>
+                      <button
+                        className="w-full text-left px-3 py-2.5 flex items-center gap-3 active:bg-muted/50 transition-colors"
+                        onClick={() => setSelectedLead(l)}
+                      >
+                        <div className="shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center relative">
+                          <span className="text-xs font-bold text-foreground">{l.score}%</span>
+                          {issueCount > 0 && (
+                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
+                              {issueCount}
+                            </span>
+                          )}
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">{l.company}</p>
-                      </div>
-                      {/* Date */}
-                      <span className="text-[10px] text-muted-foreground shrink-0">
-                        {new Date(l.created_at).toLocaleDateString("pt-BR")}
-                      </span>
-                    </button>
-                  </SheetTrigger>
-                  <SheetContent side="bottom" className="rounded-t-2xl max-h-[70dvh]">
-                    <SheetHeader>
-                      <SheetTitle className="text-left">{l.name}</SheetTitle>
-                    </SheetHeader>
-                    <div className="space-y-3 mt-4 text-sm">
-                      <DetailRow label="Email" value={l.email} />
-                      <DetailRow label="Telefone" value={l.phone} />
-                      <DetailRow label="Empresa" value={l.company} />
-                      <DetailRow label="Segmento" value={l.segment || "—"} />
-                      <DetailRow label="Score" value={`${l.score}%`} />
-                      <DetailRow label="Nível" value={l.diagnosis_level} />
-                      <DetailRow label="Data" value={formatDate(l.created_at)} />
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              ))}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-medium text-foreground truncate">{l.name}</span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${diagnosisColors[l.diagnosis_level.toLowerCase()] || "bg-muted text-muted-foreground"}`}>
+                              {l.diagnosis_level}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{l.company}</p>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {new Date(l.created_at).toLocaleDateString("pt-BR")}
+                        </span>
+                      </button>
+                    </SheetTrigger>
+                    <SheetContent side="bottom" className="rounded-t-2xl max-h-[85dvh]">
+                      <SheetHeader>
+                        <SheetTitle className="text-left">{l.name}</SheetTitle>
+                      </SheetHeader>
+                      <ScrollArea className="mt-4 max-h-[70dvh] pr-3">
+                        <LeadDetailPanel lead={l} />
+                      </ScrollArea>
+                    </SheetContent>
+                  </Sheet>
+                );
+              })}
             </div>
           )}
         </div>
@@ -270,7 +277,7 @@ export default function Leads() {
     );
   }
 
-  // ── Desktop layout (original table) ──
+  // ── Desktop layout ──
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-4">
@@ -294,64 +301,84 @@ export default function Leads() {
           <Table>
             <TableHeader>
               <TableRow>
-                {["name", "email", "phone", "company", "segment", "score", "diagnosis_level", "created_at"].map((key) => {
+                {["name", "email", "company", "segment", "score", "diagnosis_level", "created_at"].map((key) => {
                   const labels: Record<string, string> = {
-                    name: "Nome", email: "Email", phone: "Telefone", company: "Empresa",
+                    name: "Nome", email: "Email", company: "Empresa",
                     segment: "Segmento", score: "Score", diagnosis_level: "Nível", created_at: "Data / Hora",
                   };
-                  const sortable = key !== "phone";
                   return (
                     <TableHead
                       key={key}
-                      className={sortable ? "cursor-pointer select-none" : ""}
-                      onClick={() => sortable && toggleSort(key as SortKey)}
+                      className="cursor-pointer select-none"
+                      onClick={() => toggleSort(key as SortKey)}
                     >
                       <span className="flex items-center gap-1">
                         {labels[key]}
-                        {sortable && <ArrowUpDown className="w-3 h-3 opacity-40" />}
+                        <ArrowUpDown className="w-3 h-3 opacity-40" />
                       </span>
                     </TableHead>
                   );
                 })}
+                <TableHead>Respostas</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((l) => (
-                <TableRow key={l.id}>
-                  <TableCell className="font-medium whitespace-nowrap">{l.name}</TableCell>
-                  <TableCell className="whitespace-nowrap">{l.email}</TableCell>
-                  <TableCell className="whitespace-nowrap">{l.phone}</TableCell>
-                  <TableCell className="whitespace-nowrap">{l.company}</TableCell>
-                  <TableCell className="whitespace-nowrap">{l.segment || "—"}</TableCell>
-                  <TableCell>{l.score}%</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${diagnosisColors[l.diagnosis_level.toLowerCase()] || "bg-muted text-muted-foreground"}`}>
-                      {l.diagnosis_level}
-                    </span>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">{formatDate(l.created_at)}</TableCell>
-                </TableRow>
-              ))}
+              {filtered.map((l) => {
+                const answersCount = Object.keys(l.answers || {}).length;
+                const issueCount = getLeadIssueCount(l);
+                return (
+                  <TableRow
+                    key={l.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => setSelectedLead(l)}
+                  >
+                    <TableCell className="font-medium whitespace-nowrap">{l.name}</TableCell>
+                    <TableCell className="whitespace-nowrap">{l.email}</TableCell>
+                    <TableCell className="whitespace-nowrap">{l.company}</TableCell>
+                    <TableCell className="whitespace-nowrap">{l.segment || "—"}</TableCell>
+                    <TableCell>{l.score}%</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${diagnosisColors[l.diagnosis_level.toLowerCase()] || "bg-muted text-muted-foreground"}`}>
+                        {l.diagnosis_level}
+                      </span>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">{formatDate(l.created_at)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-xs font-medium ${answersCount === 20 ? "text-green-600" : answersCount > 0 ? "text-yellow-600" : "text-red-500"}`}>
+                          {answersCount}/20
+                        </span>
+                        {issueCount > 0 && (
+                          <span className="w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                            {issueCount}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    Nenhum lead encontrado
-                  </TableCell>
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum lead encontrado</TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
       </div>
-    </div>
-  );
-}
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between items-center">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium text-foreground text-right">{value}</span>
+      {/* Desktop detail dialog */}
+      <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle>{selectedLead?.name}</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[70vh] pr-3">
+            {selectedLead && <LeadDetailPanel lead={selectedLead} />}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

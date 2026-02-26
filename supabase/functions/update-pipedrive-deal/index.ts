@@ -352,46 +352,50 @@ serve(async (req) => {
     const dealUpdateResult = await dealUpdateResponse.json();
     console.log("Deal update response:", dealUpdateResult.success, "status:", dealUpdateResult.data?.status);
 
-    // Build question lookup from dynamic questions
-    const questionMap: Record<string, DynamicQuestion> = {};
-    if (updateData.questions) {
-      updateData.questions.forEach((q) => { questionMap[q.id] = q; });
-    }
+    // Only add notes when we have actual answers (score > 0), skip mid-flow updates
+    const hasAnswers = updateData.score > 0 && Object.keys(updateData.answers || {}).length > 0;
 
-    // Build and add notes
-    const revenueDisplay = updateData.revenue ? (revenueLabels[updateData.revenue] || updateData.revenue) : "Não informado";
+    if (hasAnswers) {
+      // Build question lookup from dynamic questions
+      const questionMap: Record<string, DynamicQuestion> = {};
+      if (updateData.questions) {
+        updateData.questions.forEach((q) => { questionMap[q.id] = q; });
+      }
 
-    let answersSection = "\n\n📋 **RESPOSTAS DO DIAGNÓSTICO PERSONALIZADO:**\n";
-    const pillars = ["Processos", "Pessoas", "Clientes", "Controle", "Crescimento"];
-    
-    pillars.forEach((pillar) => {
-      answersSection += `\n**${pillar}:**\n`;
-      const qIds = pillarQuestions[pillar];
-      qIds.forEach((qId) => {
-        const answerValue = updateData.answers?.[qId];
-        const q = questionMap[qId];
-        const questionText = q?.text || fallbackQuestionTexts[qId] || qId;
-        
-        let answerText = "Não respondeu";
-        let emoji = "⬜";
-        if (typeof answerValue === 'number') {
-          answerText = q?.answers?.find((a) => a.value === answerValue)?.label || `Nota ${answerValue}/5`;
-          emoji = answerValue >= 4 ? "✅" : answerValue === 3 ? "⚠️" : "❌";
-        }
-        answersSection += `${emoji} ${questionText}\n   → ${answerText} (${answerValue || 0}/5)\n`;
+      // Build and add notes
+      const revenueDisplay = updateData.revenue ? (revenueLabels[updateData.revenue] || updateData.revenue) : "Não informado";
+
+      let answersSection = "\n\n📋 **RESPOSTAS DO DIAGNÓSTICO PERSONALIZADO:**\n";
+      const pillars = ["Processos", "Pessoas", "Clientes", "Controle", "Crescimento"];
+      
+      pillars.forEach((pillar) => {
+        answersSection += `\n**${pillar}:**\n`;
+        const qIds = pillarQuestions[pillar];
+        qIds.forEach((qId) => {
+          const answerValue = updateData.answers?.[qId];
+          const q = questionMap[qId];
+          const questionText = q?.text || fallbackQuestionTexts[qId] || qId;
+          
+          let answerText = "Não respondeu";
+          let emoji = "⬜";
+          if (typeof answerValue === 'number') {
+            answerText = q?.answers?.find((a) => a.value === answerValue)?.label || `Nota ${answerValue}/5`;
+            emoji = answerValue >= 4 ? "✅" : answerValue === 3 ? "⚠️" : "❌";
+          }
+          answersSection += `${emoji} ${questionText}\n   → ${answerText} (${answerValue || 0}/5)\n`;
+        });
       });
-    });
 
-    let pillarScoresSection = "\n\n📊 **PONTUAÇÃO POR PILAR:**\n";
-    if (updateData.pillar_scores && updateData.pillar_scores.length > 0) {
-      updateData.pillar_scores.forEach((pillar) => {
-        const emoji = pillar.score >= 75 ? "🟢" : pillar.score >= 50 ? "🟡" : "🔴";
-        pillarScoresSection += `${emoji} ${pillar.name}: ${pillar.score}%\n`;
-      });
-    }
+      let pillarScoresSection = "\n\n📊 **PONTUAÇÃO POR PILAR:**\n";
+      if (updateData.pillar_scores && updateData.pillar_scores.length > 0) {
+        updateData.pillar_scores.forEach((pillar) => {
+          const emoji = pillar.score >= 75 ? "🟢" : pillar.score >= 50 ? "🟡" : "🔴";
+          pillarScoresSection += `${emoji} ${pillar.name}: ${pillar.score}%\n`;
+        });
+      }
 
-    const dealNote = `
-📊 **Diagnóstico de Maturidade Empresarial** (ATUALIZAÇÃO VIA LINK DO VENDEDOR)
+      const dealNote = `
+📊 **Diagnóstico de Maturidade Empresarial**
 
 👤 **Contato:** ${updateData.name}
 🏢 **Empresa:** ${updateData.company}
@@ -405,42 +409,45 @@ serve(async (req) => {
 🏷️ **Nível:** ${updateData.diagnosis_level}
 ${pillarScoresSection}
 ${answersSection}
-    `.trim();
+      `.trim();
 
-    // Add diagnosis note
-    await fetch(
-      `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: dealNote,
-          deal_id: updateData.deal_id,
-        }),
-      }
-    );
+      // Add diagnosis note
+      await fetch(
+        `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: dealNote,
+            deal_id: updateData.deal_id,
+          }),
+        }
+      );
 
-    // Add sales guidance note
-    const salesGuidance = getSalesGuidance(
-      updateData.score,
-      updateData.diagnosis_level,
-      updateData.pillar_scores || [],
-      updateData.answers || {},
-      updateData.name,
-      updateData.questions
-    );
+      // Add sales guidance note
+      const salesGuidance = getSalesGuidance(
+        updateData.score,
+        updateData.diagnosis_level,
+        updateData.pillar_scores || [],
+        updateData.answers || {},
+        updateData.name,
+        updateData.questions
+      );
 
-    await fetch(
-      `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: salesGuidance,
-          deal_id: updateData.deal_id,
-        }),
-      }
-    );
+      await fetch(
+        `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: salesGuidance,
+            deal_id: updateData.deal_id,
+          }),
+        }
+      );
+    } else {
+      console.log("Skipping notes — mid-flow update with no answers yet");
+    }
 
     // If deal was lost, create a phone call activity
     if (wasLost) {
