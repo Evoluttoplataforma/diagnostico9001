@@ -2,16 +2,32 @@
 
 ## Diagnóstico
 
-O código está correto e funcionando. Testei no preview: o `console.log("[GTM] Evento disparado: form_submit_success")` aparece no console imediatamente após o submit do modal.
+O problema tem **duas causas**:
 
-### Ações necessárias (não são mudanças de código):
+### 1. Sessões zeradas (causa principal)
+O objeto `DAILY_VISITORS` em `src/pages/Analytics.tsx` (linha 36-45) é **hardcoded** e só tem dados até `"2026-02-24": 35`. Não existe entrada para `"2026-02-25"` nem `"2026-02-26"`, então a linha de sessões aparece como 0 nesses dias.
 
-1. **Publicar o app** — Clicar em Publish > Update para que as alterações do código cheguem ao site publicado (onde o GTM Preview está rodando).
+### 2. Bug de timezone nos leads
+Na linha 205, o `key` é gerado com `d.toISOString().split("T")[0]`, que retorna a data em **UTC**. Porém, os leads são agrupados (linha 194) usando o mesmo método `toISOString()`, então as datas são consistentes entre si. O problema é que como o usuário está no Brasil (UTC-3), um lead criado às 22h do dia 24/02 BRT aparece como 25/02 UTC, potencialmente deslocando leads entre dias.
 
-2. **Verificar configuração do GTM** — No GTM, o trigger precisa ser:
-   - Tipo: **Custom Event**
-   - Nome do evento: `form_submit_success`
-   - (Não usar "Form Submission" que monitora submits de `<form>` HTML)
+### Plano de correção
 
-Nenhuma alteração de código é necessária.
+**`src/pages/Analytics.tsx`**:
+
+1. **Atualizar `DAILY_VISITORS`** com os dados de 25 e 26 de fevereiro (preciso saber os valores ou colocar estimativas temporárias).
+
+2. **Corrigir timezone** na geração de chaves de data: substituir `d.toISOString().split("T")[0]` por uma função que usa a data local em vez de UTC, tanto no agrupamento de leads (linha 194) quanto no preenchimento de dias (linha 205). Isso garante consistência com o horário de Brasília.
+
+```ts
+// Antes (UTC):
+const key = d.toISOString().split("T")[0];
+
+// Depois (local):
+const key = format(d, "yyyy-MM-dd");
+```
+
+Isso será aplicado nas linhas 194 e 205.
+
+### Pergunta pendente
+Qual o número de visitantes dos dias 25 e 26 de fevereiro para atualizar o `DAILY_VISITORS`? Ou prefere que eu remova essa métrica hardcoded e busque os dados de outra forma?
 
