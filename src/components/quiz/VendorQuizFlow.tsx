@@ -108,6 +108,10 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
   };
 
   const handleContactNext = (contactData: VendorContactData) => {
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).dataLayer.push({ event: "form_submit_success" });
+    console.log("[GTM] Evento disparado: form_submit_success (vendor)");
+
     setData((prev) => ({ ...prev, contact: contactData }));
     setCurrentStep("company");
   };
