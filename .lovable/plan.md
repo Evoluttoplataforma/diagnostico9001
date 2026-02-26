@@ -1,33 +1,42 @@
 
 
-## Diagnóstico
+## O que falta no Lovable comparado com a sua página HTML
 
-O problema tem **duas causas**:
+### 1. Session ID via sessionStorage
+**Faltando.** Criar um hook/utilitário que gera um `sessionId` único via `sessionStorage` (chave `lp_session_id`) e disponibiliza para os eventos.
 
-### 1. Sessões zeradas (causa principal)
-O objeto `DAILY_VISITORS` em `src/pages/Analytics.tsx` (linha 36-45) é **hardcoded** e só tem dados até `"2026-02-24": 35`. Não existe entrada para `"2026-02-25"` nem `"2026-02-26"`, então a linha de sessões aparece como 0 nesses dias.
+### 2. Dados do lead no dataLayer.push do `form_submit_success`
+**Faltando.** Atualmente o push (linha 43 do Quiz.tsx e linha equivalente no VendorQuizFlow.tsx) envia apenas `{ event: "form_submit_success" }`. Precisa incluir:
+- `session_id`
+- `lead_name`
+- `lead_email`
+- `lead_phone`
+- `lead_first_name` (primeiro nome)
+- `lead_last_name` (sobrenome)
+- `time_on_page_at_submit` (segundos desde o carregamento da página)
 
-### 2. Bug de timezone nos leads
-Na linha 205, o `key` é gerado com `d.toISOString().split("T")[0]`, que retorna a data em **UTC**. Porém, os leads são agrupados (linha 194) usando o mesmo método `toISOString()`, então as datas são consistentes entre si. O problema é que como o usuário está no Brasil (UTC-3), um lead criado às 22h do dia 24/02 BRT aparece como 25/02 UTC, potencialmente deslocando leads entre dias.
+### 3. Tracking de tempo na página (`time_on_page_at_submit`)
+**Faltando.** Registrar `Date.now()` ao carregar a página e calcular a diferença no momento do submit.
 
-### Plano de correção
+### 4. Evento `thank_you_page_view` na página de obrigado
+**Faltando.** Na `Obrigado.tsx`, o evento atual é `tally_form_submit`. Precisa adicionar (ou substituir por) `thank_you_page_view` com `page_url` e `page_path`.
 
-**`src/pages/Analytics.tsx`**:
+### Alterações
 
-1. **Atualizar `DAILY_VISITORS`** com os dados de 25 e 26 de fevereiro (preciso saber os valores ou colocar estimativas temporárias).
+**Novo arquivo `src/lib/session.ts`:**
+- Função `getSessionId()` que lê/cria o ID no `sessionStorage` com chave `lp_session_id`
 
-2. **Corrigir timezone** na geração de chaves de data: substituir `d.toISOString().split("T")[0]` por uma função que usa a data local em vez de UTC, tanto no agrupamento de leads (linha 194) quanto no preenchimento de dias (linha 205). Isso garante consistência com o horário de Brasília.
+**`src/components/quiz/Quiz.tsx`:**
+- Importar `getSessionId`
+- Registrar `pageStartTime = Date.now()` via `useRef` no início do componente
+- No `handleWelcomeNext`, enriquecer o `dataLayer.push` com: `session_id`, `lead_name`, `lead_email`, `lead_phone`, `lead_first_name`, `lead_last_name`, `time_on_page_at_submit`
 
-```ts
-// Antes (UTC):
-const key = d.toISOString().split("T")[0];
+**`src/components/quiz/VendorQuizFlow.tsx`:**
+- Mesmas alterações: importar `getSessionId`, registrar `pageStartTime`, enriquecer o `dataLayer.push` no `handleContactNext`
 
-// Depois (local):
-const key = format(d, "yyyy-MM-dd");
-```
-
-Isso será aplicado nas linhas 194 e 205.
+**`src/pages/Obrigado.tsx`:**
+- Adicionar evento `thank_you_page_view` com `page_url: window.location.href` e `page_path: window.location.pathname` (mantendo o `tally_form_submit` existente ou substituindo — confirmo abaixo)
 
 ### Pergunta pendente
-Qual o número de visitantes dos dias 25 e 26 de fevereiro para atualizar o `DAILY_VISITORS`? Ou prefere que eu remova essa métrica hardcoded e busque os dados de outra forma?
+O evento `tally_form_submit` na página de obrigado deve ser **mantido junto** com o novo `thank_you_page_view`, ou **substituído** por ele?
 
