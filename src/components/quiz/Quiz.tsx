@@ -50,11 +50,10 @@ export const Quiz = () => {
     (window as any).dataLayer.push({
       event: "form_submit_success",
       session_id: getSessionId(),
-      lead_name: welcomeFormData.name,
-      lead_email: welcomeFormData.email,
-      lead_phone: phoneDigitsOnly,
-      lead_first_name: firstName,
-      lead_last_name: lastName,
+      email: welcomeFormData.email,
+      phoneNumber: phoneDigitsOnly,
+      nome: firstName,
+      sobrenome: lastName,
       time_on_page_at_submit: Math.round((Date.now() - pageStartTime.current) / 1000),
     });
     console.log("[GTM] Evento disparado: form_submit_success");

@@ -119,11 +119,10 @@ export const VendorQuizFlow = ({ dealId, initialData, ownerName }: VendorQuizFlo
     (window as any).dataLayer.push({
       event: "form_submit_success",
       session_id: getSessionId(),
-      lead_name: contactData.name,
-      lead_email: contactData.email,
-      lead_phone: phoneDigitsOnly,
-      lead_first_name: firstName,
-      lead_last_name: lastName,
+      email: contactData.email,
+      phoneNumber: phoneDigitsOnly,
+      nome: firstName,
+      sobrenome: lastName,
       time_on_page_at_submit: Math.round((Date.now() - pageStartTime.current) / 1000),
     });
     console.log("[GTM] Evento disparado: form_submit_success (vendor)");
