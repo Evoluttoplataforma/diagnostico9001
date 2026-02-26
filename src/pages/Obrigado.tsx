@@ -24,6 +24,7 @@ const Obrigado = () => {
     if (state) {
       (window as any).dataLayer = (window as any).dataLayer || [];
       (window as any).dataLayer.push({ event: "tally_form_submit" });
+      (window as any).dataLayer.push({ event: "form_submit_success" });
     }
   }, []);
   // If no state, redirect to home
