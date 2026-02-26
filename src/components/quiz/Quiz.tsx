@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useUTM } from "@/hooks/use-utm";
 import { DiagnosisLoading } from "./results/DiagnosisLoading";
 import { QuestionsLoading } from "./results/QuestionsLoading";
+import { getSessionId } from "@/lib/session";
 
 type Step = "welcome" | "chat" | "generating" | "questions";
 
@@ -32,6 +33,7 @@ export const Quiz = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dealIdRef = useRef<number | null>(null);
   const ownerNameRef = useRef<string | null>(null);
+  const pageStartTime = useRef(Date.now());
 
   const totalQuestions = dynamicQuestions.length || 20;
   const totalSteps = totalQuestions + 2;
@@ -39,8 +41,22 @@ export const Quiz = () => {
   // --- Welcome popup submitted: immediately create Pipedrive lead ---
   const handleWelcomeNext = async (welcomeFormData: WelcomeFormData) => {
     // Disparar evento GTM imediatamente após submissão do formulário
+    const nameParts = welcomeFormData.name.trim().split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+    const phoneDigitsOnly = welcomeFormData.phone.replace(/\D/g, "");
+
     (window as any).dataLayer = (window as any).dataLayer || [];
-    (window as any).dataLayer.push({ event: "form_submit_success" });
+    (window as any).dataLayer.push({
+      event: "form_submit_success",
+      session_id: getSessionId(),
+      lead_name: welcomeFormData.name,
+      lead_email: welcomeFormData.email,
+      lead_phone: phoneDigitsOnly,
+      lead_first_name: firstName,
+      lead_last_name: lastName,
+      time_on_page_at_submit: Math.round((Date.now() - pageStartTime.current) / 1000),
+    });
     console.log("[GTM] Evento disparado: form_submit_success");
 
     setData((prev) => ({ ...prev, welcomeData: welcomeFormData }));
