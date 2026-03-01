@@ -624,6 +624,7 @@ ${leadData.utm_term ? `- Term: ${leadData.utm_term}` : ""}`.replace(/\n+/g, '\n'
 📊 **Diagnóstico de Maturidade Empresarial**
 
 👤 **Contato:** ${leadData.name}
+💼 **Cargo:** ${leadData.job_title || "Não informado"}
 🏢 **Empresa:** ${leadData.company}
 🏭 **Segmento:** ${leadData.segment || "Não informado"}
 👥 **Porte:** ${leadData.company_size || "Não informado"} funcionários
