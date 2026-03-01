@@ -834,6 +834,7 @@ export default function Analytics() {
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Etapa</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Motivo Perda</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Pipedrive</th>
+                        <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">Copy</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Source</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Medium</th>
                         <th className="text-left py-2 px-2 text-xs text-muted-foreground font-medium">UTM Campaign</th>
@@ -889,6 +890,9 @@ export default function Analytics() {
                                 Abrir
                               </a>
                             ) : <span className="text-muted-foreground">—</span>}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {l.copy_variant || "—"}
                           </td>
                           <td className="py-2 px-2 text-xs text-muted-foreground whitespace-nowrap">
                             {l.utm_source || "—"}
