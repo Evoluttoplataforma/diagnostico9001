@@ -97,6 +97,24 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_visitors: {
+        Row: {
+          created_at: string
+          date: string
+          sessions: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          sessions?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          sessions?: number
+        }
+        Relationships: []
+      }
       dashboard_settings: {
         Row: {
           copy_order: Json | null
