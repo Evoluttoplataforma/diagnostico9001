@@ -398,6 +398,7 @@ serve(async (req) => {
 📊 **Diagnóstico de Maturidade Empresarial**
 
 👤 **Contato:** ${updateData.name}
+💼 **Cargo:** ${updateData.job_title || "Não informado"}
 🏢 **Empresa:** ${updateData.company}
 🏭 **Segmento:** ${updateData.segment || "Não informado"}
 👥 **Porte:** ${updateData.company_size || "Não informado"} funcionários
