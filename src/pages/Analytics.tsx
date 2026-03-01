@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical, GripVertical, CalendarIcon, ChevronDown, ExternalLink } from "lucide-react";
+import { Lock, Loader2, TrendingUp, Users, Target, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, FlaskConical, GripVertical, CalendarIcon, ChevronDown, ExternalLink, Plus, Save } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend,
@@ -32,19 +33,8 @@ interface Lead {
   utm_term: string | null;
 }
 
-// Hardcoded visitor data from project analytics (updated periodically)
-const DAILY_VISITORS: Record<string, number> = {
-  "2026-01-25": 28, "2026-01-26": 31, "2026-01-27": 50, "2026-01-28": 39,
-  "2026-01-29": 43, "2026-01-30": 43, "2026-01-31": 17, "2026-02-01": 24,
-  "2026-02-02": 319, "2026-02-03": 327, "2026-02-04": 101, "2026-02-05": 20,
-  "2026-02-06": 23, "2026-02-07": 13, "2026-02-08": 61, "2026-02-09": 116,
-  "2026-02-10": 60, "2026-02-11": 67, "2026-02-12": 76, "2026-02-13": 23,
-  "2026-02-14": 11, "2026-02-15": 7, "2026-02-16": 5, "2026-02-17": 7,
-  "2026-02-18": 8, "2026-02-19": 85, "2026-02-20": 70, "2026-02-21": 41,
-  "2026-02-22": 43, "2026-02-23": 40, "2026-02-24": 35,
-  "2026-02-25": 38, "2026-02-26": 32,
-  "2026-02-27": 151, "2026-02-28": 114, "2026-03-01": 59,
-};
+// Will be loaded from database
+let DAILY_VISITORS: Record<string, number> = {};
 const COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899"];
 
 type PeriodPreset = "today" | "yesterday" | "7d" | "30d" | "this-month" | "last-month" | "90d" | "all" | "custom";
@@ -94,6 +84,11 @@ export default function Analytics() {
   const [periodOpen, setPeriodOpen] = useState(false);
   const defaultSections = ["stats", "daily", "utm-analytics", "pie-charts", "seg-size", "ab-test", "copys-ref", "recent-leads"];
   const [sectionOrder, setSectionOrder] = useState<string[]>(defaultSections);
+  const [dailyVisitors, setDailyVisitors] = useState<Record<string, number>>({});
+  const [sessionsDialogOpen, setSessionsDialogOpen] = useState(false);
+  const [newSessionDate, setNewSessionDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [newSessionCount, setNewSessionCount] = useState("");
+  const [savingSessions, setSavingSessions] = useState(false);
   const passwordRef = useRef("");
   const dragSection = useRef<number | null>(null);
   const dragOverSection = useRef<number | null>(null);
@@ -120,6 +115,11 @@ export default function Analytics() {
         if (data.settings) {
           if (Array.isArray(data.settings.section_order)) setSectionOrder(data.settings.section_order);
           if (Array.isArray(data.settings.copy_order)) setCopyOrder(data.settings.copy_order);
+        }
+        // Load visitors from API
+        if (data.visitors) {
+          setDailyVisitors(data.visitors);
+          DAILY_VISITORS = data.visitors;
         }
         setAuthenticated(true);
         // Enrich recent leads with Pipedrive data
@@ -149,7 +149,31 @@ export default function Analytics() {
     supabase.functions.invoke("save-dashboard-settings", { body });
   };
 
-  // ── Period range ──
+  const handleSaveSessions = async () => {
+    if (!newSessionDate || !newSessionCount) return;
+    setSavingSessions(true);
+    try {
+      const { data } = await supabase.functions.invoke("save-daily-visitors", {
+        body: {
+          password: passwordRef.current,
+          entries: [{ date: newSessionDate, sessions: parseInt(newSessionCount, 10) }],
+        },
+      });
+      if (data?.success) {
+        setDailyVisitors(prev => {
+          const updated = { ...prev, [newSessionDate]: parseInt(newSessionCount, 10) };
+          DAILY_VISITORS = updated;
+          return updated;
+        });
+        setNewSessionDate(format(new Date(), "yyyy-MM-dd"));
+        setNewSessionCount("");
+        setSessionsDialogOpen(false);
+      }
+    } finally {
+      setSavingSessions(false);
+    }
+  };
+
   const dateRange = useMemo(() => {
     if (periodPreset === "custom" && customFrom && customTo) {
       return { from: startOfDay(customFrom), to: endOfDay(customTo) };
@@ -208,7 +232,7 @@ export default function Analytics() {
       dailyData.push({
         date: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         leads: byDay[key] || 0,
-        sessoes: DAILY_VISITORS[key] || 0,
+        sessoes: dailyVisitors[key] || 0,
         variants: byDayVariant[key] || {},
       });
     }
@@ -318,7 +342,7 @@ export default function Analytics() {
       utmCampaignData,
       utmContentData,
     };
-  }, [leads, dateRange]);
+  }, [leads, dateRange, dailyVisitors]);
 
   // ── Login screen ──
   if (!authenticated) {
@@ -391,7 +415,56 @@ export default function Analytics() {
             <p className="text-sm text-muted-foreground">Diagnóstico ISO 9001 — Templum Consultoria</p>
           </div>
 
-          {/* Period Selector */}
+          <div className="flex items-center gap-2">
+            {/* Add Sessions Button */}
+            <Dialog open={sessionsDialogOpen} onOpenChange={setSessionsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sessões</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Adicionar Sessões Diárias</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Data</label>
+                    <Input
+                      type="date"
+                      value={newSessionDate}
+                      onChange={(e) => setNewSessionDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Quantidade de sessões</label>
+                    <Input
+                      type="number"
+                      placeholder="Ex: 150"
+                      value={newSessionCount}
+                      onChange={(e) => setNewSessionCount(e.target.value)}
+                      min="0"
+                    />
+                  </div>
+                  {dailyVisitors[newSessionDate] !== undefined && (
+                    <p className="text-xs text-muted-foreground">
+                      ⚠️ Já existe um registro para esta data ({dailyVisitors[newSessionDate]} sessões). Será sobrescrito.
+                    </p>
+                  )}
+                  <Button
+                    onClick={handleSaveSessions}
+                    disabled={!newSessionDate || !newSessionCount || savingSessions}
+                    className="w-full gap-2"
+                  >
+                    {savingSessions ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Salvar
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Period Selector */}
           <Popover open={periodOpen} onOpenChange={setPeriodOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="gap-2 min-w-[180px] justify-between">
@@ -470,6 +543,7 @@ export default function Analytics() {
               </div>
             </PopoverContent>
           </Popover>
+          </div>
         </div>
 
         {(() => {

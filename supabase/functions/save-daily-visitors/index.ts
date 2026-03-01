@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { password } = await req.json();
+    const { password, entries } = await req.json();
 
     if (password !== ADMIN_PASSWORD) {
       return new Response(
@@ -23,47 +23,32 @@ serve(async (req) => {
       );
     }
 
+    if (!Array.isArray(entries) || entries.length === 0) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Nenhum dado enviado" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Fetch all leads
-    const { data: leads, error: leadsError } = await supabase
-      .from("quiz_leads")
-      .select("id, name, email, company, segment, company_size, score, diagnosis_level, created_at, copy_variant, utm_source, utm_medium, utm_campaign, utm_content, utm_term")
-      .order("created_at", { ascending: false })
-      .limit(1000);
-
-    if (leadsError) throw leadsError;
-
-    // Fetch dashboard settings
-    const { data: settings } = await supabase
-      .from("dashboard_settings")
-      .select("section_order, copy_order")
-      .eq("id", "default")
-      .single();
-
-    // Fetch daily visitors
-    const { data: visitors } = await supabase
+    // Upsert entries (insert or update on conflict)
+    const { error } = await supabase
       .from("daily_visitors")
-      .select("date, sessions")
-      .order("date", { ascending: true });
+      .upsert(
+        entries.map((e: { date: string; sessions: number }) => ({
+          date: e.date,
+          sessions: e.sessions,
+        })),
+        { onConflict: "date" }
+      );
 
-    const visitorsMap: Record<string, number> = {};
-    if (visitors) {
-      visitors.forEach((v: { date: string; sessions: number }) => {
-        visitorsMap[v.date] = v.sessions;
-      });
-    }
+    if (error) throw error;
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        leads: leads || [],
-        events: [],
-        settings: settings || null,
-        visitors: visitorsMap,
-      }),
+      JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
