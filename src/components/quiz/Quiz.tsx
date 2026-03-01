@@ -33,6 +33,7 @@ export const Quiz = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dealIdRef = useRef<number | null>(null);
   const ownerNameRef = useRef<string | null>(null);
+  const leadIdRef = useRef<string | null>(null);
   const pageStartTime = useRef(Date.now());
 
   const totalQuestions = dynamicQuestions.length || 20;
@@ -60,6 +61,36 @@ export const Quiz = () => {
 
     setData((prev) => ({ ...prev, welcomeData: welcomeFormData }));
     setCurrentStep("chat");
+
+    // Insert lead immediately into quiz_leads with pending status
+    const newLeadId = crypto.randomUUID();
+    leadIdRef.current = newLeadId;
+    try {
+      const { error: leadError } = await supabase.from("quiz_leads").insert({
+        id: newLeadId,
+        name: welcomeFormData.name,
+        email: welcomeFormData.email,
+        phone: welcomeFormData.phone,
+        company: welcomeFormData.company,
+        score: 0,
+        diagnosis_level: "pending",
+        answers: {},
+        copy_variant: welcomeFormData.copyVariant,
+        utm_source: utmParams.utm_source || "",
+        utm_medium: utmParams.utm_medium || "",
+        utm_campaign: utmParams.utm_campaign || "",
+        utm_content: utmParams.utm_content || "",
+        utm_term: utmParams.utm_term || "",
+      });
+
+      if (leadError) {
+        console.error("Error inserting lead:", leadError);
+        leadIdRef.current = null;
+      }
+    } catch (err) {
+      console.error("Lead insert error:", err);
+      leadIdRef.current = null;
+    }
 
     // Fire-and-forget Pipedrive creation with initial 4 fields
     try {
@@ -100,6 +131,18 @@ export const Quiz = () => {
     const welcomeData = data.welcomeData!;
     setData((prev) => ({ ...prev, company: chatData }));
     setCurrentStep("generating");
+
+    // Update lead with chat data (segment, company_size)
+    if (leadIdRef.current) {
+      try {
+        await supabase.from("quiz_leads").update({
+          segment: chatData.segment,
+          company_size: chatData.companySize,
+        }).eq("id", leadIdRef.current);
+      } catch (err) {
+        console.error("Lead update error:", err);
+      }
+    }
 
     try {
       // Update existing deal with chat data if available
@@ -203,23 +246,35 @@ export const Quiz = () => {
       const minLoadingPromise = new Promise((resolve) => setTimeout(resolve, 8000));
 
       const submitPromise = (async () => {
-        const { error } = await supabase.from("quiz_leads").insert({
-          name: welcomeData.name,
-          email: welcomeData.email,
-          phone: welcomeData.phone,
-          company: welcomeData.company,
-          segment: finalSegment,
-          company_size: companyData.companySize,
-          score: score,
-          answers: allAnswers,
-          diagnosis_level: diagnosis.level,
-          copy_variant: welcomeData.copyVariant,
-          utm_source: utmParams.utm_source || "",
-          utm_medium: utmParams.utm_medium || "",
-          utm_campaign: utmParams.utm_campaign || "",
-          utm_content: utmParams.utm_content || "",
-          utm_term: utmParams.utm_term || "",
-        });
+        // Update existing lead with quiz results
+        const updateQuery = leadIdRef.current
+          ? supabase.from("quiz_leads").update({
+              segment: finalSegment,
+              company_size: companyData.companySize,
+              score: score,
+              answers: allAnswers,
+              diagnosis_level: diagnosis.level,
+              pillar_scores: pillarScores as any,
+            }).eq("id", leadIdRef.current)
+          : supabase.from("quiz_leads").insert({
+              name: welcomeData.name,
+              email: welcomeData.email,
+              phone: welcomeData.phone,
+              company: welcomeData.company,
+              segment: finalSegment,
+              company_size: companyData.companySize,
+              score: score,
+              answers: allAnswers,
+              diagnosis_level: diagnosis.level,
+              copy_variant: welcomeData.copyVariant,
+              utm_source: utmParams.utm_source || "",
+              utm_medium: utmParams.utm_medium || "",
+              utm_campaign: utmParams.utm_campaign || "",
+              utm_content: utmParams.utm_content || "",
+              utm_term: utmParams.utm_term || "",
+            });
+
+        const { error } = await updateQuery;
 
         if (error) {
           console.error("Error saving lead:", error);
