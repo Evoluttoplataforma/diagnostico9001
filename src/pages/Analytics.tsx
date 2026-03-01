@@ -86,8 +86,7 @@ export default function Analytics() {
   const [sectionOrder, setSectionOrder] = useState<string[]>(defaultSections);
   const [dailyVisitors, setDailyVisitors] = useState<Record<string, number>>({});
   const [sessionsDialogOpen, setSessionsDialogOpen] = useState(false);
-  const [newSessionDate, setNewSessionDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [newSessionCount, setNewSessionCount] = useState("");
+  const [bulkSessionsText, setBulkSessionsText] = useState("");
   const [savingSessions, setSavingSessions] = useState(false);
   const passwordRef = useRef("");
   const dragSection = useRef<number | null>(null);
@@ -150,23 +149,36 @@ export default function Analytics() {
   };
 
   const handleSaveSessions = async () => {
-    if (!newSessionDate || !newSessionCount) return;
+    if (!bulkSessionsText.trim()) return;
     setSavingSessions(true);
     try {
+      // Parse bulk text: each line is "YYYY-MM-DD:number" or "YYYY-MM-DD number" or "YYYY-MM-DD,number"
+      const entries: { date: string; sessions: number }[] = [];
+      const lines = bulkSessionsText.trim().split("\n");
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})[:\s,;]+(\d+)$/);
+        if (match) {
+          entries.push({ date: match[1], sessions: parseInt(match[2], 10) });
+        }
+      }
+      if (entries.length === 0) return;
+
       const { data } = await supabase.functions.invoke("save-daily-visitors", {
         body: {
           password: passwordRef.current,
-          entries: [{ date: newSessionDate, sessions: parseInt(newSessionCount, 10) }],
+          entries,
         },
       });
       if (data?.success) {
         setDailyVisitors(prev => {
-          const updated = { ...prev, [newSessionDate]: parseInt(newSessionCount, 10) };
+          const updated = { ...prev };
+          entries.forEach(e => { updated[e.date] = e.sessions; });
           DAILY_VISITORS = updated;
           return updated;
         });
-        setNewSessionDate(format(new Date(), "yyyy-MM-dd"));
-        setNewSessionCount("");
+        setBulkSessionsText("");
         setSessionsDialogOpen(false);
       }
     } finally {
@@ -426,39 +438,33 @@ export default function Analytics() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Adicionar Sessões Diárias</DialogTitle>
+                  <DialogTitle>Adicionar Sessões em Massa</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Data</label>
-                    <Input
-                      type="date"
-                      value={newSessionDate}
-                      onChange={(e) => setNewSessionDate(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Quantidade de sessões</label>
-                    <Input
-                      type="number"
-                      placeholder="Ex: 150"
-                      value={newSessionCount}
-                      onChange={(e) => setNewSessionCount(e.target.value)}
-                      min="0"
-                    />
-                  </div>
-                  {dailyVisitors[newSessionDate] !== undefined && (
+                    <label className="text-sm font-medium text-foreground">
+                      Cole os dados (uma linha por dia)
+                    </label>
                     <p className="text-xs text-muted-foreground">
-                      ⚠️ Já existe um registro para esta data ({dailyVisitors[newSessionDate]} sessões). Será sobrescrito.
+                      Formato: <code className="bg-muted px-1 py-0.5 rounded">YYYY-MM-DD:número</code>
                     </p>
-                  )}
+                    <textarea
+                      className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-mono"
+                      placeholder={"2025-01-25:120\n2025-01-26:95\n2025-01-27:140"}
+                      value={bulkSessionsText}
+                      onChange={(e) => setBulkSessionsText(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {bulkSessionsText.trim().split("\n").filter(l => l.trim().match(/^\d{4}-\d{2}-\d{2}[:\s,;]+\d+$/)).length} linhas válidas detectadas
+                    </p>
+                  </div>
                   <Button
                     onClick={handleSaveSessions}
-                    disabled={!newSessionDate || !newSessionCount || savingSessions}
+                    disabled={!bulkSessionsText.trim() || savingSessions}
                     className="w-full gap-2"
                   >
                     {savingSessions ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Salvar
+                    Salvar Tudo
                   </Button>
                 </div>
               </DialogContent>
