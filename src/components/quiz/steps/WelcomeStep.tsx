@@ -132,7 +132,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             <div className="space-y-4 mb-6">
               <FormInput name="name" value={formData.name} onChange={handleChange} label="Nome Completo *" icon={User} delay={0} autoComplete="name" />
               <FormInput type="email" name="email" value={formData.email} onChange={handleChange} label="Email *" icon={Mail} delay={0} autoComplete="email" />
-              <FormInput type="tel" name="phone" value={formData.phone} onChange={handleChange} label="Celular com (DDD) *" icon={Phone} delay={0} autoComplete="tel" />
+              <PhoneInputWithCountry value={formData.phone} onChange={(v) => setFormData((prev) => ({ ...prev, phone: v }))} label="Celular *" delay={0} />
               <FormInput name="company" value={formData.company} onChange={handleChange} label="Nome da Empresa *" icon={Building2} delay={0} />
             </div>
 
