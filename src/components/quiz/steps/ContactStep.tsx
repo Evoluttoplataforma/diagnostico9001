@@ -100,7 +100,7 @@ export const ContactStep = ({
               label="WhatsApp (com DDD)"
               icon={Phone}
               delay={300}
-              autoComplete="tel"
+              autoComplete="off"
             />
           </div>
 
