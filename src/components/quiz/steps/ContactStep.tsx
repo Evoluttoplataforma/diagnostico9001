@@ -93,15 +93,11 @@ export const ContactStep = ({
               autoComplete="email"
             />
 
-            <FormInput
-              type="tel"
-              name="phone"
+            <PhoneInputWithCountry
               value={formData.phone}
-              onChange={handleChange}
+              onChange={(v) => setFormData((prev) => ({ ...prev, phone: v }))}
               label="WhatsApp (com DDD)"
-              icon={Phone}
               delay={300}
-              autoComplete="nope-phone-no-autofill"
             />
           </div>
 
