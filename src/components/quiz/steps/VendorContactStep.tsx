@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { User, Mail, Phone, Sparkles, Briefcase, CheckCircle } from "lucide-react";
+import { User, Mail, Sparkles, Briefcase, CheckCircle } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
 import { FormStepIndicator } from "../FormStepIndicator";
 import { FormInput } from "../FormInput";
+import { PhoneInputWithCountry } from "../PhoneInputWithCountry";
 
 interface VendorContactStepProps {
   currentStep: number;
@@ -127,15 +128,11 @@ export const VendorContactStep = ({
               autoComplete="email"
             />
 
-            <FormInput
-              name="phone"
+            <PhoneInputWithCountry
               value={formData.phone}
-              onChange={handleChange}
+              onChange={(v) => setFormData((prev) => ({ ...prev, phone: v }))}
               label="WhatsApp"
-              type="tel"
-              icon={Phone}
               delay={200}
-              autoComplete="tel"
             />
 
             <FormInput

@@ -6,6 +6,7 @@ import { TeamSection } from "./TeamSection";
 import { ProcessSection } from "./ProcessSection";
 import templumLogo from "@/assets/logo-templum.jpeg";
 import { FormInput } from "../FormInput";
+import { PhoneInputWithCountry } from "../PhoneInputWithCountry";
 import { getSessionVariant, type CopyVariant } from "../copyVariants";
 
 export interface WelcomeFormData {
@@ -71,20 +72,9 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
 
   const isValid = formData.name && formData.email && formData.phone && formData.company;
 
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 11);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === "phone") {
-      setFormData((prev) => ({ ...prev, phone: formatPhone(value) }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
@@ -142,7 +132,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
             <div className="space-y-4 mb-6">
               <FormInput name="name" value={formData.name} onChange={handleChange} label="Nome Completo *" icon={User} delay={0} autoComplete="name" />
               <FormInput type="email" name="email" value={formData.email} onChange={handleChange} label="Email *" icon={Mail} delay={0} autoComplete="email" />
-              <FormInput type="tel" name="phone" value={formData.phone} onChange={handleChange} label="Celular com (DDD) *" icon={Phone} delay={0} autoComplete="tel" />
+              <PhoneInputWithCountry value={formData.phone} onChange={(v) => setFormData((prev) => ({ ...prev, phone: v }))} label="Celular *" delay={0} />
               <FormInput name="company" value={formData.company} onChange={handleChange} label="Nome da Empresa *" icon={Building2} delay={0} />
             </div>
 
