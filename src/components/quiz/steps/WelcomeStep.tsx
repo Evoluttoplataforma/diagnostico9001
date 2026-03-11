@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { QuizButton } from "../QuizButton";
-import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Building2 } from "lucide-react";
+import { CheckCircle, ShieldCheck, TrendingUp, AlertTriangle, ChevronDown, Star, Shield, Award, MapPin, HelpCircle, X, User, Mail, Phone, Building2 } from "lucide-react";
 import { TestimonialsSection } from "./TestimonialsSection";
 import { TeamSection } from "./TeamSection";
 import { ProcessSection } from "./ProcessSection";

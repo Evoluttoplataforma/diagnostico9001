@@ -128,15 +128,11 @@ export const VendorContactStep = ({
               autoComplete="email"
             />
 
-            <FormInput
-              name="phone"
+            <PhoneInputWithCountry
               value={formData.phone}
-              onChange={handleChange}
+              onChange={(v) => setFormData((prev) => ({ ...prev, phone: v }))}
               label="WhatsApp"
-              type="tel"
-              icon={Phone}
               delay={200}
-              autoComplete="tel"
             />
 
             <FormInput
