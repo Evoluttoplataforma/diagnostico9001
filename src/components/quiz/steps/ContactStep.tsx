@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { User, Mail, Phone, Sparkles } from "lucide-react";
+import { User, Mail, Sparkles } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
 import { FormStepIndicator } from "../FormStepIndicator";
 import { FormInput } from "../FormInput";
+import { PhoneInputWithCountry } from "../PhoneInputWithCountry";
 
 interface ContactStepProps {
   currentStep: number;
