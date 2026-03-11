@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { User, Mail, Phone, Sparkles } from "lucide-react";
+import { User, Mail, Sparkles } from "lucide-react";
 import { QuizHeader } from "../QuizHeader";
 import { QuizButton } from "../QuizButton";
 import { FormStepIndicator } from "../FormStepIndicator";
 import { FormInput } from "../FormInput";
+import { PhoneInputWithCountry } from "../PhoneInputWithCountry";
 
 interface ContactStepProps {
   currentStep: number;
@@ -92,15 +93,11 @@ export const ContactStep = ({
               autoComplete="email"
             />
 
-            <FormInput
-              type="tel"
-              name="phone"
+            <PhoneInputWithCountry
               value={formData.phone}
-              onChange={handleChange}
+              onChange={(v) => setFormData((prev) => ({ ...prev, phone: v }))}
               label="WhatsApp (com DDD)"
-              icon={Phone}
               delay={300}
-              autoComplete="nope-phone-no-autofill"
             />
           </div>
 
