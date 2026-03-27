@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Lock, Loader2, Download, Search, ArrowUpDown, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { DateFilter } from "@/components/leads/DateFilter";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -78,7 +82,64 @@ export default function Leads() {
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [datePreset, setDatePreset] = useState<string>("");
   const isMobile = useIsMobile();
+
+  const applyPreset = (preset: string) => {
+    const now = new Date();
+    setDatePreset(preset);
+    switch (preset) {
+      case "today":
+        setDateFrom(startOfDay(now));
+        setDateTo(endOfDay(now));
+        break;
+      case "yesterday":
+        setDateFrom(startOfDay(subDays(now, 1)));
+        setDateTo(endOfDay(subDays(now, 1)));
+        break;
+      case "7d":
+        setDateFrom(startOfDay(subDays(now, 6)));
+        setDateTo(endOfDay(now));
+        break;
+      case "30d":
+        setDateFrom(startOfDay(subDays(now, 29)));
+        setDateTo(endOfDay(now));
+        break;
+      case "month":
+        setDateFrom(startOfMonth(now));
+        setDateTo(endOfMonth(now));
+        break;
+      case "last_month":
+        setDateFrom(startOfMonth(subMonths(now, 1)));
+        setDateTo(endOfMonth(subMonths(now, 1)));
+        break;
+      case "all":
+        setDateFrom(undefined);
+        setDateTo(undefined);
+        break;
+    }
+  };
+
+  const clearDateFilter = () => {
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setDatePreset("");
+  };
+
+  const dateFilterLabel = () => {
+    if (!dateFrom && !dateTo) return null;
+    if (datePreset === "today") return "Hoje";
+    if (datePreset === "yesterday") return "Ontem";
+    if (datePreset === "7d") return "Últimos 7 dias";
+    if (datePreset === "30d") return "Últimos 30 dias";
+    if (datePreset === "month") return "Este mês";
+    if (datePreset === "last_month") return "Mês passado";
+    const from = dateFrom ? format(dateFrom, "dd/MM", { locale: ptBR }) : "";
+    const to = dateTo ? format(dateTo, "dd/MM", { locale: ptBR }) : "";
+    return `${from} – ${to}`;
+  };
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -112,12 +173,16 @@ export default function Leads() {
   const filtered = leads
     .filter((l) => {
       const q = search.toLowerCase();
-      return (
+      const matchesSearch =
         l.name.toLowerCase().includes(q) ||
         l.email.toLowerCase().includes(q) ||
         l.company.toLowerCase().includes(q) ||
-        (l.segment || "").toLowerCase().includes(q)
-      );
+        (l.segment || "").toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+      const d = new Date(l.created_at);
+      if (dateFrom && d < dateFrom) return false;
+      if (dateTo && d > dateTo) return false;
+      return true;
     })
     .sort((a, b) => {
       const valA = a[sortKey] ?? "";
@@ -191,6 +256,17 @@ export default function Leads() {
             <span className="text-xs text-muted-foreground">({filtered.length})</span>
           </div>
           <div className="flex items-center gap-1">
+            <DateFilter
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              datePreset={datePreset}
+              onPreset={applyPreset}
+              onFromChange={(d) => { setDateFrom(d); setDatePreset(""); }}
+              onToChange={(d) => { setDateTo(d); setDatePreset(""); }}
+              onClear={clearDateFilter}
+              label={dateFilterLabel()}
+              compact
+            />
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowSearch(!showSearch)}>
               {showSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
             </Button>
@@ -286,7 +362,17 @@ export default function Leads() {
             <h1 className="text-2xl font-bold text-foreground">Leads</h1>
             <p className="text-sm text-muted-foreground">{filtered.length} registros</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <DateFilter
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              datePreset={datePreset}
+              onPreset={applyPreset}
+              onFromChange={(d) => { setDateFrom(d); setDatePreset(""); }}
+              onToChange={(d) => { setDateTo(d); setDatePreset(""); }}
+              onClear={clearDateFilter}
+              label={dateFilterLabel()}
+            />
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
