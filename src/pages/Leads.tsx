@@ -4,10 +4,9 @@ import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Lock, Loader2, Download, Search, ArrowUpDown, X, CalendarIcon } from "lucide-react";
+import { Lock, Loader2, Download, Search, ArrowUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DateFilter } from "@/components/leads/DateFilter";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -257,6 +256,17 @@ export default function Leads() {
             <span className="text-xs text-muted-foreground">({filtered.length})</span>
           </div>
           <div className="flex items-center gap-1">
+            <DateFilter
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              datePreset={datePreset}
+              onPreset={applyPreset}
+              onFromChange={(d) => { setDateFrom(d); setDatePreset(""); }}
+              onToChange={(d) => { setDateTo(d); setDatePreset(""); }}
+              onClear={clearDateFilter}
+              label={dateFilterLabel()}
+              compact
+            />
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowSearch(!showSearch)}>
               {showSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
             </Button>
@@ -352,7 +362,17 @@ export default function Leads() {
             <h1 className="text-2xl font-bold text-foreground">Leads</h1>
             <p className="text-sm text-muted-foreground">{filtered.length} registros</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <DateFilter
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              datePreset={datePreset}
+              onPreset={applyPreset}
+              onFromChange={(d) => { setDateFrom(d); setDatePreset(""); }}
+              onToChange={(d) => { setDateTo(d); setDatePreset(""); }}
+              onClear={clearDateFilter}
+              label={dateFilterLabel()}
+            />
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
