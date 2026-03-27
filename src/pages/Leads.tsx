@@ -1,8 +1,13 @@
 import { useState } from "react";
+import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, Loader2, Download, Search, ArrowUpDown, X } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Lock, Loader2, Download, Search, ArrowUpDown, X, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -78,7 +83,64 @@ export default function Leads() {
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [datePreset, setDatePreset] = useState<string>("");
   const isMobile = useIsMobile();
+
+  const applyPreset = (preset: string) => {
+    const now = new Date();
+    setDatePreset(preset);
+    switch (preset) {
+      case "today":
+        setDateFrom(startOfDay(now));
+        setDateTo(endOfDay(now));
+        break;
+      case "yesterday":
+        setDateFrom(startOfDay(subDays(now, 1)));
+        setDateTo(endOfDay(subDays(now, 1)));
+        break;
+      case "7d":
+        setDateFrom(startOfDay(subDays(now, 6)));
+        setDateTo(endOfDay(now));
+        break;
+      case "30d":
+        setDateFrom(startOfDay(subDays(now, 29)));
+        setDateTo(endOfDay(now));
+        break;
+      case "month":
+        setDateFrom(startOfMonth(now));
+        setDateTo(endOfMonth(now));
+        break;
+      case "last_month":
+        setDateFrom(startOfMonth(subMonths(now, 1)));
+        setDateTo(endOfMonth(subMonths(now, 1)));
+        break;
+      case "all":
+        setDateFrom(undefined);
+        setDateTo(undefined);
+        break;
+    }
+  };
+
+  const clearDateFilter = () => {
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setDatePreset("");
+  };
+
+  const dateFilterLabel = () => {
+    if (!dateFrom && !dateTo) return null;
+    if (datePreset === "today") return "Hoje";
+    if (datePreset === "yesterday") return "Ontem";
+    if (datePreset === "7d") return "Últimos 7 dias";
+    if (datePreset === "30d") return "Últimos 30 dias";
+    if (datePreset === "month") return "Este mês";
+    if (datePreset === "last_month") return "Mês passado";
+    const from = dateFrom ? format(dateFrom, "dd/MM", { locale: ptBR }) : "";
+    const to = dateTo ? format(dateTo, "dd/MM", { locale: ptBR }) : "";
+    return `${from} – ${to}`;
+  };
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -112,12 +174,16 @@ export default function Leads() {
   const filtered = leads
     .filter((l) => {
       const q = search.toLowerCase();
-      return (
+      const matchesSearch =
         l.name.toLowerCase().includes(q) ||
         l.email.toLowerCase().includes(q) ||
         l.company.toLowerCase().includes(q) ||
-        (l.segment || "").toLowerCase().includes(q)
-      );
+        (l.segment || "").toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+      const d = new Date(l.created_at);
+      if (dateFrom && d < dateFrom) return false;
+      if (dateTo && d > dateTo) return false;
+      return true;
     })
     .sort((a, b) => {
       const valA = a[sortKey] ?? "";
