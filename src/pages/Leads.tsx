@@ -170,8 +170,14 @@ export default function Leads() {
     }
   };
 
+  const isTestLead = (l: Lead) => {
+    const fields = [l.name, l.email, l.company, l.segment || ""].map(f => f.toLowerCase());
+    return fields.some(f => f.includes("test") || f.includes("teste"));
+  };
+
   const filtered = leads
     .filter((l) => {
+      if (isTestLead(l)) return false;
       const q = search.toLowerCase();
       const matchesSearch =
         l.name.toLowerCase().includes(q) ||
