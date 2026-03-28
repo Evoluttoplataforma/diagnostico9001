@@ -463,16 +463,64 @@ export const PostQuizChat = ({
           </div>
         )}
 
+        {/* Post-report pitch: specialist or not interested */}
+        {showButtons && phase === "post_report_pitch" && (
+          <div className="flex flex-col gap-2 ml-12 mb-3 animate-fade-in">
+            <button
+              onClick={handlePostReportSpecialist}
+              className="flex items-center gap-3 bg-card border-2 border-primary px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md hover:bg-primary/5"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left">
+                <span className="text-foreground font-semibold block">Falar com um especialista</span>
+                <span className="text-muted-foreground text-xs">15 min • gratuito • sem compromisso</span>
+              </div>
+            </button>
+            <button
+              onClick={handleNotInterested}
+              className="flex items-center gap-3 bg-card border-2 border-border hover:border-muted-foreground/30 px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md"
+            >
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                <Star className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="text-left">
+                <span className="text-foreground block">Agora não, obrigado</span>
+                <span className="text-muted-foreground text-xs">Avaliar a experiência</span>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Star rating */}
+        {showButtons && phase === "rating" && (
+          <div className="flex flex-col items-center gap-3 ml-12 mb-3 animate-fade-in">
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => handleRating(star)}
+                  className="p-1 transition-transform hover:scale-125"
+                >
+                  <Star
+                    className={cn(
+                      "w-8 h-8 transition-colors",
+                      star <= selectedRating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground/30 hover:text-yellow-400/60"
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground">Toque para avaliar</span>
+          </div>
+        )}
+
         {/* Disqualified leads */}
         {showButtons && phase === "done" && isDisqualified && (
           <div className="flex flex-col gap-2 ml-12 mb-3 animate-fade-in">
-            <button
-              onClick={handleSeeFullReport}
-              className="flex items-center gap-3 bg-card border-2 border-primary px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md hover:bg-primary/5"
-            >
-              <Award className="w-5 h-5 text-primary" />
-              <span className="text-foreground font-semibold">Ver relatório completo</span>
-            </button>
             <a
               href="https://www.instagram.com/templumconsultoria/"
               target="_blank"
