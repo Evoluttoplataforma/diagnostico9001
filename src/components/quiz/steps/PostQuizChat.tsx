@@ -64,7 +64,7 @@ const TypingIndicator = () => (
   </div>
 );
 
-type Phase = "congrats" | "ask_result" | "showing_result" | "pitch" | "done";
+type Phase = "congrats" | "ask_result" | "showing_result" | "pitch" | "choose_executive" | "done";
 
 const addPipedriveNote = async (dealId: number | null, content: string) => {
   if (!dealId) return;
@@ -198,13 +198,29 @@ export const PostQuizChat = ({
 
       setTimeout(() => {
         setMessages(prev => [...prev, {
-          text: `Escolha o especialista que prefere e agende uma conversa rápida de 15 minutos. Sem compromisso, sem enrolação. 🎯`,
+          text: `Em uma conversa rápida de 15 minutos, ele vai te mostrar exatamente o que priorizar para sair de ${score}% e chegar onde você quer. Sem compromisso, sem enrolação. 🎯`,
           isUser: false,
         }]);
         setIsTyping(false);
         setShowButtons(true);
       }, 12500);
     }
+  };
+
+  const handleWantSpecialist = () => {
+    setShowButtons(false);
+    setMessages(prev => [...prev, { text: "Quero falar com um especialista! 🚀", isUser: true }]);
+    setIsTyping(true);
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        text: `Ótima escolha! 💪 Aqui estão nossos especialistas em ISO 9001. Escolha com quem prefere conversar:`,
+        isUser: false,
+      }]);
+      setIsTyping(false);
+      setPhase("choose_executive");
+      setShowButtons(true);
+    }, 1200);
   };
 
   const handleSelectExecutive = (execKey: string) => {
@@ -287,8 +303,38 @@ export const PostQuizChat = ({
           </div>
         )}
 
-        {/* Executive cards for qualified leads */}
+        {/* Pitch: ask specialist or report */}
         {showButtons && phase === "pitch" && !isDisqualified && (
+          <div className="flex flex-col gap-2 ml-12 mb-3 animate-fade-in">
+            <button
+              onClick={handleWantSpecialist}
+              className="flex items-center gap-3 bg-card border-2 border-primary px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md hover:bg-primary/5"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left">
+                <span className="text-foreground font-semibold block">Falar com um especialista</span>
+                <span className="text-muted-foreground text-xs">15 min • gratuito • sem compromisso</span>
+              </div>
+            </button>
+            <button
+              onClick={handleSeeFullReport}
+              className="flex items-center gap-3 bg-card border-2 border-border hover:border-primary/40 px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md"
+            >
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                <Award className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="text-left">
+                <span className="text-foreground block">Ver relatório completo</span>
+                <span className="text-muted-foreground text-xs">Detalhamento por pilar + plano de ação</span>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Choose executive */}
+        {showButtons && phase === "choose_executive" && (
           <div className="flex flex-col gap-2 ml-12 mb-3 animate-fade-in">
             {EXECUTIVES.map((exec) => (
               <button
@@ -308,19 +354,6 @@ export const PostQuizChat = ({
                 <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
               </button>
             ))}
-
-            <button
-              onClick={handleSeeFullReport}
-              className="flex items-center gap-3 bg-card border-2 border-border hover:border-primary/40 px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md mt-1"
-            >
-              <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <Award className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div className="text-left">
-                <span className="text-foreground block">Ver relatório completo</span>
-                <span className="text-muted-foreground text-xs">Detalhamento por pilar + plano de ação</span>
-              </div>
-            </button>
           </div>
         )}
 
