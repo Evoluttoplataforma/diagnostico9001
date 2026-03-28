@@ -54,7 +54,7 @@ export const ResultStep = ({
   const employeeCount = parseInt(companySize, 10) || 0;
   const isDisqualified = employeeCount < 10 && revenue === "abaixo_100k";
 
-  const [isSchedulingOpen, setIsSchedulingOpen] = useState(false);
+  const [isSchedulingOpen, setIsSchedulingOpen] = useState(autoOpenScheduling);
   const [aiDiagnosis, setAiDiagnosis] = useState<DiagnosisData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [minLoadingComplete, setMinLoadingComplete] = useState(false);
