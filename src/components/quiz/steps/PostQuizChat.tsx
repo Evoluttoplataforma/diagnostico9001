@@ -90,6 +90,7 @@ export const PostQuizChat = ({
 }: PostQuizChatProps) => {
   const firstName = name.split(" ")[0];
   const diagnosis = getDiagnosis(score);
+  const employeeCount = parseInt(companySize, 10) || 0;
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(true);
   const [phase, setPhase] = useState<Phase>("congrats");
