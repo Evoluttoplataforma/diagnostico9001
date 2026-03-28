@@ -40,6 +40,7 @@ const CHAT_FIELDS: ChatField[] = [
       { value: "Analista da Qualidade", label: "Analista da Qualidade" },
       { value: "Sócio(a)", label: "Sócio(a)" },
       { value: "Consultor(a)", label: "Consultor(a)" },
+      { value: "Funcionário(a)", label: "Funcionário(a)" },
       { value: "Outro", label: "Outro" },
     ],
   },
