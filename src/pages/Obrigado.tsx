@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { ResultStep } from "@/components/quiz/steps/ResultStep";
+import { PostQuizChat } from "@/components/quiz/steps/PostQuizChat";
 import { AnswerValue, PillarScore } from "@/components/quiz/quizData";
 
 interface LocationState {
@@ -19,6 +20,8 @@ interface LocationState {
 const Obrigado = () => {
   const location = useLocation();
   const state = location.state as LocationState | null;
+  const [showFullResult, setShowFullResult] = useState(false);
+  const [openScheduling, setOpenScheduling] = useState(false);
 
   useEffect(() => {
     if (state) {
@@ -36,7 +39,7 @@ const Obrigado = () => {
       console.warn("[GTM] State não encontrado — eventos NÃO disparados");
     }
   }, []);
-  // If no state, redirect to home
+
   if (
     !state ||
     !state.name ||
@@ -47,18 +50,41 @@ const Obrigado = () => {
     return <Navigate to="/" replace />;
   }
 
+  const employeeCount = parseInt(state.companySize, 10) || 0;
+  const isDisqualified = employeeCount < 10 && state.revenue === "abaixo_100k";
+
+  if (showFullResult) {
+    return (
+      <ResultStep
+        name={state.name}
+        score={state.score}
+        answers={state.answers}
+        segment={state.segment}
+        companySize={state.companySize}
+        revenue={state.revenue}
+        company={state.company}
+        pillarScores={state.pillarScores}
+        ownerName={state.ownerName}
+        dealId={state.dealId}
+        autoOpenScheduling={openScheduling}
+      />
+    );
+  }
+
   return (
-    <ResultStep
+    <PostQuizChat
       name={state.name}
       score={state.score}
-      answers={state.answers}
+      pillarScores={state.pillarScores}
       segment={state.segment}
       companySize={state.companySize}
-      revenue={state.revenue}
       company={state.company}
-      pillarScores={state.pillarScores}
-      ownerName={state.ownerName}
-      dealId={state.dealId}
+      isDisqualified={isDisqualified}
+      onShowFullResult={() => setShowFullResult(true)}
+      onScheduleMeeting={() => {
+        setOpenScheduling(true);
+        setShowFullResult(true);
+      }}
     />
   );
 };
