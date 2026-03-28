@@ -135,6 +135,11 @@ export const PostQuizChat = ({
     setMessages(prev => [...prev, { text: "Sim, quero ver! 🚀", isUser: true }]);
     setIsTyping(true);
 
+    addPipedriveNote(
+      dealId,
+      `👁️ **ENGAJAMENTO DO LEAD**\n\n✅ ${name} clicou em "Quero ver meu resultado" — demonstrou interesse ativo no diagnóstico.\n\n📌 **Para a SDR:** Lead engajado. Completou todas as 20 perguntas E pediu para ver o resultado. Isso indica comprometimento real com melhoria de gestão.`
+    );
+
     const levelEmoji = diagnosis.level === "low" ? "🔴" : diagnosis.level === "medium" ? "🟡" : "🟢";
 
     setTimeout(() => {
@@ -213,6 +218,11 @@ export const PostQuizChat = ({
     setMessages(prev => [...prev, { text: "Quero falar com um especialista! 🚀", isUser: true }]);
     setIsTyping(true);
 
+    addPipedriveNote(
+      dealId,
+      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA (direto)**\n\n🚀 ${name} escolheu "Falar com um especialista" SEM pedir o relatório primeiro.\n\n📌 **Para a SDR:** Este é o melhor sinal possível! O lead já está convencido e quer agir. Se ele não agendar sozinho nos próximos minutos, ligue imediatamente.\n\n⏰ **Urgência:** ALTA — aproveitar o momento de decisão.`
+    );
+
     setTimeout(() => {
       setMessages(prev => [...prev, {
         text: `Ótima escolha! 💪 Aqui estão nossos especialistas em ISO 9001. Escolha com quem prefere conversar:`,
@@ -229,9 +239,11 @@ export const PostQuizChat = ({
     setShowButtons(false);
     setMessages(prev => [...prev, { text: `Quero agendar com ${exec.name}! 📅`, isUser: true }]);
 
+    const pillarSummary = sortedPillars.map(p => `${p.name}: ${p.score}%`).join(" | ");
+
     addPipedriveNote(
       dealId,
-      `🎯 **AÇÃO DO LEAD NO DIAGNÓSTICO**\n\n📅 O lead ${name} escolheu agendar com **${exec.name}** no chat pós-diagnóstico.\n\n⚡ **Ação necessária:** Checar a agenda de ${exec.name} e confirmar o agendamento.`
+      `📅 **LEAD ESCOLHEU EXECUTIVO — AÇÃO IMEDIATA**\n\n👤 ${name} escolheu agendar com **${exec.name}**.\n📊 Score: ${score}% | ${pillarSummary}\n\n⚡ **Para a SDR:**\n1. Checar a agenda de ${exec.name} AGORA\n2. Se o lead não aparecer na agenda em 24h, ligar para confirmar\n3. Usar o score de ${score}% como gancho: "${firstName}, vi que você agendou após o diagnóstico. Vamos garantir que ${exec.name} tenha todos os dados para te ajudar"\n\n📞 Telefone do lead: disponível no contato do negócio`
     );
 
     setTimeout(() => {
@@ -245,9 +257,14 @@ export const PostQuizChat = ({
     setMessages(prev => [...prev, { text: "Quero ver o relatório completo 📊", isUser: true }]);
     setIsTyping(true);
 
+    const pillarDetails2 = sortedPillars.map(p => {
+      const emoji = p.score >= 75 ? "🟢" : p.score >= 50 ? "🟡" : "🔴";
+      return `${emoji} ${p.name}: ${p.score}%`;
+    }).join("\n");
+
     addPipedriveNote(
       dealId,
-      `📊 **AÇÃO DO LEAD NO DIAGNÓSTICO**\n\n📄 O lead ${name} optou por ver o relatório completo no chat.\n\n💡 **Dica para SDR:** O lead demonstrou interesse no diagnóstico. Abordar com foco nos dados do relatório para gerar urgência.`
+      `📊 **LEAD PEDIU RELATÓRIO COMPLETO**\n\n📄 ${name} optou por ver o relatório antes de decidir.\n\n📈 **Resumo mostrado ao lead:**\n${pillarDetails2}\n\n📌 **Para a SDR:**\n• Lead analítico — quer entender os dados antes de agir\n• Abordagem recomendada: usar os NÚMEROS do relatório como gancho\n• Script: "${firstName}, vi que você analisou seu diagnóstico com atenção. O pilar ${worstPillar.name} com ${worstPillar.score}% é onde podemos gerar mais impacto rápido para a ${company}"\n• Aguardar: o lead ainda verá opção de agendar após o relatório`
     );
 
     setTimeout(() => {
@@ -306,6 +323,11 @@ export const PostQuizChat = ({
     setMessages(prev => [...prev, { text: "Quero falar com um especialista! 🚀", isUser: true }]);
     setIsTyping(true);
 
+    addPipedriveNote(
+      dealId,
+      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA APÓS RELATÓRIO**\n\n🚀 ${name} viu o relatório completo E decidiu falar com especialista.\n\n📌 **Para a SDR:** Lead muito qualificado! Já conhece seus números e quer agir. Se não agendar sozinho, ligar em no máximo 2h.\n\n💡 **Gancho:** "${firstName}, vi que depois de analisar seu diagnóstico de ${score}% você decidiu conversar com nosso time. Isso mostra que você leva a gestão da ${company} a sério."\n\n⏰ **Urgência:** ALTA`
+    );
+
     setTimeout(() => {
       setMessages(prev => [...prev, {
         text: `Ótima escolha! 💪 Escolha com quem prefere conversar:`,
@@ -324,7 +346,7 @@ export const PostQuizChat = ({
 
     addPipedriveNote(
       dealId,
-      `⭐ **AÇÃO DO LEAD NO DIAGNÓSTICO**\n\n❌ O lead ${name} optou por NÃO agendar com especialista após ver o relatório.\n\n💡 **Próximo passo:** Aguardar avaliação de satisfação e fazer follow-up em 48h.`
+      `⚠️ **LEAD NÃO QUIS AGENDAR**\n\n❌ ${name} viu o relatório (${score}%) mas optou por NÃO agendar.\n\n📌 **Para a SDR — Plano de Follow-up:**\n1. ⏰ **Em 48h:** Enviar WhatsApp: "${firstName}, tudo bem? Vi que você fez nosso diagnóstico e sua empresa tem potencial incrível. Posso te mostrar em 15 min como elevar o score de ${score}% para +${Math.min(score + 25, 95)}%?"\n2. 📧 **Em 5 dias:** Email com conteúdo sobre ${worstPillar.name} (pilar mais fraco: ${worstPillar.score}%)\n3. 📞 **Em 10 dias:** Ligação final antes de arquivar\n\n💡 **Motivo provável:** Lead precisa de mais tempo ou aprovação interna. Não descarte — 30% dos "agora não" convertem em 2 semanas.`
     );
 
     setTimeout(() => {
@@ -344,9 +366,16 @@ export const PostQuizChat = ({
     setMessages(prev => [...prev, { text: `${"⭐".repeat(stars)}`, isUser: true }]);
     setIsTyping(true);
 
+    const sentiment = stars >= 4 ? "POSITIVA" : stars >= 3 ? "NEUTRA" : "NEGATIVA";
+    const followUpTip = stars >= 4
+      ? `Lead satisfeito com a experiência. Usar isso no contato: "${firstName}, vi que você curtiu o diagnóstico! Imagina quando aplicar as melhorias na prática..."`
+      : stars >= 3
+        ? `Lead neutro. Abordar com cuidado e foco em valor prático.`
+        : `Lead insatisfeito. Usar abordagem empática: "${firstName}, queremos melhorar. O que achou que faltou?"`;
+
     addPipedriveNote(
       dealId,
-      `⭐ **AVALIAÇÃO DO DIAGNÓSTICO**\n\n${name} avaliou a experiência com **${stars}/5 estrelas**.`
+      `⭐ **AVALIAÇÃO DO DIAGNÓSTICO: ${stars}/5 — ${sentiment}**\n\n${name} avaliou a experiência do diagnóstico.\n\n📌 **Para a SDR:**\n${followUpTip}\n\n📊 Contexto: Score ${score}% | Pilar fraco: ${worstPillar.name} (${worstPillar.score}%) | Pilar forte: ${bestPillar.name} (${bestPillar.score}%)`
     );
 
     setTimeout(() => {
