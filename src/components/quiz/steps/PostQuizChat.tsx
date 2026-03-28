@@ -4,7 +4,7 @@ import normaPhoto from "@/assets/norma-photo.png";
 import victorPhoto from "@/assets/victor-photo.png";
 import viniciusPhoto from "@/assets/vinicius-photo.png";
 import diegoPhoto from "@/assets/diego-photo.png";
-import { Calendar, Award, ExternalLink } from "lucide-react";
+import { Calendar, Award, ExternalLink, Star } from "lucide-react";
 import { PillarScore, getDiagnosis } from "../quizData";
 import { SALESPERSON_DATA } from "../results/salespersonData";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +64,7 @@ const TypingIndicator = () => (
   </div>
 );
 
-type Phase = "congrats" | "ask_result" | "showing_result" | "pitch" | "choose_executive" | "done";
+type Phase = "congrats" | "ask_result" | "showing_result" | "pitch" | "choose_executive" | "report_chat" | "post_report_pitch" | "rating" | "done";
 
 const addPipedriveNote = async (dealId: number | null, content: string) => {
   if (!dealId) return;
@@ -94,6 +94,7 @@ export const PostQuizChat = ({
   const [isTyping, setIsTyping] = useState(true);
   const [phase, setPhase] = useState<Phase>("congrats");
   const [showButtons, setShowButtons] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const sortedPillars = [...pillarScores].sort((a, b) => b.score - a.score);
@@ -241,16 +242,121 @@ export const PostQuizChat = ({
 
   const handleSeeFullReport = () => {
     setShowButtons(false);
-    setMessages(prev => [...prev, { text: "Quero ver o relatório completo", isUser: true }]);
+    setMessages(prev => [...prev, { text: "Quero ver o relatório completo 📊", isUser: true }]);
+    setIsTyping(true);
 
     addPipedriveNote(
       dealId,
-      `📊 **AÇÃO DO LEAD NO DIAGNÓSTICO**\n\n📄 O lead ${name} optou por ver o relatório completo antes de agendar.\n\n💡 **Dica para SDR:** O lead demonstrou interesse no diagnóstico. Abordar com foco nos dados do relatório para gerar urgência.`
+      `📊 **AÇÃO DO LEAD NO DIAGNÓSTICO**\n\n📄 O lead ${name} optou por ver o relatório completo no chat.\n\n💡 **Dica para SDR:** O lead demonstrou interesse no diagnóstico. Abordar com foco nos dados do relatório para gerar urgência.`
     );
 
     setTimeout(() => {
-      onShowFullResult();
-    }, 500);
+      setMessages(prev => [...prev, {
+        text: `Com certeza, ${firstName}! Vou te mostrar o detalhamento completo aqui mesmo 👇`,
+        isUser: false,
+      }]);
+      setIsTyping(true);
+    }, 1200);
+
+    // Show pillar-by-pillar breakdown
+    const pillarDetails = sortedPillars.map(p => {
+      const emoji = p.score >= 75 ? "🟢" : p.score >= 50 ? "🟡" : "🔴";
+      return `${emoji} **${p.name}:** ${p.score}%`;
+    }).join("\n");
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        text: `📊 **Detalhamento por Pilar:**\n\n${pillarDetails}`,
+        isUser: false,
+      }]);
+      setIsTyping(true);
+    }, 3200);
+
+    // Actionable insights
+    const actionLines = [];
+    if (worstPillar.score < 50) {
+      actionLines.push(`🔥 **Ação urgente em ${worstPillar.name}** — com apenas ${worstPillar.score}%, esse pilar está travando o crescimento da ${company}.`);
+    }
+    if (bestPillar.score >= 70) {
+      actionLines.push(`💪 **${bestPillar.name} é seu diferencial** — com ${bestPillar.score}%, vocês já têm uma base sólida aqui.`);
+    }
+    actionLines.push(`\n📈 Com as ações certas, é possível elevar seu score de **${score}%** para **${Math.min(score + 25, 95)}%** em poucos meses.`);
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        text: actionLines.join("\n\n"),
+        isUser: false,
+      }]);
+      setIsTyping(true);
+    }, 5500);
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        text: `${firstName}, esse é o panorama. Agora a grande questão: você quer **transformar esses números** ou só conhecê-los? 😉\n\nNossos especialistas podem montar um plano personalizado para a ${company} em apenas 15 minutos.`,
+        isUser: false,
+      }]);
+      setIsTyping(false);
+      setPhase("post_report_pitch");
+      setShowButtons(true);
+    }, 8000);
+  };
+
+  const handlePostReportSpecialist = () => {
+    setShowButtons(false);
+    setMessages(prev => [...prev, { text: "Quero falar com um especialista! 🚀", isUser: true }]);
+    setIsTyping(true);
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        text: `Ótima escolha! 💪 Escolha com quem prefere conversar:`,
+        isUser: false,
+      }]);
+      setIsTyping(false);
+      setPhase("choose_executive");
+      setShowButtons(true);
+    }, 1200);
+  };
+
+  const handleNotInterested = () => {
+    setShowButtons(false);
+    setMessages(prev => [...prev, { text: "Agora não, obrigado", isUser: true }]);
+    setIsTyping(true);
+
+    addPipedriveNote(
+      dealId,
+      `⭐ **AÇÃO DO LEAD NO DIAGNÓSTICO**\n\n❌ O lead ${name} optou por NÃO agendar com especialista após ver o relatório.\n\n💡 **Próximo passo:** Aguardar avaliação de satisfação e fazer follow-up em 48h.`
+    );
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        text: `Sem problemas, ${firstName}! 😊 Antes de ir, que nota você dá para essa experiência do diagnóstico? Sua opinião nos ajuda a melhorar!`,
+        isUser: false,
+      }]);
+      setIsTyping(false);
+      setPhase("rating");
+      setShowButtons(true);
+    }, 1200);
+  };
+
+  const handleRating = (stars: number) => {
+    setSelectedRating(stars);
+    setShowButtons(false);
+    setMessages(prev => [...prev, { text: `${"⭐".repeat(stars)}`, isUser: true }]);
+    setIsTyping(true);
+
+    addPipedriveNote(
+      dealId,
+      `⭐ **AVALIAÇÃO DO DIAGNÓSTICO**\n\n${name} avaliou a experiência com **${stars}/5 estrelas**.`
+    );
+
+    setTimeout(() => {
+      const thankYou = stars >= 4
+        ? `Que bom que você curtiu, ${firstName}! 🥳 Se mudar de ideia sobre falar com um especialista, é só voltar. Sucesso com a ${company}! 🚀`
+        : `Obrigada pelo feedback, ${firstName}! Vamos usar isso para melhorar. Sucesso com a ${company}! 💪`;
+      setMessages(prev => [...prev, { text: thankYou, isUser: false }]);
+      setIsTyping(false);
+      setPhase("done");
+    }, 1200);
   };
 
   const renderText = (text: string) => {
