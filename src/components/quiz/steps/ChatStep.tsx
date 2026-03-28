@@ -31,7 +31,17 @@ const CHAT_FIELDS: ChatField[] = [
   {
     key: "jobTitle",
     question: "Qual é o seu cargo na empresa?",
-    placeholder: "Ex: Diretor, Gerente, Sócio...",
+    placeholder: "",
+    type: "select",
+    options: [
+      { value: "Diretor(a) / CEO", label: "Diretor(a) / CEO" },
+      { value: "Gerente", label: "Gerente" },
+      { value: "Coordenador(a)", label: "Coordenador(a)" },
+      { value: "Analista da Qualidade", label: "Analista da Qualidade" },
+      { value: "Sócio(a)", label: "Sócio(a)" },
+      { value: "Consultor(a)", label: "Consultor(a)" },
+      { value: "Outro", label: "Outro" },
+    ],
   },
   {
     key: "segment",
