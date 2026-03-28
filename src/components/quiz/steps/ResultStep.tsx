@@ -22,6 +22,7 @@ interface ResultStepProps {
   company?: string;
   ownerName?: string | null;
   dealId?: number | null;
+  autoOpenScheduling?: boolean;
 }
 
 interface DiagnosisData {
@@ -43,6 +44,7 @@ export const ResultStep = ({
   company,
   ownerName,
   dealId,
+  autoOpenScheduling = false,
 }: ResultStepProps) => {
   const firstName = name.split(" ")[0];
   const diagnosis = getDiagnosis(score);
@@ -52,7 +54,7 @@ export const ResultStep = ({
   const employeeCount = parseInt(companySize, 10) || 0;
   const isDisqualified = employeeCount < 10 && revenue === "abaixo_100k";
 
-  const [isSchedulingOpen, setIsSchedulingOpen] = useState(false);
+  const [isSchedulingOpen, setIsSchedulingOpen] = useState(autoOpenScheduling);
   const [aiDiagnosis, setAiDiagnosis] = useState<DiagnosisData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [minLoadingComplete, setMinLoadingComplete] = useState(false);
