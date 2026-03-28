@@ -249,13 +249,21 @@ export const PostQuizChat = ({
 
     setTimeout(() => {
       setMessages(prev => [...prev, {
-        text: `Perfeito! Estou abrindo a agenda do **${exec.name}** para você escolher o melhor horário. 📅\n\nSe a página não abrir automaticamente, clique no botão abaixo.`,
+        text: `Perfeito! Estou abrindo a agenda do **${exec.name}** para você escolher o melhor horário. 📅`,
+        isUser: false,
+      }]);
+      setIsTyping(true);
+      window.open(exec.calendarLink, "_blank");
+    }, 1200);
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        text: `${firstName}, foi um prazer te guiar nesse diagnóstico! 🤝\n\nTenho certeza que a conversa com o **${exec.name}** vai ser incrível. Ele vai te mostrar exatamente como transformar esses números em resultados reais para a ${company}.\n\n**Boa reunião e sucesso!** 🚀🎯`,
         isUser: false,
       }]);
       setIsTyping(false);
       setPhase("done");
-      window.open(exec.calendarLink, "_blank");
-    }, 1200);
+    }, 3500);
   };
 
   const handleSeeFullReport = () => {
