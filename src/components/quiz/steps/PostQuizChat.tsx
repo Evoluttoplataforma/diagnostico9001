@@ -238,6 +238,7 @@ export const PostQuizChat = ({
     const exec = SALESPERSON_DATA[execKey];
     setShowButtons(false);
     setMessages(prev => [...prev, { text: `Quero agendar com ${exec.name}! 📅`, isUser: true }]);
+    setIsTyping(true);
 
     const pillarSummary = sortedPillars.map(p => `${p.name}: ${p.score}%`).join(" | ");
 
@@ -247,9 +248,14 @@ export const PostQuizChat = ({
     );
 
     setTimeout(() => {
+      setMessages(prev => [...prev, {
+        text: `Perfeito! Estou abrindo a agenda do **${exec.name}** para você escolher o melhor horário. 📅\n\nSe a página não abrir automaticamente, clique no botão abaixo.`,
+        isUser: false,
+      }]);
+      setIsTyping(false);
+      setPhase("done");
       window.open(exec.calendarLink, "_blank");
-      onScheduleMeeting(execKey);
-    }, 500);
+    }, 1200);
   };
 
   const handleSeeFullReport = () => {
