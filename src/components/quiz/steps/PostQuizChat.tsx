@@ -82,6 +82,7 @@ export const PostQuizChat = ({
   score,
   pillarScores,
   segment,
+  companySize,
   company,
   isDisqualified,
   dealId,
@@ -90,6 +91,7 @@ export const PostQuizChat = ({
 }: PostQuizChatProps) => {
   const firstName = name.split(" ")[0];
   const diagnosis = getDiagnosis(score);
+  const employeeCount = parseInt(companySize, 10) || 0;
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(true);
   const [phase, setPhase] = useState<Phase>("congrats");
@@ -202,14 +204,32 @@ export const PostQuizChat = ({
         setIsTyping(true);
       }, 10000);
 
+      const pricingText = employeeCount <= 10
+        ? `💰 Para empresas de até **10 funcionários**, o investimento é de **R$ 1.500/mês**. Um valor acessível para transformar a gestão da ${company}!`
+        : `💰 Para empresas a partir de **11 funcionários**, o investimento é de **R$ 2.500/mês**. Um investimento estratégico para levar a ${company} ao próximo nível!`;
+
       setTimeout(() => {
         setMessages(prev => [...prev, {
-          text: `Em uma conversa rápida de 15 minutos, ele vai te mostrar exatamente o que priorizar para sair de ${score}% e chegar onde você quer. Sem compromisso, sem enrolação. 🎯`,
+          text: pricingText,
+          isUser: false,
+        }]);
+        setIsTyping(true);
+      }, 12500);
+
+      const budgetLabel = employeeCount <= 10 ? "R$ 1.500/mês (até 10 func.)" : "R$ 2.500/mês (11+ func.)";
+      addPipedriveNote(
+        dealId,
+        `💰 **BUDGET APRESENTADO AO LEAD**\n\n${name} (${company}) recebeu a informação de investimento:\n• **${budgetLabel}**\n• Funcionários: ${companySize}\n\n📌 **Para a SDR:** O lead já foi informado sobre o valor. Validação de budget feita no chat. Use isso na abordagem: "${firstName}, como você já viu, o investimento para a ${company} é de ${budgetLabel}. Na conversa com o especialista, vamos detalhar exatamente o retorno que isso traz."`
+      );
+
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          text: `Em uma conversa rápida de 15 minutos, nosso especialista vai te mostrar exatamente o que priorizar para sair de ${score}% e chegar onde você quer. Sem compromisso, sem enrolação. 🎯`,
           isUser: false,
         }]);
         setIsTyping(false);
         setShowButtons(true);
-      }, 12500);
+      }, 15000);
     }
   };
 
