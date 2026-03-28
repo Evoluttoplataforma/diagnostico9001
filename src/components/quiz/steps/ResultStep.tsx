@@ -44,6 +44,7 @@ export const ResultStep = ({
   company,
   ownerName,
   dealId,
+  autoOpenScheduling = false,
 }: ResultStepProps) => {
   const firstName = name.split(" ")[0];
   const diagnosis = getDiagnosis(score);
