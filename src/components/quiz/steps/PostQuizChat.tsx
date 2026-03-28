@@ -82,6 +82,7 @@ export const PostQuizChat = ({
   score,
   pillarScores,
   segment,
+  companySize,
   company,
   isDisqualified,
   dealId,
