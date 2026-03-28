@@ -198,7 +198,7 @@ export const PostQuizChat = ({
 
       setTimeout(() => {
         setMessages(prev => [...prev, {
-          text: `Escolha o especialista que prefere e agende uma conversa rápida de 15 minutos. Sem compromisso, sem enrolação. 🎯`,
+          text: `Em uma conversa rápida de 15 minutos, ele vai te mostrar exatamente o que priorizar para sair de ${score}% e chegar onde você quer. Sem compromisso, sem enrolação. 🎯`,
           isUser: false,
         }]);
         setIsTyping(false);
