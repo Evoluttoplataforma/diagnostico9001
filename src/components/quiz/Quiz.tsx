@@ -313,6 +313,38 @@ export const Quiz = () => {
             console.error("Pipedrive update error:", updateErr);
           }
         }
+        // Send webhook to Make.com with all lead data
+        try {
+          await fetch("https://hook.us1.make.com/bw2cuflzdtr3a8nmxutyaelb6vd6jbjw", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: welcomeData.name,
+              email: welcomeData.email,
+              phone: welcomeData.phone,
+              company: welcomeData.company,
+              segment: finalSegment,
+              company_size: companyData.companySize,
+              revenue: companyData.revenue,
+              job_title: companyData.jobTitle,
+              score: score,
+              diagnosis_level: diagnosis.level,
+              answers: allAnswers,
+              pillar_scores: pillarScores,
+              copy_variant: welcomeData.copyVariant,
+              utm_source: utmParams.utm_source || "",
+              utm_medium: utmParams.utm_medium || "",
+              utm_campaign: utmParams.utm_campaign || "",
+              utm_content: utmParams.utm_content || "",
+              utm_term: utmParams.utm_term || "",
+              deal_id: dealIdRef.current,
+              created_at: new Date().toISOString(),
+            }),
+          });
+        } catch (webhookErr) {
+          console.error("Webhook error:", webhookErr);
+        }
+
         return true;
       })();
 
