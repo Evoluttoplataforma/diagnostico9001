@@ -22,6 +22,7 @@ interface ResultStepProps {
   company?: string;
   ownerName?: string | null;
   dealId?: number | null;
+  autoOpenScheduling?: boolean;
 }
 
 interface DiagnosisData {
