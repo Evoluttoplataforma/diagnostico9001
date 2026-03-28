@@ -204,24 +204,31 @@ export const PostQuizChat = ({
         setIsTyping(true);
       }, 10000);
 
-      const pricingText = employeeCount <= 10
-        ? `💰 Para empresas de até **10 funcionários**, o investimento é de **R$ 1.500/mês**. Um valor acessível para transformar a gestão da ${company}!`
-        : `💰 Para empresas a partir de **11 funcionários**, o investimento é de **R$ 2.500/mês**. Um investimento estratégico para levar a ${company} ao próximo nível!`;
+      const showPricing = employeeCount <= 40;
 
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          text: pricingText,
-          isUser: false,
-        }]);
-        setIsTyping(true);
-      }, 12500);
+      if (showPricing) {
+        const pricingText = employeeCount <= 10
+          ? `💰 Para empresas de até **10 funcionários**, o investimento é de **R$ 1.500/mês**. Um valor acessível para transformar a gestão da ${company}!`
+          : `💰 Para empresas de **11 a 40 funcionários**, o investimento é de **R$ 2.500/mês**. Um investimento estratégico para levar a ${company} ao próximo nível!`;
 
-      const budgetLabel = employeeCount <= 10 ? "R$ 1.500/mês (até 10 func.)" : "R$ 2.500/mês (11+ func.)";
-      addPipedriveNote(
-        dealId,
-        `💰 **BUDGET APRESENTADO AO LEAD**\n\n${name} (${company}) recebeu a informação de investimento:\n• **${budgetLabel}**\n• Funcionários: ${companySize}\n\n📌 **Para a SDR:** O lead já foi informado sobre o valor. Validação de budget feita no chat. Use isso na abordagem: "${firstName}, como você já viu, o investimento para a ${company} é de ${budgetLabel}. Na conversa com o especialista, vamos detalhar exatamente o retorno que isso traz."`
-      );
+        setTimeout(() => {
+          setMessages(prev => [...prev, { text: pricingText, isUser: false }]);
+          setIsTyping(true);
+        }, 12500);
 
+        const budgetLabel = employeeCount <= 10 ? "R$ 1.500/mês (até 10 func.)" : "R$ 2.500/mês (11-40 func.)";
+        addPipedriveNote(
+          dealId,
+          `💰 **BUDGET APRESENTADO AO LEAD**\n\n${name} (${company}) recebeu a informação de investimento:\n• **${budgetLabel}**\n• Funcionários: ${companySize}\n\n📌 **Para a SDR:** O lead já foi informado sobre o valor. Validação de budget feita no chat. Use isso na abordagem: "${firstName}, como você já viu, o investimento para a ${company} é de ${budgetLabel}. Na conversa com o especialista, vamos detalhar exatamente o retorno que isso traz."`
+        );
+      } else {
+        addPipedriveNote(
+          dealId,
+          `🏢 **EMPRESA GRANDE — INVESTIMENTO NÃO APRESENTADO**\n\n${name} (${company}) tem ${companySize} funcionários (acima de 40).\n\n📌 **Para a SDR:** O valor NÃO foi informado no chat. Empresa grande requer proposta personalizada. Tratar como negociação consultiva — o especialista deve apresentar o investimento na reunião.`
+        );
+      }
+
+      const ctaDelay = showPricing ? 15000 : 12500;
       setTimeout(() => {
         setMessages(prev => [...prev, {
           text: `Em uma conversa rápida de 15 minutos, nosso especialista vai te mostrar exatamente o que priorizar para sair de ${score}% e chegar onde você quer. Sem compromisso, sem enrolação. 🎯`,
@@ -229,7 +236,7 @@ export const PostQuizChat = ({
         }]);
         setIsTyping(false);
         setShowButtons(true);
-      }, 15000);
+      }, ctaDelay);
     }
   };
 
