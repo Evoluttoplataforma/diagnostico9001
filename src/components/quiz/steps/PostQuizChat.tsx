@@ -1,8 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import normaPhoto from "@/assets/norma-photo.png";
-import { Calendar, ArrowRight, Star, TrendingUp, Award } from "lucide-react";
+import victorPhoto from "@/assets/victor-photo.png";
+import viniciusPhoto from "@/assets/vinicius-photo.png";
+import diegoPhoto from "@/assets/diego-photo.png";
+import { Calendar, Award, ExternalLink } from "lucide-react";
 import { PillarScore, getDiagnosis } from "../quizData";
+import { SALESPERSON_DATA } from "../results/salespersonData";
+import { supabase } from "@/integrations/supabase/client";
+
+const PHOTO_MAP: Record<string, string> = {
+  Victor: victorPhoto,
+  Vinicius: viniciusPhoto,
+  Diego: diegoPhoto,
+};
+
+const EXECUTIVES = Object.entries(SALESPERSON_DATA).map(([key, data]) => ({
+  key,
+  ...data,
+  photo: PHOTO_MAP[key],
+}));
 
 interface PostQuizChatProps {
   name: string;
@@ -12,8 +29,9 @@ interface PostQuizChatProps {
   companySize: string;
   company: string;
   isDisqualified: boolean;
-  onShowFullResult: () => void;
-  onScheduleMeeting: () => void;
+  dealId: number | null;
+  onShowFullResult: (selectedExecutive?: string) => void;
+  onScheduleMeeting: (selectedExecutive?: string) => void;
 }
 
 interface Message {
@@ -48,6 +66,17 @@ const TypingIndicator = () => (
 
 type Phase = "congrats" | "ask_result" | "showing_result" | "pitch" | "done";
 
+const addPipedriveNote = async (dealId: number | null, content: string) => {
+  if (!dealId) return;
+  try {
+    await supabase.functions.invoke("add-pipedrive-note", {
+      body: { deal_id: dealId, content },
+    });
+  } catch (err) {
+    console.error("Failed to add Pipedrive note:", err);
+  }
+};
+
 export const PostQuizChat = ({
   name,
   score,
@@ -55,6 +84,7 @@ export const PostQuizChat = ({
   segment,
   company,
   isDisqualified,
+  dealId,
   onShowFullResult,
   onScheduleMeeting,
 }: PostQuizChatProps) => {
@@ -168,7 +198,7 @@ export const PostQuizChat = ({
 
       setTimeout(() => {
         setMessages(prev => [...prev, {
-          text: `Em uma conversa rápida de 15 minutos, ele vai te mostrar exatamente o que priorizar para sair de ${score}% e chegar onde você quer. Sem compromisso, sem enrolação. 🎯`,
+          text: `Escolha o especialista que prefere e agende uma conversa rápida de 15 minutos. Sem compromisso, sem enrolação. 🎯`,
           isUser: false,
         }]);
         setIsTyping(false);
@@ -177,17 +207,31 @@ export const PostQuizChat = ({
     }
   };
 
-  const handleSchedule = () => {
+  const handleSelectExecutive = (execKey: string) => {
+    const exec = SALESPERSON_DATA[execKey];
     setShowButtons(false);
-    setMessages(prev => [...prev, { text: "Quero agendar! 📅", isUser: true }]);
+    setMessages(prev => [...prev, { text: `Quero agendar com ${exec.name}! 📅`, isUser: true }]);
+
+    addPipedriveNote(
+      dealId,
+      `🎯 **AÇÃO DO LEAD NO DIAGNÓSTICO**\n\n📅 O lead ${name} escolheu agendar com **${exec.name}** no chat pós-diagnóstico.\n\n⚡ **Ação necessária:** Checar a agenda de ${exec.name} e confirmar o agendamento.`
+    );
+
     setTimeout(() => {
-      onScheduleMeeting();
+      window.open(exec.calendarLink, "_blank");
+      onScheduleMeeting(execKey);
     }, 500);
   };
 
   const handleSeeFullReport = () => {
     setShowButtons(false);
     setMessages(prev => [...prev, { text: "Quero ver o relatório completo", isUser: true }]);
+
+    addPipedriveNote(
+      dealId,
+      `📊 **AÇÃO DO LEAD NO DIAGNÓSTICO**\n\n📄 O lead ${name} optou por ver o relatório completo antes de agendar.\n\n💡 **Dica para SDR:** O lead demonstrou interesse no diagnóstico. Abordar com foco nos dados do relatório para gerar urgência.`
+    );
+
     setTimeout(() => {
       onShowFullResult();
     }, 500);
@@ -227,7 +271,7 @@ export const PostQuizChat = ({
         ))}
         {isTyping && <TypingIndicator />}
 
-        {/* Buttons based on phase */}
+        {/* Ask result button */}
         {showButtons && phase === "ask_result" && (
           <div className="flex justify-end mb-3 animate-fade-in">
             <button
@@ -243,25 +287,33 @@ export const PostQuizChat = ({
           </div>
         )}
 
+        {/* Executive cards for qualified leads */}
         {showButtons && phase === "pitch" && !isDisqualified && (
           <div className="flex flex-col gap-2 ml-12 mb-3 animate-fade-in">
-            <button
-              onClick={handleSchedule}
-              className="flex items-center gap-3 bg-card border-2 border-primary px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md hover:bg-primary/5"
-            >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-5 h-5 text-primary" />
-              </div>
-              <div className="text-left">
-                <span className="text-foreground font-semibold block">Agendar com consultor</span>
-                <span className="text-muted-foreground text-xs">15 min • gratuito • sem compromisso</span>
-              </div>
-            </button>
+            {EXECUTIVES.map((exec) => (
+              <button
+                key={exec.key}
+                onClick={() => handleSelectExecutive(exec.key)}
+                className="flex items-center gap-3 bg-card border-2 border-border hover:border-primary px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md hover:bg-primary/5"
+              >
+                <img
+                  src={exec.photo}
+                  alt={exec.name}
+                  className="w-11 h-11 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
+                />
+                <div className="text-left flex-1">
+                  <span className="text-foreground font-semibold block">{exec.name}</span>
+                  <span className="text-muted-foreground text-xs">{exec.role}</span>
+                </div>
+                <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
+              </button>
+            ))}
+
             <button
               onClick={handleSeeFullReport}
-              className="flex items-center gap-3 bg-card border-2 border-border hover:border-primary/40 px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md"
+              className="flex items-center gap-3 bg-card border-2 border-border hover:border-primary/40 px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md mt-1"
             >
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+              <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                 <Award className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="text-left">
@@ -272,6 +324,7 @@ export const PostQuizChat = ({
           </div>
         )}
 
+        {/* Disqualified leads */}
         {showButtons && phase === "done" && isDisqualified && (
           <div className="flex flex-col gap-2 ml-12 mb-3 animate-fade-in">
             <button
@@ -287,7 +340,7 @@ export const PostQuizChat = ({
               rel="noopener noreferrer"
               className="flex items-center gap-3 bg-card border-2 border-border hover:border-primary/40 px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md"
             >
-              <Star className="w-5 h-5 text-muted-foreground" />
+              <ExternalLink className="w-5 h-5 text-muted-foreground" />
               <span className="text-foreground">Seguir Templum no Instagram</span>
             </a>
           </div>

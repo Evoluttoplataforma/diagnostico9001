@@ -22,6 +22,7 @@ const Obrigado = () => {
   const state = location.state as LocationState | null;
   const [showFullResult, setShowFullResult] = useState(false);
   const [openScheduling, setOpenScheduling] = useState(false);
+  const [selectedExecutive, setSelectedExecutive] = useState<string | null>(null);
 
   useEffect(() => {
     if (state) {
@@ -64,7 +65,7 @@ const Obrigado = () => {
         revenue={state.revenue}
         company={state.company}
         pillarScores={state.pillarScores}
-        ownerName={state.ownerName}
+        ownerName={selectedExecutive || state.ownerName}
         dealId={state.dealId}
         autoOpenScheduling={openScheduling}
       />
@@ -80,8 +81,13 @@ const Obrigado = () => {
       companySize={state.companySize}
       company={state.company}
       isDisqualified={isDisqualified}
-      onShowFullResult={() => setShowFullResult(true)}
-      onScheduleMeeting={() => {
+      dealId={state.dealId}
+      onShowFullResult={(execKey) => {
+        if (execKey) setSelectedExecutive(execKey);
+        setShowFullResult(true);
+      }}
+      onScheduleMeeting={(execKey) => {
+        if (execKey) setSelectedExecutive(execKey);
         setOpenScheduling(true);
         setShowFullResult(true);
       }}
