@@ -492,10 +492,14 @@ serve(async (req) => {
     if (firstStageId) {
       dealBody.stage_id = firstStageId;
     }
+    // Rodrigo Furniel's user ID for disqualified leads
+    const RODRIGO_USER_ID = 8149006;
+
     // Apply appropriate label based on qualification status (priority: DESQUALIFICADO > PRIORIDADE > DIAGNÓSTICO)
     if (isDisqualified && disqualifiedLabelId) {
       dealBody.label = disqualifiedLabelId;
-      console.log("Applying DESQUALIFICADO_DIAGNÓSTICO label");
+      dealBody.user_id = RODRIGO_USER_ID;
+      console.log("Applying DESQUALIFICADO_DIAGNÓSTICO label and reassigning to Rodrigo");
     } else if (isPriority && priorityLabelId) {
       dealBody.label = priorityLabelId;
       console.log("Applying PRIORIDADE label (40+ funcionários)");

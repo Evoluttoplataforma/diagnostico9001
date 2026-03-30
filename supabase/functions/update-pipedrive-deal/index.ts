@@ -338,9 +338,14 @@ serve(async (req) => {
       title: `Diagnóstico ISO 9001 - ${updateData.name} (${updateData.company})`,
     };
 
+    // Rodrigo Furniel's user ID for disqualified leads
+    const RODRIGO_USER_ID = 8149006;
+
     // Label priority: DESQUALIFICADO > PRIORIDADE > DIAGNÓSTICO
     if (isDisqualified && disqualifiedLabelId) {
       dealBody.label = disqualifiedLabelId;
+      dealBody.user_id = RODRIGO_USER_ID;
+      console.log("Reassigning disqualified deal to Rodrigo Furniel");
     } else if (isPriority && priorityLabelId) {
       dealBody.label = priorityLabelId;
     } else if (labelId) {
