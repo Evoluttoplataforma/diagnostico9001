@@ -482,7 +482,53 @@ ${answersSection}
         console.error("Error creating sales guidance note:", salesNoteErr);
       }
     } else {
-      console.log("Skipping notes — mid-flow update with no answers yet");
+      // Mid-flow: create a partial note with collected info so far
+      console.log("Creating partial note (mid-flow) for deal:", updateData.deal_id);
+      try {
+        const revenueDisplay = updateData.revenue ? (revenueLabels[updateData.revenue] || updateData.revenue) : "Não informado";
+        
+        const qualificationStatus = (() => {
+          const empCount = parseInt(updateData.company_size, 10) || 0;
+          const isDisq = empCount < 10 && updateData.revenue === "abaixo_100k";
+          const isPrio = empCount > 40;
+          if (isDisq) return "🔴 DESQUALIFICADO (< 10 funcionários + faturamento < R$100k)";
+          if (isPrio) return "🟢 PRIORIDADE (40+ funcionários)";
+          return "🟡 QUALIFICADO - Aguardando diagnóstico";
+        })();
+
+        const partialNote = `
+📝 **Lead Registrado — Aguardando Diagnóstico**
+
+👤 **Contato:** ${updateData.name}
+💼 **Cargo:** ${updateData.job_title || "Não informado"}
+🏢 **Empresa:** ${updateData.company}
+🏭 **Segmento:** ${updateData.segment || "Não informado"}
+👥 **Porte:** ${updateData.company_size || "Não informado"} funcionários
+💰 **Faturamento:** ${revenueDisplay}
+📧 **Email:** ${updateData.email}
+📱 **Telefone:** ${updateData.phone}
+
+📋 **Status:** ${qualificationStatus}
+
+⏳ O lead está respondendo o diagnóstico. As notas completas com score, respostas e orientação de vendas serão adicionadas ao finalizar.
+        `.trim();
+
+        const partialNoteResponse = await fetch(
+          `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: partialNote,
+              deal_id: updateData.deal_id,
+            }),
+          }
+        );
+        const partialNoteResult = await partialNoteResponse.json();
+        console.log("Partial note result:", partialNoteResult.success);
+      } catch (partialNoteErr) {
+        console.error("Error creating partial note:", partialNoteErr);
+      }
     }
 
     // If deal was lost, create a phone call activity
