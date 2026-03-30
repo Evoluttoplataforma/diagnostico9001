@@ -247,7 +247,8 @@ export const PostQuizChat = ({
 
     addPipedriveNote(
       dealId,
-      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA (direto)**\n\n🚀 ${name} escolheu "Falar com um especialista" SEM pedir o relatório primeiro.\n\n📌 **Para a SDR:** Este é o melhor sinal possível! O lead já está convencido e quer agir. Se ele não agendar sozinho nos próximos minutos, ligue imediatamente.\n\n⏰ **Urgência:** ALTA — aproveitar o momento de decisão.`
+      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA (direto)**\n\n🚀 ${name} escolheu "Falar com um especialista" SEM pedir o relatório primeiro.\n\n📌 **Para a SDR:** Este é o melhor sinal possível! O lead já está convencido e quer agir. Se ele não agendar sozinho nos próximos minutos, ligue imediatamente.\n\n⏰ **Urgência:** ALTA — aproveitar o momento de decisão.`,
+      true
     );
 
     setTimeout(() => {
