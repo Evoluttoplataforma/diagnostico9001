@@ -265,7 +265,7 @@ export const PostQuizChat = ({
 
     setTimeout(() => {
       setMessages(prev => [...prev, {
-        text: `Ótima escolha! 💪 Aqui estão nossos especialistas em ISO 9001. Escolha com quem prefere conversar:`,
+        text: `Ótima escolha! 💪 Separei o **${assignedExec.name}**, nosso ${assignedExec.role}, para te atender. Agende direto com ele:`,
         isUser: false,
       }]);
       setIsTyping(false);
