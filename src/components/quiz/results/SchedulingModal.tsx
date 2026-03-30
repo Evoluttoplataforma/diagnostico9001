@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Calendar, ExternalLink, Loader2, RefreshCw, MessageCircle, Mail, Phone } from "lucide-react";
 import { QuizButton } from "../QuizButton";
@@ -23,16 +23,28 @@ const PHOTO_MAP: Record<string, string> = {
   Diego: diegoPhoto,
 };
 
+const EXECUTIVE_KEYS = ["Victor", "Diego", "Vinicius"] as const;
+
+function getRouletteExec(): string {
+  const key = "exec_roulette_index";
+  const current = parseInt(localStorage.getItem(key) || "0", 10);
+  return EXECUTIVE_KEYS[current % EXECUTIVE_KEYS.length];
+}
+
 export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, dealId, isLoading: externalLoading }: SchedulingModalProps) => {
   const [ownerName, setOwnerName] = useState<string | null>(initialOwnerName);
   const [isPolling, setIsPolling] = useState(false);
   const [pollAttempts, setPollAttempts] = useState(0);
   const [hasPolled, setHasPolled] = useState(false);
   
+  // Roulette fallback — stable per mount
+  const rouletteKey = useMemo(() => getRouletteExec(), []);
+  
   const MAX_POLL_ATTEMPTS = 6;
   const POLL_INTERVAL = 3000;
   
-  const salespersonKey = getSalespersonKey(ownerName);
+  // Use owner from Pipedrive if recognized, otherwise use roulette
+  const salespersonKey = getSalespersonKey(ownerName) || rouletteKey;
   const salesperson = salespersonKey ? SALESPERSON_DATA[salespersonKey] : null;
   const photo = salespersonKey ? PHOTO_MAP[salespersonKey] : null;
 
@@ -87,6 +99,7 @@ export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, 
         if (attempts < MAX_POLL_ATTEMPTS) {
           setTimeout(poll, POLL_INTERVAL);
         } else {
+          // Polling exhausted — roulette fallback is already active via salespersonKey
           setIsPolling(false);
           setHasPolled(true);
         }
@@ -124,22 +137,6 @@ export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, 
       const body = encodeURIComponent("Olá!\n\nAcabei de fazer o diagnóstico ISO 9001 e gostaria de agendar uma conversa para discutir os próximos passos.\n\nAguardo seu retorno!");
       window.location.href = `mailto:${salesperson.email}?subject=${subject}&body=${body}`;
     }
-  };
-
-  const handleRetryPolling = async () => {
-    setIsPolling(true);
-    setPollAttempts(0);
-    setHasPolled(false);
-    
-    const newOwnerName = await fetchUpdatedOwner();
-    const newSalesperson = getSalespersonKey(newOwnerName);
-    
-    if (newSalesperson) {
-      setOwnerName(newOwnerName);
-    }
-    
-    setIsPolling(false);
-    setHasPolled(true);
   };
 
   return (
@@ -251,55 +248,13 @@ export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, 
                   )}
                 </div>
               </div>
-
             </div>
           ) : (
-            <>
-              {/* Fallback: Show all salespeople */}
-              <div className="text-center mb-4">
-                <p className="text-sm text-muted-foreground">
-                  Escolha um de nossos especialistas:
-                </p>
-                {dealId && (
-                  <button
-                    onClick={handleRetryPolling}
-                    className="mt-2 text-xs text-primary hover:underline flex items-center gap-1 mx-auto"
-                  >
-                    <RefreshCw className="w-3 h-3" />
-                    Tentar identificar novamente
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                {Object.entries(SALESPERSON_DATA).map(([key, person]) => (
-                  <button
-                    key={key}
-                    onClick={() => window.open(person.calendarLink, "_blank")}
-                    className="w-full flex items-center gap-3 p-4 bg-card border border-border rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all group"
-                  >
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-primary/10 flex items-center justify-center">
-                      {PHOTO_MAP[key] ? (
-                        <img 
-                          src={PHOTO_MAP[key]} 
-                          alt={person.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-lg font-bold text-primary">
-                          {person.name.charAt(0)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <span className="font-medium text-foreground block">{person.name}</span>
-                      <span className="text-xs text-muted-foreground">{person.role}</span>
-                    </div>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </button>
-                ))}
-              </div>
-            </>
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Não foi possível identificar um especialista. Tente novamente.
+              </p>
+            </div>
           )}
         </div>
       </DialogContent>
