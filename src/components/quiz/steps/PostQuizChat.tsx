@@ -15,11 +15,22 @@ const PHOTO_MAP: Record<string, string> = {
   Diego: diegoPhoto,
 };
 
-const EXECUTIVES = Object.entries(SALESPERSON_DATA).map(([key, data]) => ({
+const EXECUTIVE_KEYS = Object.keys(SALESPERSON_DATA); // ["Victor", "Diego", "Vinicius"]
+
+// Roulette: each lead gets the next executive in rotation
+function getNextExecutive(): string {
+  const STORAGE_KEY = "exec_roulette_index";
+  const current = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10);
+  const key = EXECUTIVE_KEYS[current % EXECUTIVE_KEYS.length];
+  localStorage.setItem(STORAGE_KEY, String(current + 1));
+  return key;
+}
+
+const buildExecutive = (key: string) => ({
   key,
-  ...data,
+  ...SALESPERSON_DATA[key],
   photo: PHOTO_MAP[key],
-}));
+});
 
 interface PostQuizChatProps {
   name: string;
@@ -102,6 +113,7 @@ export const PostQuizChat = ({
   const sortedPillars = [...pillarScores].sort((a, b) => b.score - a.score);
   const bestPillar = sortedPillars[0];
   const worstPillar = sortedPillars[sortedPillars.length - 1];
+  const [assignedExec] = useState(() => buildExecutive(getNextExecutive()));
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -253,7 +265,7 @@ export const PostQuizChat = ({
 
     setTimeout(() => {
       setMessages(prev => [...prev, {
-        text: `Ótima escolha! 💪 Aqui estão nossos especialistas em ISO 9001. Escolha com quem prefere conversar:`,
+        text: `Ótima escolha! 💪 Separei o **${assignedExec.name}**, nosso ${assignedExec.role}, para te atender. Agende direto com ele:`,
         isUser: false,
       }]);
       setIsTyping(false);
@@ -373,7 +385,7 @@ export const PostQuizChat = ({
 
     setTimeout(() => {
       setMessages(prev => [...prev, {
-        text: `Ótima escolha! 💪 Escolha com quem prefere conversar:`,
+        text: `Ótima escolha! 💪 Separei o **${assignedExec.name}** para te atender. Agende direto com ele:`,
         isUser: false,
       }]);
       setIsTyping(false);
@@ -511,27 +523,24 @@ export const PostQuizChat = ({
           </div>
         )}
 
-        {/* Choose executive */}
+        {/* Choose executive — roulette: show single assigned exec */}
         {showButtons && phase === "choose_executive" && (
           <div className="flex flex-col gap-2 ml-12 mb-3 animate-fade-in">
-            {EXECUTIVES.map((exec) => (
-              <button
-                key={exec.key}
-                onClick={() => handleSelectExecutive(exec.key)}
-                className="flex items-center gap-3 bg-card border-2 border-border hover:border-primary px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md hover:bg-primary/5"
-              >
-                <img
-                  src={exec.photo}
-                  alt={exec.name}
-                  className="w-11 h-11 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
-                />
-                <div className="text-left flex-1">
-                  <span className="text-foreground font-semibold block">{exec.name}</span>
-                  <span className="text-muted-foreground text-xs">{exec.role}</span>
-                </div>
-                <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
-              </button>
-            ))}
+            <button
+              onClick={() => handleSelectExecutive(assignedExec.key)}
+              className="flex items-center gap-3 bg-card border-2 border-primary px-4 py-3 rounded-xl text-sm font-medium transition-all hover:shadow-md hover:bg-primary/5"
+            >
+              <img
+                src={assignedExec.photo}
+                alt={assignedExec.name}
+                className="w-11 h-11 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
+              />
+              <div className="text-left flex-1">
+                <span className="text-foreground font-semibold block">{assignedExec.name}</span>
+                <span className="text-muted-foreground text-xs">{assignedExec.role}</span>
+              </div>
+              <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
+            </button>
           </div>
         )}
 
