@@ -359,6 +359,8 @@ serve(async (req) => {
       dealBody[revenueFieldKey] = revenueLabels[updateData.revenue] || updateData.revenue;
     }
 
+    console.log("Deal body to update:", JSON.stringify(dealBody));
+
     const dealUpdateResponse = await fetch(
       `https://api.pipedrive.com/v1/deals/${updateData.deal_id}?api_token=${apiToken}`,
       {
