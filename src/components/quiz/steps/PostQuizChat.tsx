@@ -114,7 +114,6 @@ export const PostQuizChat = ({
   const bestPillar = sortedPillars[0];
   const worstPillar = sortedPillars[sortedPillars.length - 1];
   const [assignedExec] = useState(() => buildExecutive(getNextExecutive()));
-  const worstPillar = sortedPillars[sortedPillars.length - 1];
 
   useEffect(() => {
     if (scrollRef.current) {
