@@ -15,11 +15,22 @@ const PHOTO_MAP: Record<string, string> = {
   Diego: diegoPhoto,
 };
 
-const EXECUTIVES = Object.entries(SALESPERSON_DATA).map(([key, data]) => ({
+const EXECUTIVE_KEYS = Object.keys(SALESPERSON_DATA); // ["Victor", "Diego", "Vinicius"]
+
+// Roulette: each lead gets the next executive in rotation
+function getNextExecutive(): string {
+  const STORAGE_KEY = "exec_roulette_index";
+  const current = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10);
+  const key = EXECUTIVE_KEYS[current % EXECUTIVE_KEYS.length];
+  localStorage.setItem(STORAGE_KEY, String(current + 1));
+  return key;
+}
+
+const buildExecutive = (key: string) => ({
   key,
-  ...data,
+  ...SALESPERSON_DATA[key],
   photo: PHOTO_MAP[key],
-}));
+});
 
 interface PostQuizChatProps {
   name: string;
