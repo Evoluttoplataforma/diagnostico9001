@@ -385,7 +385,7 @@ export const PostQuizChat = ({
 
     setTimeout(() => {
       setMessages(prev => [...prev, {
-        text: `Ótima escolha! 💪 Escolha com quem prefere conversar:`,
+        text: `Ótima escolha! 💪 Separei o **${assignedExec.name}** para te atender. Agende direto com ele:`,
         isUser: false,
       }]);
       setIsTyping(false);
