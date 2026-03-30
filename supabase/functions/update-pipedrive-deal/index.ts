@@ -285,6 +285,7 @@ serve(async (req) => {
 
     let labelId = null;
     let disqualifiedLabelId = null;
+    let priorityLabelId = null;
     let segmentFieldKey: string | null = null;
     let revenueFieldKey: string | null = null;
 
