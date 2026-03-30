@@ -66,11 +66,11 @@ const TypingIndicator = () => (
 
 type Phase = "congrats" | "ask_result" | "showing_result" | "pitch" | "choose_executive" | "report_chat" | "post_report_pitch" | "rating" | "done";
 
-const addPipedriveNote = async (dealId: number | null, content: string) => {
+const addPipedriveNote = async (dealId: number | null, content: string, applyPriorityLabel = false) => {
   if (!dealId) return;
   try {
     await supabase.functions.invoke("add-pipedrive-note", {
-      body: { deal_id: dealId, content },
+      body: { deal_id: dealId, content, apply_priority_label: applyPriorityLabel },
     });
   } catch (err) {
     console.error("Failed to add Pipedrive note:", err);
@@ -247,7 +247,8 @@ export const PostQuizChat = ({
 
     addPipedriveNote(
       dealId,
-      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA (direto)**\n\n🚀 ${name} escolheu "Falar com um especialista" SEM pedir o relatório primeiro.\n\n📌 **Para a SDR:** Este é o melhor sinal possível! O lead já está convencido e quer agir. Se ele não agendar sozinho nos próximos minutos, ligue imediatamente.\n\n⏰ **Urgência:** ALTA — aproveitar o momento de decisão.`
+      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA (direto)**\n\n🚀 ${name} escolheu "Falar com um especialista" SEM pedir o relatório primeiro.\n\n📌 **Para a SDR:** Este é o melhor sinal possível! O lead já está convencido e quer agir. Se ele não agendar sozinho nos próximos minutos, ligue imediatamente.\n\n⏰ **Urgência:** ALTA — aproveitar o momento de decisão.`,
+      true
     );
 
     setTimeout(() => {
@@ -366,7 +367,8 @@ export const PostQuizChat = ({
 
     addPipedriveNote(
       dealId,
-      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA APÓS RELATÓRIO**\n\n🚀 ${name} viu o relatório completo E decidiu falar com especialista.\n\n📌 **Para a SDR:** Lead muito qualificado! Já conhece seus números e quer agir. Se não agendar sozinho, ligar em no máximo 2h.\n\n💡 **Gancho:** "${firstName}, vi que depois de analisar seu diagnóstico de ${score}% você decidiu conversar com nosso time. Isso mostra que você leva a gestão da ${company} a sério."\n\n⏰ **Urgência:** ALTA`
+      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA APÓS RELATÓRIO**\n\n🚀 ${name} viu o relatório completo E decidiu falar com especialista.\n\n📌 **Para a SDR:** Lead muito qualificado! Já conhece seus números e quer agir. Se não agendar sozinho, ligar em no máximo 2h.\n\n💡 **Gancho:** "${firstName}, vi que depois de analisar seu diagnóstico de ${score}% você decidiu conversar com nosso time. Isso mostra que você leva a gestão da ${company} a sério."\n\n⏰ **Urgência:** ALTA`,
+      true
     );
 
     setTimeout(() => {
