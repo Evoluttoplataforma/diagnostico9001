@@ -382,6 +382,7 @@ serve(async (req) => {
     
     let labelId = null;
     let disqualifiedLabelId = null;
+    let priorityLabelId = null;
     let utmSourceFieldKey: string | null = null;
     let utmMediumFieldKey: string | null = null;
     let utmCampaignFieldKey: string | null = null;
