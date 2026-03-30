@@ -66,11 +66,11 @@ const TypingIndicator = () => (
 
 type Phase = "congrats" | "ask_result" | "showing_result" | "pitch" | "choose_executive" | "report_chat" | "post_report_pitch" | "rating" | "done";
 
-const addPipedriveNote = async (dealId: number | null, content: string) => {
+const addPipedriveNote = async (dealId: number | null, content: string, applyPriorityLabel = false) => {
   if (!dealId) return;
   try {
     await supabase.functions.invoke("add-pipedrive-note", {
-      body: { deal_id: dealId, content },
+      body: { deal_id: dealId, content, apply_priority_label: applyPriorityLabel },
     });
   } catch (err) {
     console.error("Failed to add Pipedrive note:", err);
