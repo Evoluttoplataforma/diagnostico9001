@@ -474,7 +474,8 @@ serve(async (req) => {
     // Check if lead is disqualified (less than 10 employees AND revenue below 100k/month)
     const employeeCount = parseInt(leadData.company_size, 10) || 0;
     const isDisqualified = employeeCount < 10 && leadData.revenue === "abaixo_100k";
-    console.log("Disqualification check:", { employeeCount, revenue: leadData.revenue, isDisqualified });
+    const isPriority = employeeCount > 40;
+    console.log("Qualification check:", { employeeCount, revenue: leadData.revenue, isDisqualified, isPriority });
 
     // Create a deal in Pipedrive (in Inbound pipeline with appropriate label)
     const dealTitle = `Diagnóstico ISO 9001 - ${leadData.name} (${leadData.company})`;
@@ -491,10 +492,13 @@ serve(async (req) => {
     if (firstStageId) {
       dealBody.stage_id = firstStageId;
     }
-    // Apply appropriate label based on qualification status
+    // Apply appropriate label based on qualification status (priority: DESQUALIFICADO > PRIORIDADE > DIAGNÓSTICO)
     if (isDisqualified && disqualifiedLabelId) {
       dealBody.label = disqualifiedLabelId;
       console.log("Applying DESQUALIFICADO_DIAGNÓSTICO label");
+    } else if (isPriority && priorityLabelId) {
+      dealBody.label = priorityLabelId;
+      console.log("Applying PRIORIDADE label (40+ funcionários)");
     } else if (labelId) {
       dealBody.label = labelId;
       console.log("Applying DIAGNÓSTICO label");

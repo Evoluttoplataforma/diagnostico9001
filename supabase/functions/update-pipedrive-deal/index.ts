@@ -328,17 +328,21 @@ serve(async (req) => {
       }
     }
 
-    // Check disqualification
+    // Check qualification
     const employeeCount = parseInt(updateData.company_size, 10) || 0;
     const isDisqualified = employeeCount < 10 && updateData.revenue === "abaixo_100k";
+    const isPriority = employeeCount > 40;
 
     // Update deal with diagnosis info
     const dealBody: Record<string, unknown> = {
       title: `Diagnóstico ISO 9001 - ${updateData.name} (${updateData.company})`,
     };
 
+    // Label priority: DESQUALIFICADO > PRIORIDADE > DIAGNÓSTICO
     if (isDisqualified && disqualifiedLabelId) {
       dealBody.label = disqualifiedLabelId;
+    } else if (isPriority && priorityLabelId) {
+      dealBody.label = priorityLabelId;
     } else if (labelId) {
       dealBody.label = labelId;
     }
