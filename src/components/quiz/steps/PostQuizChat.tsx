@@ -367,7 +367,8 @@ export const PostQuizChat = ({
 
     addPipedriveNote(
       dealId,
-      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA APÓS RELATÓRIO**\n\n🚀 ${name} viu o relatório completo E decidiu falar com especialista.\n\n📌 **Para a SDR:** Lead muito qualificado! Já conhece seus números e quer agir. Se não agendar sozinho, ligar em no máximo 2h.\n\n💡 **Gancho:** "${firstName}, vi que depois de analisar seu diagnóstico de ${score}% você decidiu conversar com nosso time. Isso mostra que você leva a gestão da ${company} a sério."\n\n⏰ **Urgência:** ALTA`
+      `🔥 **LEAD QUENTE — PEDIU ESPECIALISTA APÓS RELATÓRIO**\n\n🚀 ${name} viu o relatório completo E decidiu falar com especialista.\n\n📌 **Para a SDR:** Lead muito qualificado! Já conhece seus números e quer agir. Se não agendar sozinho, ligar em no máximo 2h.\n\n💡 **Gancho:** "${firstName}, vi que depois de analisar seu diagnóstico de ${score}% você decidiu conversar com nosso time. Isso mostra que você leva a gestão da ${company} a sério."\n\n⏰ **Urgência:** ALTA`,
+      true
     );
 
     setTimeout(() => {
