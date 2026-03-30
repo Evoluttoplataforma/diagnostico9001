@@ -415,6 +415,15 @@ serve(async (req) => {
           disqualifiedLabelId = desqualificadoLabel.id;
           console.log("Found DESQUALIFICADO_DIAGNÓSTICO label:", disqualifiedLabelId);
         }
+
+        // Find PRIORIDADE label
+        const priorityLabel = labelField.options.find(
+          (opt: { label: string }) => opt.label.toUpperCase() === "PRIORIDADE"
+        );
+        if (priorityLabel) {
+          priorityLabelId = priorityLabel.id;
+          console.log("Found PRIORIDADE label:", priorityLabelId);
+        }
       }
 
       // Find UTM custom fields
