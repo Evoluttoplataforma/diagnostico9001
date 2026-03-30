@@ -359,6 +359,8 @@ serve(async (req) => {
       dealBody[revenueFieldKey] = revenueLabels[updateData.revenue] || updateData.revenue;
     }
 
+    console.log("Deal body to update:", JSON.stringify(dealBody));
+
     const dealUpdateResponse = await fetch(
       `https://api.pipedrive.com/v1/deals/${updateData.deal_id}?api_token=${apiToken}`,
       {
@@ -372,6 +374,7 @@ serve(async (req) => {
 
     // Only add notes when we have actual answers (score > 0), skip mid-flow updates
     const hasAnswers = updateData.score > 0 && Object.keys(updateData.answers || {}).length > 0;
+    console.log("hasAnswers check:", { score: updateData.score, answersCount: Object.keys(updateData.answers || {}).length, hasAnswers });
 
     if (hasAnswers) {
       // Build question lookup from dynamic questions
@@ -431,39 +434,53 @@ ${answersSection}
       `.trim();
 
       // Add diagnosis note
-      await fetch(
-        `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: dealNote,
-            deal_id: updateData.deal_id,
-          }),
-        }
-      );
+      console.log("Creating diagnosis note for deal:", updateData.deal_id);
+      try {
+        const noteResponse = await fetch(
+          `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: dealNote,
+              deal_id: updateData.deal_id,
+            }),
+          }
+        );
+        const noteResult = await noteResponse.json();
+        console.log("Diagnosis note result:", noteResult.success);
+      } catch (noteErr) {
+        console.error("Error creating diagnosis note:", noteErr);
+      }
 
       // Add sales guidance note
-      const salesGuidance = getSalesGuidance(
-        updateData.score,
-        updateData.diagnosis_level,
-        updateData.pillar_scores || [],
-        updateData.answers || {},
-        updateData.name,
-        updateData.questions
-      );
+      console.log("Creating sales guidance note for deal:", updateData.deal_id);
+      try {
+        const salesGuidance = getSalesGuidance(
+          updateData.score,
+          updateData.diagnosis_level,
+          updateData.pillar_scores || [],
+          updateData.answers || {},
+          updateData.name,
+          updateData.questions
+        );
 
-      await fetch(
-        `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: salesGuidance,
-            deal_id: updateData.deal_id,
-          }),
-        }
-      );
+        const salesNoteResponse = await fetch(
+          `https://api.pipedrive.com/v1/notes?api_token=${apiToken}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: salesGuidance,
+              deal_id: updateData.deal_id,
+            }),
+          }
+        );
+        const salesNoteResult = await salesNoteResponse.json();
+        console.log("Sales guidance note result:", salesNoteResult.success);
+      } catch (salesNoteErr) {
+        console.error("Error creating sales guidance note:", salesNoteErr);
+      }
     } else {
       console.log("Skipping notes — mid-flow update with no answers yet");
     }
