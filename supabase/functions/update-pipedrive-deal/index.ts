@@ -307,6 +307,14 @@ serve(async (req) => {
         if (desqualificadoLabel) {
           disqualifiedLabelId = desqualificadoLabel.id;
         }
+
+        // Find PRIORIDADE label
+        const priorityLabel = labelField.options.find(
+          (opt: { label: string }) => opt.label.toUpperCase() === "PRIORIDADE"
+        );
+        if (priorityLabel) {
+          priorityLabelId = priorityLabel.id;
+        }
       }
 
       for (const field of dealFieldsResult.data) {
