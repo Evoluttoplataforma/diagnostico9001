@@ -28,7 +28,9 @@ const EXECUTIVE_KEYS = ["Victor", "Diego", "Vinicius"] as const;
 function getRouletteExec(): string {
   const key = "exec_roulette_index";
   const current = parseInt(localStorage.getItem(key) || "0", 10);
-  return EXECUTIVE_KEYS[current % EXECUTIVE_KEYS.length];
+  const exec = EXECUTIVE_KEYS[current % EXECUTIVE_KEYS.length];
+  localStorage.setItem(key, String(current + 1));
+  return exec;
 }
 
 export const SchedulingModal = ({ isOpen, onClose, ownerName: initialOwnerName, dealId, isLoading: externalLoading }: SchedulingModalProps) => {

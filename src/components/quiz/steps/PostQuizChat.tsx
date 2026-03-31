@@ -23,6 +23,7 @@ function getNextExecutive(): string {
   const current = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10);
   const key = EXECUTIVE_KEYS[current % EXECUTIVE_KEYS.length];
   localStorage.setItem(STORAGE_KEY, String(current + 1));
+  localStorage.setItem(STORAGE_KEY, String(current + 1));
   return key;
 }
 
